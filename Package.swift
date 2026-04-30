@@ -4,11 +4,21 @@ import PackageDescription
 
 let package = Package(
     name: "OpalHedge",
+    platforms: [
+        .macOS(.v26),
+        .iOS(.v26),
+        .watchOS(.v26),
+        .tvOS(.v26),
+        .visionOS(.v26)
+    ],
     products: [
         .library(
             name: "OpalHedge",
             targets: ["OpalHedge"]
         )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/58opals/OpalCrypto.git", branch: "develop")
     ],
     targets: [
         .target(
@@ -21,7 +31,12 @@ let package = Package(
             ]
         ),
         .target(name: "OpalHedgeCore"),
-        .target(name: "OpalHedgeOracle"),
+        .target(
+            name: "OpalHedgeOracle",
+            dependencies: [
+                .product(name: "OpalCrypto", package: "OpalCrypto")
+            ]
+        ),
         .target(name: "OpalHedgeBitcoinCash"),
         .target(name: "OpalHedgeClient"),
         .testTarget(

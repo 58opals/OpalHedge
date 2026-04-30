@@ -2,8 +2,8 @@
 
 import OpalHedgeClient
 
-public extension OpalHedge {
-    enum Client {
+extension OpalHedge {
+    public enum Client {
         public typealias Context = OpalHedgeClientContext
     }
 }

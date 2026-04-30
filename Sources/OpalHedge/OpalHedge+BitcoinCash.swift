@@ -2,8 +2,8 @@
 
 import OpalHedgeBitcoinCash
 
-public extension OpalHedge {
-    enum BitcoinCash {
+extension OpalHedge {
+    public enum BitcoinCash {
         public typealias Context = OpalHedgeBitcoinCashContext
     }
 }
