@@ -3,8 +3,8 @@
 public struct OpalHedgeCoreContractMetadata: Sendable, Equatable {
     public let takerSide: OpalHedgeCoreContractSide
     public let makerSide: OpalHedgeCoreContractSide
-    public let shortPayoutAddress: String
-    public let longPayoutAddress: String
+    public let shortPayoutAddress: OpalHedgeCoreContractPayoutAddress
+    public let longPayoutAddress: OpalHedgeCoreContractPayoutAddress
     public let startingOracleMessageHex: String
     public let startingOracleSignatureHex: String
     public let startPrice: Int64
@@ -22,8 +22,8 @@ public struct OpalHedgeCoreContractMetadata: Sendable, Equatable {
     public init(
         takerSide: OpalHedgeCoreContractSide,
         makerSide: OpalHedgeCoreContractSide,
-        shortPayoutAddress: String,
-        longPayoutAddress: String,
+        shortPayoutAddress: OpalHedgeCoreContractPayoutAddress,
+        longPayoutAddress: OpalHedgeCoreContractPayoutAddress,
         startingOracleMessageHex: String,
         startingOracleSignatureHex: String,
         startPrice: Int64,
@@ -55,5 +55,54 @@ public struct OpalHedgeCoreContractMetadata: Sendable, Equatable {
         self.shortInputInSatoshis = shortInputInSatoshis
         self.longInputInSatoshis = longInputInSatoshis
         self.minerCostInSatoshis = minerCostInSatoshis
+    }
+
+    package init(from context: OpalHedgeCoreContractMetadataContext) throws {
+        try self.init(
+            from: OpalHedgeCoreContractPlanDerivationContext(
+                creationContext: context.creationContext,
+                fundingAmounts: context.fundingAmounts
+            )
+        )
+    }
+
+    public init(from context: OpalHedgeCoreContractPlanDerivationContext) throws {
+        let creationContext = context.creationContext
+        let fundingAmounts = context.fundingAmounts
+        let startingOracleProof = creationContext.startingOracleProof
+        self.init(
+            takerSide: creationContext.takerSide,
+            makerSide: creationContext.makerSide,
+            shortPayoutAddress: creationContext.shortPayoutAddress,
+            longPayoutAddress: creationContext.longPayoutAddress,
+            startingOracleMessageHex: startingOracleProof.messageHex,
+            startingOracleSignatureHex: startingOracleProof.signatureHex,
+            startPrice: startingOracleProof.priceValue,
+            durationInSeconds: creationContext.maturityTimestamp
+                - startingOracleProof.messageTimestamp,
+            nominalUnits: creationContext.nominalUnits,
+            lowLiquidationPriceMultiplier: creationContext.lowLiquidationPriceMultiplier,
+            highLiquidationPriceMultiplier: creationContext.highLiquidationPriceMultiplier,
+            isSimpleHedge: creationContext.isSimpleHedge,
+            shortInputInOracleUnits: Self.oracleUnits(
+                for: fundingAmounts.shortInputInSatoshis,
+                startPrice: startingOracleProof.priceValue
+            ),
+            longInputInOracleUnits: Self.oracleUnits(
+                for: fundingAmounts.longInputInSatoshis,
+                startPrice: startingOracleProof.priceValue
+            ),
+            shortInputInSatoshis: fundingAmounts.shortInputInSatoshis,
+            longInputInSatoshis: fundingAmounts.longInputInSatoshis,
+            minerCostInSatoshis: creationContext.minerCostInSatoshis
+        )
+    }
+
+    private static func oracleUnits(for satoshis: Int64, startPrice: Int64) -> Double {
+        let satoshisPerBitcoinCash = Double(
+            OpalHedgeCoreContractConstraintPolicy.satoshisPerBitcoinCash
+        )
+
+        return (Double(satoshis) / satoshisPerBitcoinCash) * Double(startPrice)
     }
 }

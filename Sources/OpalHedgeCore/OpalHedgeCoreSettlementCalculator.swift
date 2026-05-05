@@ -1,8 +1,6 @@
 // OpalHedgeCoreSettlementCalculator.swift
 
 public enum OpalHedgeCoreSettlementCalculator {
-    private static let dustLimit: Int64 = 1_332
-
     public static func calculateOutcome(
         parameters: OpalHedgeCoreContractParameters,
         fundingSatoshis: Int64,
@@ -25,9 +23,15 @@ public enum OpalHedgeCoreSettlementCalculator {
         )
         let satsForNominalUnits = parameters.nominalUnitsXSatsPerBch / clampedPrice
         let shortPayoutSatsUnsafe = satsForNominalUnits - parameters.satsForNominalUnitsAtHighLiquidation
-        let shortPayoutSatsSafe = max(dustLimit, shortPayoutSatsUnsafe)
+        let shortPayoutSatsSafe = max(
+            OpalHedgeCoreContractConstraintPolicy.dustLimitSatoshis,
+            shortPayoutSatsUnsafe
+        )
         let longPayoutSatsUnsafe = parameters.payoutSats - shortPayoutSatsSafe
-        let longPayoutSatsSafe = max(dustLimit, longPayoutSatsUnsafe)
+        let longPayoutSatsSafe = max(
+            OpalHedgeCoreContractConstraintPolicy.dustLimitSatoshis,
+            longPayoutSatsUnsafe
+        )
         let totalPayoutSatsSafe = shortPayoutSatsSafe + longPayoutSatsSafe
         let minerFeeSats = fundingSatoshis - totalPayoutSatsSafe
 
