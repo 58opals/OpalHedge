@@ -1,7 +1,6 @@
 // OpalHedgeCoreContractConstraintPolicy.swift
 
 public enum OpalHedgeCoreContractConstraintPolicy {
-    public static let cashAddressPrefix = "bitcoincash:"
     public static let cashAddressPayToPublicKeyHashPayloadLength = 42
     public static let compressedPublicKeyHexCharacterCount = 66
     public static let dustLimitSatoshis: Int64 = 1_332

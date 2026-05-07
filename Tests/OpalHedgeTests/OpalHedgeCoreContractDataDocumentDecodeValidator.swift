@@ -60,6 +60,66 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
         #expect(decodedDocument.jsonText == document.jsonText)
     }
 
+    @Test("Rejects payout address and lock script drift when decoding")
+    func rejectPayoutAddressAndLockScriptDriftWhenDecoding() throws {
+        let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            replacingFieldAt: .metadata("hedgePayoutAddress"),
+            with: OpalHedgeFixtureData.longPayoutAddress,
+            in: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
+        )
+        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
+        }
+
+        #expect(
+            error == .inconsistentPayoutAddressLockScript(
+                name: "shortPayoutAddress",
+                addressPublicKeyHashHex: "45f1f1c4a9b9419a5088a3e9c24a293d7a150e64",
+                lockScriptPublicKeyHashHex: "285bb350881b21ac89724c6fb6dc914d096cd53b"
+            )
+        )
+    }
+
+    @Test("Rejects start price drift from starting oracle message when decoding")
+    func rejectStartPriceDriftFromStartingOracleMessageWhenDecoding() throws {
+        let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            replacingFieldAt: .metadata("startPrice"),
+            with: 23_601,
+            in: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
+        )
+        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
+        }
+
+        #expect(
+            error == .inconsistentOracleMessageComponent(
+                name: "startPrice",
+                expected: 23_600,
+                actual: 23_601
+            )
+        )
+    }
+
+    @Test("Rejects start timestamp drift from starting oracle message when decoding")
+    func rejectStartTimestampDriftFromStartingOracleMessageWhenDecoding() throws {
+        let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            replacingFieldAt: .parameter("startTimestamp"),
+            with: 615_644,
+            in: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
+        )
+        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
+        }
+
+        #expect(
+            error == .inconsistentOracleMessageComponent(
+                name: "startTimestamp",
+                expected: 615_643,
+                actual: 615_644
+            )
+        )
+    }
+
     @Test("Rejects invalid contract data document top-level field shapes")
     func rejectInvalidContractDataDocumentTopLevelFieldShapes() throws {
         let cases: [FieldShapeCase] = [

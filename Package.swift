@@ -46,7 +46,13 @@ let package = Package(
         .target(name: "OpalHedgeClient"),
         .testTarget(
             name: "OpalHedgeTests",
-            dependencies: ["OpalHedge"]
+            dependencies: [
+                "OpalHedge",
+                "OpalHedgeCore",
+                "OpalHedgeOracle",
+                "OpalHedgeBitcoinCash",
+                "OpalHedgeClient"
+            ]
         )
     ]
 )

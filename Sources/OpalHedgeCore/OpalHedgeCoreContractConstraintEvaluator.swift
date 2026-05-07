@@ -12,10 +12,20 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
         }
 
         try validateStartingOracleProof(context.startingOracleProof)
-        try validatePayoutAddress(context.shortPayoutAddress.rawValue, name: "shortPayoutAddress")
-        try validatePayoutAddress(context.longPayoutAddress.rawValue, name: "longPayoutAddress")
+        _ = try validatePayoutAddress(context.shortPayoutAddress.rawValue, name: "shortPayoutAddress")
+        _ = try validatePayoutAddress(context.longPayoutAddress.rawValue, name: "longPayoutAddress")
         try validateLockScriptHex(context.shortLockScript.hex, name: "shortLockScript")
         try validateLockScriptHex(context.longLockScript.hex, name: "longLockScript")
+        try validatePayoutAddress(
+            context.shortPayoutAddress,
+            matches: context.shortLockScript,
+            name: "shortPayoutAddress"
+        )
+        try validatePayoutAddress(
+            context.longPayoutAddress,
+            matches: context.longLockScript,
+            name: "longPayoutAddress"
+        )
         try validateCompressedPublicKeyHex(
             context.shortMutualRedeemPublicKey.hex,
             name: "shortMutualRedeemPublicKey"
@@ -150,6 +160,21 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
                 longInput: longInputInSatoshis,
                 payoutSats: payoutSats
             )
+        }
+    }
+
+    static func validatePayoutAddress(
+        _ address: OpalHedgeCoreContractPayoutAddress,
+        matches lockScript: OpalHedgeCoreContractLockScript,
+        name: String
+    ) throws {
+        guard address.publicKeyHashHex == lockScript.publicKeyHashHex else {
+            throw OpalHedgeCoreContractConstraintError
+                .inconsistentPayoutAddressLockScript(
+                    name: name,
+                    addressPublicKeyHashHex: address.publicKeyHashHex,
+                    lockScriptPublicKeyHashHex: lockScript.publicKeyHashHex
+                )
         }
     }
 

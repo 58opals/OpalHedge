@@ -3,11 +3,12 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractParameterEncoderValidator {
     @Test("Encodes AnyHedge v0.12 constructor parameters in stack order")
     func encodeAnyHedgeV0_12ConstructorParametersInStackOrder() throws {
-        let pushes = try OpalHedge.BitcoinCash.AnyHedgeContractParameterEncoder
+        let pushes = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackPushes(from: makeParameterData())
 
         #expect(pushes.map(hexText) == [
@@ -30,9 +31,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterEncoderValidator {
     @Test("Encodes AnyHedge v0.12 constructor stack bytecode")
     func encodeAnyHedgeV0_12ConstructorStackBytecode() throws {
         let parameterData = try makeParameterData()
-        let pushes = try OpalHedge.BitcoinCash.AnyHedgeContractParameterEncoder
+        let pushes = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackPushes(from: parameterData)
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractParameterEncoder
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackBytecode(from: parameterData)
 
         #expect(bytecode == pushes.reduce(Data()) { $0 + $1 })
@@ -81,8 +82,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterEncoderValidator {
         shortLockScriptHex: String = OpalHedgeFixtureData.shortLockScriptHex,
         longLockScriptHex: String = OpalHedgeFixtureData.longLockScriptHex,
         oraclePublicKeyHex: String = OpalHedgeFixtureData.oraclePublicKeyHex
-    ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractParameterData {
-        try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractParameterData {
+        try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             shortMutualRedeemPublicKeyHex: shortMutualRedeemPublicKeyHex,
             longMutualRedeemPublicKeyHex: longMutualRedeemPublicKeyHex,
             enableMutualRedemption: enableMutualRedemption,
@@ -101,10 +102,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterEncoderValidator {
 
     private func captureParameterError(
         _ operation: () throws -> Void
-    ) -> OpalHedge.BitcoinCash.AnyHedgeContractParameterError? {
+    ) -> OpalHedgeBitcoinCashAnyHedgeContractParameterError? {
         do {
             try operation()
-        } catch let error as OpalHedge.BitcoinCash.AnyHedgeContractParameterError {
+        } catch let error as OpalHedgeBitcoinCashAnyHedgeContractParameterError {
             return error
         } catch {
             Issue.record("Unexpected error: \(error)")

@@ -8,7 +8,6 @@ struct OpalHedgeFacadeValidator {
     func createFacadeContexts() {
         _ = OpalHedge.Core.Context()
         _ = OpalHedge.Oracle.Context()
-        _ = OpalHedge.BitcoinCash.Context()
         _ = OpalHedge.Client.Context()
     }
 
@@ -62,29 +61,38 @@ struct OpalHedgeFacadeValidator {
 
     @Test("Uses Bitcoin Cash settlement facade aliases")
     func useBitcoinCashSettlementFacadeAliases() throws {
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
-            plan: try OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
-            )
+        let clientContext = OpalHedge.Client.Context()
+        let contractPlan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
         )
-        let fundingRecord = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
-            bundle: bundle,
+        let settlementRequest = try clientContext.createAnyHedgeContractSettlementRequest(
+            from: contractPlan,
             fundingTransactionHash: String(repeating: "1", count: 64),
-            fundingOutputIndex: 0
-        )
-        let settlementRequest = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest(
-            fundingRecord: fundingRecord,
+            fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
                 .makeStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
                 .makeSettlementOracleProof()
         )
-        let settlementRecord = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord(
-            settlementRequest: settlementRequest,
+        let settlementRecord = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: contractPlan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof(),
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
-        let summary = OpalHedge.BitcoinCash.AnyHedgeContractSettlementSummary(
-            settlementRecord: settlementRecord
+        let summary = try clientContext.createAnyHedgeContractSettlementSummary(
+            from: contractPlan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof(),
+            settlementTransactionHash: String(repeating: "2", count: 64)
         )
 
         #expect(summary.settlementPayoutAmounts ==
@@ -96,27 +104,30 @@ struct OpalHedgeFacadeValidator {
 
     @Test("Uses Bitcoin Cash data document reconstruction facade aliases")
     func useBitcoinCashDataDocumentReconstructionFacadeAliases() throws {
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
-            plan: try OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
-            )
+        let clientContext = OpalHedge.Client.Context()
+        let contractPlan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
         )
-        let fundingRecord = try bundle.createFundingRecord(
+        let fundingRequest = try clientContext.createAnyHedgeContractFundingRequest(
+            from: contractPlan
+        )
+        let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
+            from: contractPlan,
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0
         )
-        let settlementRequest = try fundingRecord.createSettlementRequest(
+        let settlementRecord = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: contractPlan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
                 .makeStartingSettlementOracleProof(),
-            settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof()
-        )
-        let settlementRecord = try settlementRequest.createSettlementRecord(
+            settlementOracleProof: OpalHedgeContractFixtureBuilder.makeSettlementOracleProof(),
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
 
         let fundingRequestDocument = try OpalHedge.Core.ContractDataDocument(
-            jsonText: bundle.dataDocument.jsonText
+            jsonText: fundingRequest.contractDataDocument.jsonText
         )
         let fundingRecordDocument = try OpalHedge.Core.ContractDataDocument(
             jsonText: fundingRecord.dataDocument.jsonText
@@ -136,7 +147,7 @@ struct OpalHedgeFacadeValidator {
         let reconstructedSummary = try OpalHedge.BitcoinCash
             .AnyHedgeContractSettlementSummary(dataDocument: settlementRecordDocument)
 
-        #expect(reconstructedFundingRequest == bundle.fundingRequest)
+        #expect(reconstructedFundingRequest == fundingRequest)
         #expect(reconstructedFundingRecord == fundingRecord)
         #expect(reconstructedSettlementRecord == settlementRecord)
         #expect(reconstructedLifecycleState == .settled(settlementRecord))

@@ -2,11 +2,12 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
     @Test("Creates AnyHedge contract funding request from bundle")
     func createAnyHedgeContractFundingRequestFromBundle() throws {
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             )
@@ -57,7 +58,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
 
     @Test("Reconstructs AnyHedge contract funding request from data document")
     func reconstructAnyHedgeContractFundingRequestFromDataDocument() throws {
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             )
@@ -77,8 +78,13 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
     @Test("Creates AnyHedge contract funding request from data document with client context")
     func createAnyHedgeContractFundingRequestFromDataDocumentWithClientContext() throws {
         let clientContext = OpalHedge.Client.Context()
+        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
+            longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
+        )
         let bundle = try clientContext.createAnyHedgeContractBundle(
-            from: OpalHedgeFixtureData.contractCreationContext
+            from: creationContext,
+            network: .regtest
         )
         let decodedDocument = try OpalHedge.Core.ContractDataDocument(
             jsonText: bundle.dataDocument.jsonText

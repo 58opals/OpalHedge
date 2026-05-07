@@ -2,11 +2,12 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashContractScriptArtifactValidator {
     @Test("Provides AnyHedge v0.12 script artifact version")
     func provideAnyHedgeScriptArtifactVersion() {
-        let version = OpalHedge.BitcoinCash.ContractScriptArtifactVersion
+        let version = OpalHedgeBitcoinCashContractScriptArtifactVersion
             .anyHedgeV0_12
 
         #expect(version.rawValue == "v0.12")
@@ -16,7 +17,7 @@ struct OpalHedgeBitcoinCashContractScriptArtifactValidator {
 
     @Test("Provides AnyHedge v0.12 script artifact reference")
     func provideAnyHedgeScriptArtifactReference() {
-        let artifact = OpalHedge.BitcoinCash.ContractScriptArtifact
+        let artifact = OpalHedgeBitcoinCashContractScriptArtifact
             .anyHedgeV0_12
 
         #expect(artifact.version == .anyHedgeV0_12)

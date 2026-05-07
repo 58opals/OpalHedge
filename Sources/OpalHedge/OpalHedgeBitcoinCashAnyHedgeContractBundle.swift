@@ -3,25 +3,25 @@
 import OpalHedgeBitcoinCash
 import OpalHedgeCore
 
-public struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
-    public let plan: OpalHedgeCoreContractPlan
-    public let draftData: OpalHedgeCoreContractDraftData
-    public let parameterData: OpalHedgeBitcoinCashAnyHedgeContractParameterData
-    public let bytecode: OpalHedgeBitcoinCashAnyHedgeContractBytecode
-    public let contractAddress: OpalHedgeBitcoinCashContractAddress
-    public let fundingOutput: OpalHedgeBitcoinCashAnyHedgeContractFundingOutput
-    public let dataDocument: OpalHedgeCoreContractDataDocument
-    public let fundingRequest: OpalHedgeBitcoinCashAnyHedgeContractFundingRequest
+package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
+    package let plan: OpalHedgeCoreContractPlan
+    package let draftData: OpalHedgeCoreContractDraftData
+    package let parameterData: OpalHedgeBitcoinCashAnyHedgeContractParameterData
+    package let bytecode: OpalHedgeBitcoinCashAnyHedgeContractBytecode
+    package let contractAddress: OpalHedgeBitcoinCashContractAddress
+    package let fundingOutput: OpalHedgeBitcoinCashAnyHedgeContractFundingOutput
+    package let dataDocument: OpalHedgeCoreContractDataDocument
+    package let fundingRequest: OpalHedgeBitcoinCashAnyHedgeContractFundingRequest
 
-    public var fundingState: OpalHedgeBitcoinCashAnyHedgeContractFundingState {
+    package var fundingState: OpalHedgeBitcoinCashAnyHedgeContractFundingState {
         OpalHedgeBitcoinCashAnyHedgeContractFundingState(bundle: self)
     }
 
-    public var lifecycleState: OpalHedgeBitcoinCashAnyHedgeContractLifecycleState {
+    package var lifecycleState: OpalHedgeBitcoinCashAnyHedgeContractLifecycleState {
         OpalHedgeBitcoinCashAnyHedgeContractLifecycleState(bundle: self)
     }
 
-    public func createFundingRecord(
+    package func createFundingRecord(
         fundingTransactionHash: String,
         fundingOutputIndex: Int64,
         fundingSatoshis: Int64? = nil
@@ -34,7 +34,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
         )
     }
 
-    public init(
+    package init(
         plan: OpalHedgeCoreContractPlan,
         network: OpalHedgeBitcoinCashNetwork = .mainnet,
         scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
@@ -42,6 +42,8 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
         fundings: [OpalHedgeCoreContractFunding] = [],
         fees: [OpalHedgeCoreContractFeeData] = []
     ) throws {
+        try network.validatePayoutAddressNetworks(in: plan)
+
         let draftData = OpalHedgeCoreContractDraftData(
             plan: plan,
             fundings: fundings,

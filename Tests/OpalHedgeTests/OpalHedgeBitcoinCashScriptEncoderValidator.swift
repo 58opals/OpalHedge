@@ -3,6 +3,7 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashScriptEncoderValidator {
     @Test("Encodes minimally serialized Script numbers")
@@ -21,7 +22,7 @@ struct OpalHedgeBitcoinCashScriptEncoderValidator {
         ]
 
         for (value, expectedBytes) in vectors {
-            let encodedData = OpalHedge.BitcoinCash.ScriptEncoder
+            let encodedData = OpalHedgeBitcoinCashScriptEncoder
                 .encodeScriptNumber(value)
 
             #expect(encodedData == Data(expectedBytes))
@@ -40,7 +41,7 @@ struct OpalHedgeBitcoinCashScriptEncoderValidator {
         ]
 
         for (value, expectedBytes) in vectors {
-            let encodedData = try OpalHedge.BitcoinCash.ScriptEncoder
+            let encodedData = try OpalHedgeBitcoinCashScriptEncoder
                 .encodeScriptNumberPush(value)
 
             #expect(encodedData == Data(expectedBytes))
@@ -54,25 +55,25 @@ struct OpalHedgeBitcoinCashScriptEncoderValidator {
         let pushData2 = Data(repeating: 0xcc, count: 256)
         let pushData4 = Data(repeating: 0xdd, count: 65_536)
 
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(Data()) == Data([0x00]))
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(Data([0x01])) == Data([0x51]))
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(Data([0x81])) == Data([0x4f]))
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(Data([0x51])) == Data([0x01, 0x51]))
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(Data()) == Data([0x00]))
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(Data([0x01])) == Data([0x51]))
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(Data([0x81])) == Data([0x4f]))
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(Data([0x51])) == Data([0x01, 0x51]))
 
         var directPushExpectedData = Data([0x4b])
         directPushExpectedData.append(directPushData)
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(directPushData) == directPushExpectedData)
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(directPushData) == directPushExpectedData)
 
         var pushData1ExpectedData = Data([0x4c, 0x4c])
         pushData1ExpectedData.append(pushData1)
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(pushData1) == pushData1ExpectedData)
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(pushData1) == pushData1ExpectedData)
 
         var pushData2ExpectedData = Data([0x4d, 0x00, 0x01])
         pushData2ExpectedData.append(pushData2)
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(pushData2) == pushData2ExpectedData)
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(pushData2) == pushData2ExpectedData)
 
         var pushData4ExpectedData = Data([0x4e, 0x00, 0x00, 0x01, 0x00])
         pushData4ExpectedData.append(pushData4)
-        #expect(try OpalHedge.BitcoinCash.ScriptEncoder.encodeDataPush(pushData4) == pushData4ExpectedData)
+        #expect(try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(pushData4) == pushData4ExpectedData)
     }
 }

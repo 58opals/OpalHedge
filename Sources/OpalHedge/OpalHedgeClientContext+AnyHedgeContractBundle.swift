@@ -5,7 +5,7 @@ import OpalHedgeClient
 import OpalHedgeCore
 
 extension OpalHedgeClientContext {
-    public func createAnyHedgeContractBundle(
+    package func createAnyHedgeContractBundle(
         from creationContext: OpalHedgeCoreContractCreationContext,
         network: OpalHedgeBitcoinCashNetwork = .mainnet,
         scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
@@ -24,7 +24,7 @@ extension OpalHedgeClientContext {
         )
     }
 
-    public func createAnyHedgeContractBundle(
+    package func createAnyHedgeContractBundle(
         from plan: OpalHedgeCoreContractPlan,
         network: OpalHedgeBitcoinCashNetwork = .mainnet,
         scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =

@@ -51,4 +51,32 @@ struct OpalHedgeCoreSettlementConditionResolverValidator {
 
         #expect(didThrow)
     }
+
+    @Test("Rejects settlement timestamp before previous timestamp")
+    func rejectSettlementTimestampBeforePreviousTimestamp() {
+        var error: OpalHedge.Core.SettlementConditionError?
+        do {
+            _ = try OpalHedge.Core.SettlementConditionResolver.resolve(
+                parameters: OpalHedgeFixtureData.contractParameters,
+                previousTimestamp: 615_644,
+                previousSequence: 1,
+                settlementTimestamp: 615_643,
+                settlementSequence: 2,
+                settlementPrice: 17_500
+            )
+            error = nil
+        } catch let caughtError as OpalHedge.Core.SettlementConditionError {
+            error = caughtError
+        } catch let unexpectedError {
+            Issue.record("Unexpected error: \(unexpectedError)")
+            error = nil
+        }
+
+        #expect(
+            error == .settlementMessageBeforePrevious(
+                previousTimestamp: 615_644,
+                settlementTimestamp: 615_643
+            )
+        )
+    }
 }

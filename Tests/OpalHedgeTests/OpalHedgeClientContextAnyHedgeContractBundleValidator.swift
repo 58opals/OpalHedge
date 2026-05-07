@@ -2,6 +2,7 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeClientContextAnyHedgeContractBundleValidator {
     @Test("Creates AnyHedge contract bundle from creation context")
@@ -13,7 +14,7 @@ struct OpalHedgeClientContextAnyHedgeContractBundleValidator {
         let expectedPlan = try OpalHedge.Core.ContractPlan(
             from: OpalHedgeFixtureData.contractCreationContext
         )
-        let expectedBundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let expectedBundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: expectedPlan
         )
 
@@ -30,7 +31,7 @@ struct OpalHedgeClientContextAnyHedgeContractBundleValidator {
         let bundle = try clientContext.createAnyHedgeContractBundle(
             from: plan
         )
-        let expectedBundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let expectedBundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: plan
         )
 
@@ -50,12 +51,16 @@ struct OpalHedgeClientContextAnyHedgeContractBundleValidator {
         let feeData = OpalHedge.Core.ContractFeeData(
             name: "settlement",
             description: "Settlement service fee",
-            address: OpalHedgeFixtureData.longPayoutAddress,
+            address: OpalHedgeFixtureData.longRegtestPayoutAddress,
             satoshis: 1_000
+        )
+        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
+            longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
         )
         let bundle = try OpalHedge.Client.Context()
             .createAnyHedgeContractBundle(
-                from: OpalHedgeFixtureData.contractCreationContext,
+                from: creationContext,
                 network: .regtest,
                 fundings: [funding],
                 fees: [feeData]

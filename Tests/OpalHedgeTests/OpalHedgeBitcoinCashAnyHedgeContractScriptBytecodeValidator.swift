@@ -3,11 +3,12 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractScriptBytecodeValidator {
     @Test("Provides AnyHedge v0.12 script bytecode reference")
     func provideAnyHedgeV0_12ScriptBytecodeReference() {
-        let scriptBytecode = OpalHedge.BitcoinCash.AnyHedgeContractScriptBytecode
+        let scriptBytecode = OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
             .anyHedgeV0_12
 
         #expect(scriptBytecode.artifact == .anyHedgeV0_12)
@@ -20,7 +21,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractScriptBytecodeValidator {
 
     @Test("Includes AnyHedge v0.12 script bytecode in contract bytecode")
     func includeAnyHedgeV0_12ScriptBytecodeInContractBytecode() throws {
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: OpalHedgeFixtureData.contractParameters
         )
 

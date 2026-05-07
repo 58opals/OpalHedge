@@ -1,21 +1,11 @@
 // OpalHedgeCoreContractConstraintEvaluator~BitcoinCash.swift
 
 extension OpalHedgeCoreContractConstraintEvaluator {
-    static func validatePayoutAddress(_ value: String, name: String) throws {
-        let prefix = OpalHedgeCoreContractConstraintPolicy.cashAddressPrefix
-        let expectedPayloadLength = OpalHedgeCoreContractConstraintPolicy
-            .cashAddressPayToPublicKeyHashPayloadLength
-        let payload = value.dropFirst(prefix.count)
-
-        guard value.hasPrefix(prefix),
-              value == value.lowercased(),
-              payload.count == expectedPayloadLength,
-              payload.allSatisfy({ cashAddressPayloadCharacters.contains($0) }) else {
-            throw OpalHedgeCoreContractConstraintError.invalidPayoutAddress(
-                name: name,
-                value: value
-            )
-        }
+    static func validatePayoutAddress(
+        _ value: String,
+        name: String
+    ) throws -> OpalHedgeCoreCashAddrPayoutAddress {
+        try OpalHedgeCoreCashAddrPayoutAddress.parse(value, name: name)
     }
 
     static func validateLockScriptHex(_ value: String, name: String) throws {
@@ -41,10 +31,6 @@ extension OpalHedgeCoreContractConstraintEvaluator {
                 value: value
             )
         }
-    }
-
-    private static var cashAddressPayloadCharacters: String {
-        "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
     }
 
     private static var lowercaseHexCharacters: String {

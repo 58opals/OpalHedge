@@ -3,6 +3,7 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeAnyHedgeGoldenVectorValidator {
     @Test("Matches upstream hedge ten week AnyHedge golden vector")
@@ -15,18 +16,17 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
         let plan = try OpalHedge.Core.ContractPlanner.createPlan(
             from: OpalHedgeFixtureData.contractCreationContext
         )
-        let parameterData = try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: plan
         )
-        let constructorStackPushHexTexts = try OpalHedge.BitcoinCash
-            .AnyHedgeContractParameterEncoder
+        let constructorStackPushHexTexts = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackPushes(from: parameterData)
             .map(hexText)
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             parameters: parameterData
         )
         let address = try bytecode.deriveContractAddress(network: .mainnet)
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: plan
         )
 

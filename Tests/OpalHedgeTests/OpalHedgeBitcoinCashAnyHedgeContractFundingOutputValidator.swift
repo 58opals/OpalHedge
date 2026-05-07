@@ -2,11 +2,12 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
     @Test("Creates AnyHedge contract funding output")
     func createAnyHedgeContractFundingOutput() throws {
-        let contractAddress = try OpalHedge.BitcoinCash.ContractAddress(
+        let contractAddress = try OpalHedgeBitcoinCashContractAddress(
             redeemScriptHex: "51",
             network: .mainnet
         )
@@ -25,7 +26,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
 
     @Test("Rejects invalid AnyHedge contract funding output satoshis")
     func rejectInvalidAnyHedgeContractFundingOutputSatoshis() throws {
-        let contractAddress = try OpalHedge.BitcoinCash.ContractAddress(
+        let contractAddress = try OpalHedgeBitcoinCashContractAddress(
             redeemScriptHex: "51",
             network: .mainnet
         )
@@ -42,7 +43,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
 
     @Test("Includes AnyHedge contract funding output in bundle")
     func includeAnyHedgeContractFundingOutputInBundle() throws {
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             )

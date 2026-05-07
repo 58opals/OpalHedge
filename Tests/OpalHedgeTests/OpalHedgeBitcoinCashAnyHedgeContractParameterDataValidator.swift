@@ -3,6 +3,7 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
     @Test("Creates AnyHedge parameter data from Core contract plan")
@@ -10,18 +11,19 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
         let plan = try OpalHedge.Core.ContractPlan(
             from: OpalHedgeFixtureData.contractCreationContext
         )
-        let parameterData = try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: plan
         )
-        let parametersParameterData = try OpalHedge.BitcoinCash
-            .AnyHedgeContractParameterData(from: plan.parameters)
+        let parametersParameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
+            from: plan.parameters
+        )
 
         #expect(parameterData == parametersParameterData)
     }
 
     @Test("Creates AnyHedge parameter data from Core contract parameters")
     func createAnyHedgeParameterDataFromCoreContractParameters() throws {
-        let parameterData = try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: OpalHedgeFixtureData.contractParameters
         )
         let manualParameterData = try makeManualParameterData()
@@ -34,10 +36,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
         let plan = try OpalHedge.Core.ContractPlan(
             from: OpalHedgeFixtureData.contractCreationContext
         )
-        let parameterData = try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: plan
         )
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractParameterEncoder
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackBytecode(from: parameterData)
 
         #expect(bytecode.count == 181)
@@ -51,10 +53,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
 
     @Test("Encodes Core contract parameters as AnyHedge constructor bytecode")
     func encodeCoreContractParametersAsAnyHedgeConstructorBytecode() throws {
-        let parameterData = try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: OpalHedgeFixtureData.contractParameters
         )
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractParameterEncoder
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackBytecode(from: parameterData)
 
         #expect(bytecode.count == 181)
@@ -66,9 +68,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
         )
     }
 
-    private func makeManualParameterData() throws -> OpalHedge.BitcoinCash
-        .AnyHedgeContractParameterData {
-        try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+    private func makeManualParameterData()
+        throws -> OpalHedgeBitcoinCashAnyHedgeContractParameterData {
+        try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             shortMutualRedeemPublicKeyHex: OpalHedgeFixtureData
                 .shortMutualRedeemPublicKeyHex,
             longMutualRedeemPublicKeyHex: OpalHedgeFixtureData

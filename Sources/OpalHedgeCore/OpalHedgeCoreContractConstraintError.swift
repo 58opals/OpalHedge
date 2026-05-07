@@ -15,6 +15,16 @@ public enum OpalHedgeCoreContractConstraintError: Error, Sendable, Equatable {
     case invalidPayoutAddress(name: String, value: String)
     case invalidLockScriptHex(name: String, value: String)
     case unsupportedLockScriptTemplate(name: String, value: String)
+    case inconsistentPayoutAddressLockScript(
+        name: String,
+        addressPublicKeyHashHex: String,
+        lockScriptPublicKeyHashHex: String
+    )
+    case inconsistentPayoutAddressNetwork(
+        name: String,
+        expectedCashAddrPrefix: String,
+        actualCashAddrPrefix: String
+    )
     case lowLiquidationPriceNotBelowStart(low: Int64, start: Int64)
     case highLiquidationPriceNotAboveStart(high: Int64, start: Int64)
     case invalidPayoutSatoshis(Int64)

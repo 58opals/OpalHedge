@@ -2,6 +2,7 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractLifecycleStateValidator {
     @Test("Represents unfunded AnyHedge contract lifecycle state")
@@ -169,8 +170,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractLifecycleStateValidator {
         #expect(error == .missingFundingRecord(index: 1))
     }
 
-    private func makeBundle() throws -> OpalHedge.BitcoinCash.AnyHedgeContractBundle {
-        try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+    private func makeBundle() throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {
+        try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             )

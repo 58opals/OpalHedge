@@ -2,6 +2,7 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractFundingIndexValidator {
     @Test("Selects indexed AnyHedge contract funding record from multi-funding document")
@@ -128,8 +129,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingIndexValidator {
 
     private func makeBundle(
         fundings: [OpalHedge.Core.ContractFunding] = []
-    ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractBundle {
-        try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {
+        try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             ),

@@ -2,6 +2,7 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
     @Test("Creates AnyHedge contract funding record")
@@ -125,10 +126,37 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
         )
     }
 
+    @Test("Rejects settled funding record data document")
+    func rejectSettledFundingRecordDataDocument() throws {
+        let fundingRecord = try makeBundle().createFundingRecord(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let settlementRequest = try fundingRecord.createSettlementRequest(
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof()
+        )
+        let settlementRecord = try settlementRequest.createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let settledDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: settlementRecord.dataDocument.jsonText
+        )
+        let error = captureFundingRecordError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
+                dataDocument: settledDocument
+            )
+        }
+
+        #expect(error == .fundingAlreadySettled(index: 0))
+    }
+
     private func makeBundle(
         fundings: [OpalHedge.Core.ContractFunding] = []
-    ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractBundle {
-        try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {
+        try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             ),

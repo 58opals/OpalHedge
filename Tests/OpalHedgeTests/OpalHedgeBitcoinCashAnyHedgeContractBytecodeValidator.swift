@@ -3,14 +3,15 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
     @Test("Creates AnyHedge contract bytecode from parameter data")
     func createAnyHedgeContractBytecodeFromParameterData() throws {
-        let parameterData = try OpalHedge.BitcoinCash.AnyHedgeContractParameterData(
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: OpalHedgeFixtureData.contractParameters
         )
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             parameters: parameterData
         )
 
@@ -22,7 +23,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
 
     @Test("Composes AnyHedge redeem script bytecode")
     func composeAnyHedgeRedeemScriptBytecode() throws {
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: OpalHedgeFixtureData.contractParameters
         )
         let constructorPrefix = bytecode.redeemScriptBytecode.prefix(
@@ -41,11 +42,11 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
 
     @Test("Derives AnyHedge contract address from redeem script bytecode")
     func deriveAnyHedgeContractAddressFromRedeemScriptBytecode() throws {
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: OpalHedgeFixtureData.contractParameters
         )
         let address = try bytecode.deriveContractAddress(network: .mainnet)
-        let directAddress = try OpalHedge.BitcoinCash.ContractAddress(
+        let directAddress = try OpalHedgeBitcoinCashContractAddress(
             redeemScript: bytecode.redeemScriptBytecode,
             network: .mainnet
         )
@@ -60,10 +61,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         let plan = try OpalHedge.Core.ContractPlan(
             from: OpalHedgeFixtureData.contractCreationContext
         )
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: plan
         )
-        let parametersBytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let parametersBytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: plan.parameters
         )
 
@@ -72,8 +73,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
 
     @Test("Preserves explicit AnyHedge contract script artifact")
     func preserveExplicitAnyHedgeContractScriptArtifact() throws {
-        let artifact = OpalHedge.BitcoinCash.ContractScriptArtifact(
-            version: OpalHedge.BitcoinCash.ContractScriptArtifactVersion(
+        let artifact = OpalHedgeBitcoinCashContractScriptArtifact(
+            version: OpalHedgeBitcoinCashContractScriptArtifactVersion(
                 rawValue: "v0.12-fixture",
                 displayName: "AnyHedge v0.12 Fixture",
                 contractDirectoryPath: "contracts/v0.12"
@@ -83,14 +84,14 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
             bytecodeAssemblyUrl: "https://example.invalid/bytecode.asm",
             artifactJsonUrl: "https://example.invalid/artifact.json"
         )
-        let scriptBytecode = OpalHedge.BitcoinCash.AnyHedgeContractScriptBytecode(
+        let scriptBytecode = OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode(
             artifact: artifact,
-            rawHex: OpalHedge.BitcoinCash.AnyHedgeContractScriptBytecode
+            rawHex: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
                 .anyHedgeV0_12.rawHex,
-            rawData: OpalHedge.BitcoinCash.AnyHedgeContractScriptBytecode
+            rawData: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
                 .anyHedgeV0_12.rawData
         )
-        let bytecode = try OpalHedge.BitcoinCash.AnyHedgeContractBytecode(
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: OpalHedgeFixtureData.contractParameters,
             scriptBytecode: scriptBytecode
         )

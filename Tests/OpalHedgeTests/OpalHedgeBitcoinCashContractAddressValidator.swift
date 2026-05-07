@@ -3,11 +3,12 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashContractAddressValidator {
     @Test("Derives mainnet P2SH CashAddr from script hash")
     func deriveMainnetPayToScriptHashCashAddrFromScriptHash() throws {
-        let address = try OpalHedge.BitcoinCash.ContractAddress(
+        let address = try OpalHedgeBitcoinCashContractAddress(
             scriptHash: Data([
                 0x76, 0xa0, 0x40, 0x53, 0xbd, 0xa0, 0xa8, 0x8b,
                 0xda, 0x51, 0x77, 0xb8, 0x6a, 0x15, 0xc3, 0xb2,
@@ -22,7 +23,7 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
 
     @Test("Derives testnet P2SH CashAddr from script hash")
     func deriveTestnetPayToScriptHashCashAddrFromScriptHash() throws {
-        let address = try OpalHedge.BitcoinCash.ContractAddress(
+        let address = try OpalHedgeBitcoinCashContractAddress(
             scriptHash: Data([
                 0xf5, 0xbf, 0x48, 0xb3, 0x97, 0xda, 0xe7, 0x0b,
                 0xe8, 0x2b, 0x3c, 0xca, 0x47, 0x93, 0xf8, 0xeb,
@@ -37,11 +38,11 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
 
     @Test("Derives contract address from redeem script hex")
     func deriveContractAddressFromRedeemScriptHex() throws {
-        let address = try OpalHedge.BitcoinCash.ContractAddress(
+        let address = try OpalHedgeBitcoinCashContractAddress(
             redeemScriptHex: "51",
             network: .regtest
         )
-        let addressFromHash = try OpalHedge.BitcoinCash.ContractAddress(
+        let addressFromHash = try OpalHedgeBitcoinCashContractAddress(
             scriptHash: address.scriptHash,
             network: .regtest
         )
@@ -53,7 +54,7 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
     @Test("Rejects invalid script hash length")
     func rejectInvalidScriptHashLength() {
         let error = captureContractAddressError {
-            _ = try OpalHedge.BitcoinCash.ContractAddress(
+            _ = try OpalHedgeBitcoinCashContractAddress(
                 scriptHash: Data(repeating: 0, count: 19)
             )
         }
@@ -64,7 +65,7 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
     @Test("Rejects invalid redeem script hex")
     func rejectInvalidRedeemScriptHex() {
         let error = captureContractAddressError {
-            _ = try OpalHedge.BitcoinCash.ContractAddress(
+            _ = try OpalHedgeBitcoinCashContractAddress(
                 redeemScriptHex: "zz"
             )
         }
@@ -74,10 +75,10 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
 
     private func captureContractAddressError(
         _ operation: () throws -> Void
-    ) -> OpalHedge.BitcoinCash.ContractAddressError? {
+    ) -> OpalHedgeBitcoinCashContractAddressError? {
         do {
             try operation()
-        } catch let error as OpalHedge.BitcoinCash.ContractAddressError {
+        } catch let error as OpalHedgeBitcoinCashContractAddressError {
             return error
         } catch {
             Issue.record("Unexpected error: \(error)")

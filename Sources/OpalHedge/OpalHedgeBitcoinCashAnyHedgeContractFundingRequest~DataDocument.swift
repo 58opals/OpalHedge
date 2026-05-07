@@ -10,6 +10,8 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
         scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
             .anyHedgeV0_12
     ) throws {
+        try network.validatePayoutAddressNetworks(in: dataDocument.draftData)
+
         let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: dataDocument.draftData.parameters,
             scriptBytecode: scriptBytecode

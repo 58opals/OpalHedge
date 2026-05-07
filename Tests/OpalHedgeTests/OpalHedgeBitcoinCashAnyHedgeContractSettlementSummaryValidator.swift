@@ -3,6 +3,7 @@
 import Foundation
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
     @Test("Creates AnyHedge contract settlement summary")
@@ -140,7 +141,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
     }
 
     private func makeFundingRecord() throws -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord {
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
             )

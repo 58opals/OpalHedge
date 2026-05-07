@@ -107,7 +107,7 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
         settlementRecord?.settlementSummary
     }
 
-    public init(bundle: OpalHedgeBitcoinCashAnyHedgeContractBundle) {
+    package init(bundle: OpalHedgeBitcoinCashAnyHedgeContractBundle) {
         self = .unfunded(bundle.fundingRequest)
     }
 

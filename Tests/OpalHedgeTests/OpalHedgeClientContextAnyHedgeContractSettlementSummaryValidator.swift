@@ -76,12 +76,16 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
         let feeData = OpalHedge.Core.ContractFeeData(
             name: "settlement",
             description: "Settlement service fee",
-            address: OpalHedgeFixtureData.longPayoutAddress,
+            address: OpalHedgeFixtureData.longRegtestPayoutAddress,
             satoshis: 1_000
+        )
+        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
+            longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
         )
         let summary = try OpalHedge.Client.Context()
             .createAnyHedgeContractSettlementSummary(
-                from: OpalHedgeFixtureData.contractCreationContext,
+                from: creationContext,
                 fundingTransactionHash: String(repeating: "1", count: 64),
                 fundingOutputIndex: 1,
                 previousOracleProof: OpalHedgeContractFixtureBuilder

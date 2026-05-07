@@ -28,7 +28,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecord: Sendable, Equat
         )
     }
 
-    public init(
+    package init(
         bundle: OpalHedgeBitcoinCashAnyHedgeContractBundle,
         fundingTransactionHash: String,
         fundingOutputIndex: Int64,
@@ -79,9 +79,16 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecord: Sendable, Equat
             .anyHedgeV0_12
     ) throws {
         let draftData = dataDocument.draftData
+        try network.validatePayoutAddressNetworks(in: draftData)
+
         guard draftData.fundings.indices.contains(fundingIndex) else {
             throw OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
                 .missingFundingRecord(index: fundingIndex)
+        }
+        let funding = draftData.fundings[fundingIndex]
+        guard funding.settlement == nil else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
+                .fundingAlreadySettled(index: fundingIndex)
         }
 
         let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
@@ -98,7 +105,6 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecord: Sendable, Equat
             dustReserveSatoshis: OpalHedgeCoreContractConstraintPolicy
                 .dustLimitSatoshis
         )
-        let funding = draftData.fundings[fundingIndex]
 
         try Self.validateFundingTransactionHash(funding.fundingTransactionHash)
         guard funding.fundingOutputIndex >= 0 else {

@@ -2,6 +2,7 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractSettlementPayoutAmountsValidator {
     @Test("Creates AnyHedge contract settlement payout amounts")

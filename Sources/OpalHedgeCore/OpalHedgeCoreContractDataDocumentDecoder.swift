@@ -16,6 +16,7 @@ enum OpalHedgeCoreContractDataDocumentDecoder {
             parameters,
             startPrice: metadata.startPrice
         )
+        try validateMetadata(metadata, matches: parameters)
 
         return OpalHedgeCoreContractDraftData(
             parameters: parameters,
@@ -60,8 +61,27 @@ enum OpalHedgeCoreContractDataDocumentDecoder {
     ) throws -> OpalHedgeCoreContractMetadata {
         let startingOracleMessageHex = try string("startingOracleMessage", in: dictionary)
         let startingOracleSignatureHex = try string("startingOracleSignature", in: dictionary)
-        _ = try OpalHedgeCoreContractOracleMessageData(hex: startingOracleMessageHex)
+        let startingOracleMessage = try OpalHedgeCoreContractOracleMessageData(
+            hex: startingOracleMessageHex
+        )
         _ = try OpalHedgeCoreContractOracleSignature(hex: startingOracleSignatureHex)
+        let startPrice = try int64("startPrice", in: dictionary)
+        guard startPrice == startingOracleMessage.priceValue else {
+            throw OpalHedgeCoreContractConstraintError
+                .inconsistentOracleMessageComponent(
+                    name: "startPrice",
+                    expected: startingOracleMessage.priceValue,
+                    actual: startPrice
+                )
+        }
+        guard parameters.startTimestamp == startingOracleMessage.messageTimestamp else {
+            throw OpalHedgeCoreContractConstraintError
+                .inconsistentOracleMessageComponent(
+                    name: "startTimestamp",
+                    expected: startingOracleMessage.messageTimestamp,
+                    actual: parameters.startTimestamp
+                )
+        }
 
         return try OpalHedgeCoreContractMetadata(
             takerSide: side("takerSide", in: dictionary),
@@ -74,7 +94,7 @@ enum OpalHedgeCoreContractDataDocumentDecoder {
             ),
             startingOracleMessageHex: startingOracleMessageHex,
             startingOracleSignatureHex: startingOracleSignatureHex,
-            startPrice: int64("startPrice", in: dictionary),
+            startPrice: startPrice,
             durationInSeconds: int64("durationInSeconds", in: dictionary),
             nominalUnits: double("nominalUnits", in: dictionary),
             lowLiquidationPriceMultiplier: double(
@@ -136,6 +156,22 @@ enum OpalHedgeCoreContractDataDocumentDecoder {
             description: string("description", in: dictionary),
             address: string("address", in: dictionary),
             satoshis: int64("satoshis", in: dictionary)
+        )
+    }
+
+    private static func validateMetadata(
+        _ metadata: OpalHedgeCoreContractMetadata,
+        matches parameters: OpalHedgeCoreContractParameters
+    ) throws {
+        try OpalHedgeCoreContractConstraintEvaluator.validatePayoutAddress(
+            metadata.shortPayoutAddress,
+            matches: parameters.shortLockScript,
+            name: "shortPayoutAddress"
+        )
+        try OpalHedgeCoreContractConstraintEvaluator.validatePayoutAddress(
+            metadata.longPayoutAddress,
+            matches: parameters.longLockScript,
+            name: "longPayoutAddress"
         )
     }
 }

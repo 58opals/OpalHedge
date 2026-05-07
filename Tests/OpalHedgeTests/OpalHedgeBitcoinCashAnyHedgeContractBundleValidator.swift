@@ -2,6 +2,7 @@
 
 import Testing
 import OpalHedge
+import OpalHedgeBitcoinCash
 
 struct OpalHedgeBitcoinCashAnyHedgeContractBundleValidator {
     @Test("Creates AnyHedge contract bundle from Core contract plan")
@@ -9,13 +10,15 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBundleValidator {
         let plan = try OpalHedge.Core.ContractPlan(
             from: OpalHedgeFixtureData.contractCreationContext
         )
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: plan
         )
-        let expectedParameterData = try OpalHedge.BitcoinCash
-            .AnyHedgeContractParameterData(from: plan)
-        let expectedBytecode = try OpalHedge.BitcoinCash
-            .AnyHedgeContractBytecode(from: plan)
+        let expectedParameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
+            from: plan
+        )
+        let expectedBytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
+            from: plan
+        )
 
         #expect(bundle.plan == plan)
         #expect(bundle.draftData.parameters == plan.parameters)
@@ -31,8 +34,12 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBundleValidator {
 
     @Test("Includes network funding and fee data in AnyHedge contract bundle")
     func includeNetworkFundingAndFeeDataInAnyHedgeContractBundle() throws {
+        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
+            longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
+        )
         let plan = try OpalHedge.Core.ContractPlan(
-            from: OpalHedgeFixtureData.contractCreationContext
+            from: creationContext
         )
         let funding = OpalHedge.Core.ContractFunding(
             fundingTransactionHash: String(repeating: "1", count: 64),
@@ -42,10 +49,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBundleValidator {
         let feeData = OpalHedge.Core.ContractFeeData(
             name: "settlement",
             description: "Settlement service fee",
-            address: OpalHedgeFixtureData.longPayoutAddress,
+            address: OpalHedgeFixtureData.longRegtestPayoutAddress,
             satoshis: 1_000
         )
-        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: plan,
             network: .regtest,
             fundings: [funding],

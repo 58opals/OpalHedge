@@ -30,6 +30,12 @@ public enum OpalHedgeCoreSettlementConditionResolver {
                 startTimestamp: parameters.startTimestamp
             )
         }
+        guard settlementTimestamp >= previousTimestamp else {
+            throw OpalHedgeCoreSettlementConditionError.settlementMessageBeforePrevious(
+                previousTimestamp: previousTimestamp,
+                settlementTimestamp: settlementTimestamp
+            )
+        }
         guard settlementPrice > 0 else {
             throw OpalHedgeCoreSettlementConditionError.invalidSettlementPrice(settlementPrice)
         }
