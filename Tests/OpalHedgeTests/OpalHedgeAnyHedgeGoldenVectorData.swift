@@ -2,12 +2,51 @@
 
 enum OpalHedgeAnyHedgeGoldenVectorData {
     static let sourceReferences = [
-        OpalHedgeFixtureReferenceData.anyHedgeContractMetadataV1Url,
-        OpalHedgeFixtureReferenceData.anyHedgeContractFundingV1Url,
-        OpalHedgeFixtureReferenceData.anyHedgeContractAutomatedPayoutV1Url,
-        OpalHedgeFixtureReferenceData.priceOracleLibraryUrl
+        OpalHedgeFixtureSourceReference(
+            family: .anyHedgeContractMetadata,
+            title: "AnyHedge ContractMetadataV1 interface",
+            url: OpalHedgeFixtureReferenceData.anyHedgeContractMetadataV1Url,
+            coveredFixtureNames: [
+                upstreamHedgeTenWeekContractMetadataFixtureName
+            ]
+        ),
+        OpalHedgeFixtureSourceReference(
+            family: .anyHedgeContractFunding,
+            title: "AnyHedge ContractFundingV1 interface",
+            url: OpalHedgeFixtureReferenceData.anyHedgeContractFundingV1Url,
+            coveredFixtureNames: [
+                upstreamHedgeTenWeekContractFundingsFixtureName
+            ]
+        ),
+        OpalHedgeFixtureSourceReference(
+            family: .anyHedgeContractAutomatedPayout,
+            title: "AnyHedge ContractAutomatedPayoutV1 interface",
+            url: OpalHedgeFixtureReferenceData.anyHedgeContractAutomatedPayoutV1Url,
+            coveredFixtureNames: [
+                upstreamHedgeTenWeekContractSettlementFixtureName
+            ]
+        ),
+        OpalHedgeFixtureSourceReference(
+            family: .priceOracle,
+            title: "PriceOracle library",
+            url: OpalHedgeFixtureReferenceData.priceOracleLibraryUrl,
+            coveredFixtureNames: [
+                "oraclePublicKeyHex",
+                "startingOracleMessageHex",
+                "startingOracleSignatureHex"
+            ]
+        )
     ]
 
+    static let sourceUrls = sourceReferences.map(\.url)
+    static let upstreamHedgeTenWeekContractDataDocumentFixtureName =
+        "upstreamHedgeTenWeekContractDataDocumentJsonText"
+    static let upstreamHedgeTenWeekContractMetadataFixtureName =
+        upstreamHedgeTenWeekContractDataDocumentFixtureName + ".metadata"
+    static let upstreamHedgeTenWeekContractFundingsFixtureName =
+        upstreamHedgeTenWeekContractDataDocumentFixtureName + ".fundings"
+    static let upstreamHedgeTenWeekContractSettlementFixtureName =
+        upstreamHedgeTenWeekContractDataDocumentFixtureName + ".fundings.settlement"
     static let constructorStackPushHexTexts = [
         "03dbad65",
         "03db6409",

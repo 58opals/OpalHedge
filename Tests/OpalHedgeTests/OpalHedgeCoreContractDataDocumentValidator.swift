@@ -97,6 +97,38 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         #expect(settlement["longPayoutInSatoshis"] as? Int == 1_412_429)
     }
 
+    @Test("Omits absent AnyHedge automated payout optional fields")
+    func omitAbsentAnyHedgeAutomatedPayoutOptionalFields() throws {
+        let draftData = try makeDraftData(
+            fundings: [fundingWithRequiredPayout()]
+        )
+        let document = try OpalHedge.Core.ContractDataDocument(
+            draftData: draftData
+        )
+        let dictionary = try documentDictionary(for: document)
+        let fundings = try #require(dictionary["fundings"] as? [[String: Any]])
+        let funding = try #require(fundings.first)
+        let settlement = try #require(funding["settlement"] as? [String: Any])
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: document.jsonText
+        )
+        let decodedFunding = try #require(decodedDocument.draftData.fundings.first)
+        let decodedSettlement = try #require(decodedFunding.settlement)
+
+        #expect(Set(settlement.keys) == requiredSettlementFieldNames)
+        #expect(!document.jsonText.contains("settlementMessage"))
+        #expect(!document.jsonText.contains("settlementSignature"))
+        #expect(!document.jsonText.contains("previousMessage"))
+        #expect(!document.jsonText.contains("previousSignature"))
+        #expect(!document.jsonText.contains("settlementPrice"))
+        #expect(!document.jsonText.contains("null"))
+        #expect(decodedSettlement.settlementMessageHex == nil)
+        #expect(decodedSettlement.settlementSignatureHex == nil)
+        #expect(decodedSettlement.previousMessageHex == nil)
+        #expect(decodedSettlement.previousSignatureHex == nil)
+        #expect(decodedSettlement.settlementPrice == nil)
+    }
+
     @Test("Includes funding and fee arrays")
     func includeFundingAndFeeArrays() throws {
         let draftData = try makeDraftData(
@@ -126,6 +158,56 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         #expect(document.jsonText.contains("\"satoshis\":1000"))
     }
 
+    @Test("Rejects non-finite metadata numbers when creating contract data document")
+    func rejectNonFiniteMetadataNumbersWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData()
+        let nonFiniteValues = [
+            Double.nan,
+            Double.infinity,
+            -Double.infinity
+        ]
+
+        for fieldPath in metadataNumberFieldPaths {
+            for value in nonFiniteValues {
+                let invalidDraftData = try makeDraftData(
+                    replacingMetadataNumberAt: fieldPath,
+                    with: value,
+                    in: draftData
+                )
+                let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+                    _ = try OpalHedge.Core.ContractDataDocument(
+                        draftData: invalidDraftData
+                    )
+                }
+
+                OpalHedgeContractDataDocumentErrorExpectation.expectInvalidFieldType(
+                    error,
+                    at: fieldPath,
+                    expectedFieldType: "finite number"
+                )
+            }
+        }
+    }
+
+    private var metadataNumberFieldPaths: [OpalHedgeContractDataDocumentFieldPath] {
+        [
+            .metadata("nominalUnits"),
+            .metadata("lowLiquidationPriceMultiplier"),
+            .metadata("highLiquidationPriceMultiplier"),
+            .metadata("hedgeInputInOracleUnits"),
+            .metadata("longInputInOracleUnits")
+        ]
+    }
+
+    private var requiredSettlementFieldNames: Set<String> {
+        [
+            "hedgePayoutInSatoshis",
+            "longPayoutInSatoshis",
+            "settlementTransactionHash",
+            "settlementType"
+        ]
+    }
+
     private func makeDraftData(
         fundings: [OpalHedge.Core.ContractFunding] = [],
         fees: [OpalHedge.Core.ContractFeeData] = []
@@ -138,6 +220,98 @@ struct OpalHedgeCoreContractDataDocumentValidator {
             plan: plan,
             fundings: fundings,
             fees: fees
+        )
+    }
+
+    private func makeDraftData(
+        replacingMetadataNumberAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+        with value: Double,
+        in draftData: OpalHedge.Core.ContractDraftData
+    ) throws -> OpalHedge.Core.ContractDraftData {
+        let metadata = try makeMetadata(
+            replacingNumberAt: fieldPath,
+            with: value,
+            in: draftData.metadata
+        )
+
+        return OpalHedge.Core.ContractDraftData(
+            parameters: draftData.parameters,
+            metadata: metadata,
+            fundings: draftData.fundings,
+            fees: draftData.fees
+        )
+    }
+
+    private func makeMetadata(
+        replacingNumberAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+        with value: Double,
+        in metadata: OpalHedge.Core.ContractMetadata
+    ) throws -> OpalHedge.Core.ContractMetadata {
+        switch fieldPath {
+        case .metadata("nominalUnits"):
+            return makeMetadata(from: metadata, nominalUnits: value)
+        case .metadata("lowLiquidationPriceMultiplier"):
+            return makeMetadata(from: metadata, lowLiquidationPriceMultiplier: value)
+        case .metadata("highLiquidationPriceMultiplier"):
+            return makeMetadata(from: metadata, highLiquidationPriceMultiplier: value)
+        case .metadata("hedgeInputInOracleUnits"):
+            return makeMetadata(from: metadata, shortInputInOracleUnits: value)
+        case .metadata("longInputInOracleUnits"):
+            return makeMetadata(from: metadata, longInputInOracleUnits: value)
+        default:
+            try #require(Bool(false))
+            return metadata
+        }
+    }
+
+    private func makeMetadata(
+        from metadata: OpalHedge.Core.ContractMetadata,
+        nominalUnits: Double? = nil,
+        lowLiquidationPriceMultiplier: Double? = nil,
+        highLiquidationPriceMultiplier: Double? = nil,
+        shortInputInOracleUnits: Double? = nil,
+        longInputInOracleUnits: Double? = nil
+    ) -> OpalHedge.Core.ContractMetadata {
+        OpalHedge.Core.ContractMetadata(
+            takerSide: metadata.takerSide,
+            makerSide: metadata.makerSide,
+            shortPayoutAddress: metadata.shortPayoutAddress,
+            longPayoutAddress: metadata.longPayoutAddress,
+            startingOracleMessageHex: metadata.startingOracleMessageHex,
+            startingOracleSignatureHex: metadata.startingOracleSignatureHex,
+            startPrice: metadata.startPrice,
+            durationInSeconds: metadata.durationInSeconds,
+            nominalUnits: nominalUnits ?? metadata.nominalUnits,
+            lowLiquidationPriceMultiplier: lowLiquidationPriceMultiplier
+                ?? metadata.lowLiquidationPriceMultiplier,
+            highLiquidationPriceMultiplier: highLiquidationPriceMultiplier
+                ?? metadata.highLiquidationPriceMultiplier,
+            isSimpleHedge: metadata.isSimpleHedge,
+            shortInputInOracleUnits: shortInputInOracleUnits
+                ?? metadata.shortInputInOracleUnits,
+            longInputInOracleUnits: longInputInOracleUnits
+                ?? metadata.longInputInOracleUnits,
+            shortInputInSatoshis: metadata.shortInputInSatoshis,
+            longInputInSatoshis: metadata.longInputInSatoshis,
+            minerCostInSatoshis: metadata.minerCostInSatoshis
+        )
+    }
+
+    private func fundingWithRequiredPayout() -> OpalHedge.Core.ContractFunding {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            payoutAmounts: OpalHedge.Core.ContractSettlementPayoutAmounts(
+                shortPayoutInSatoshis: 4_237_288,
+                longPayoutInSatoshis: 1_412_429
+            )
+        )
+
+        return OpalHedge.Core.ContractFunding(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 1,
+            fundingSatoshis: 5_651_049,
+            settlement: settlement
         )
     }
 

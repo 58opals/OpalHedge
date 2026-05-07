@@ -11,6 +11,8 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
     }
 
     public init(draftData: OpalHedgeCoreContractDraftData) throws {
+        try Self.validateFiniteMetadataNumbers(draftData.metadata)
+
         let data = try JSONSerialization.data(
             withJSONObject: Self.dictionary(for: draftData),
             options: [.sortedKeys]
@@ -138,6 +140,37 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
             "Hedge"
         case .long:
             "Long"
+        }
+    }
+
+    private static func validateFiniteMetadataNumbers(
+        _ metadata: OpalHedgeCoreContractMetadata
+    ) throws {
+        try validateFiniteNumber(metadata.nominalUnits, name: "nominalUnits")
+        try validateFiniteNumber(
+            metadata.lowLiquidationPriceMultiplier,
+            name: "lowLiquidationPriceMultiplier"
+        )
+        try validateFiniteNumber(
+            metadata.highLiquidationPriceMultiplier,
+            name: "highLiquidationPriceMultiplier"
+        )
+        try validateFiniteNumber(
+            metadata.shortInputInOracleUnits,
+            name: "hedgeInputInOracleUnits"
+        )
+        try validateFiniteNumber(
+            metadata.longInputInOracleUnits,
+            name: "longInputInOracleUnits"
+        )
+    }
+
+    private static func validateFiniteNumber(_ value: Double, name: String) throws {
+        guard value.isFinite else {
+            throw OpalHedgeCoreContractDataDocumentError.invalidFieldType(
+                name: name,
+                expected: "finite number"
+            )
         }
     }
 }

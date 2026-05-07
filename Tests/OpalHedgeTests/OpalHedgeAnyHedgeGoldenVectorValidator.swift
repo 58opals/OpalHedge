@@ -64,18 +64,73 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
 
     @Test("Keeps official AnyHedge and PriceOracle source references with vector")
     func keepOfficialAnyHedgeAndPriceOracleSourceReferencesWithVector() {
-        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceReferences.contains(
+        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceUrls.contains(
             OpalHedgeFixtureReferenceData.anyHedgeContractMetadataV1Url
         ))
-        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceReferences.contains(
+        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceUrls.contains(
             OpalHedgeFixtureReferenceData.anyHedgeContractFundingV1Url
         ))
-        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceReferences.contains(
+        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceUrls.contains(
             OpalHedgeFixtureReferenceData.anyHedgeContractAutomatedPayoutV1Url
         ))
-        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceReferences.contains(
+        #expect(OpalHedgeAnyHedgeGoldenVectorData.sourceUrls.contains(
             OpalHedgeFixtureReferenceData.priceOracleLibraryUrl
         ))
+    }
+
+    @Test("Documents golden vector source reference coverage")
+    func documentGoldenVectorSourceReferenceCoverage() {
+        for reference in OpalHedgeAnyHedgeGoldenVectorData.sourceReferences {
+            #expect(!reference.title.isEmpty)
+            #expect(!reference.url.isEmpty)
+            #expect(reference.url.hasPrefix("https://"))
+            #expect(!reference.coveredFixtureNames.isEmpty)
+        }
+
+        let fixtureNames = Set(OpalHedgeAnyHedgeGoldenVectorData.sourceReferences
+            .flatMap(\.coveredFixtureNames))
+        let expectedFixtureNames: Set<String> = [
+            OpalHedgeAnyHedgeGoldenVectorData.upstreamHedgeTenWeekContractMetadataFixtureName,
+            OpalHedgeAnyHedgeGoldenVectorData.upstreamHedgeTenWeekContractFundingsFixtureName,
+            OpalHedgeAnyHedgeGoldenVectorData.upstreamHedgeTenWeekContractSettlementFixtureName,
+            "oraclePublicKeyHex",
+            "startingOracleMessageHex",
+            "startingOracleSignatureHex"
+        ]
+        #expect(fixtureNames.isSuperset(of: expectedFixtureNames))
+    }
+
+    @Test("Groups golden vector source references by interface family")
+    func groupGoldenVectorSourceReferencesByInterfaceFamily() {
+        let sourceReferencesByFamily = Dictionary(
+            grouping: OpalHedgeAnyHedgeGoldenVectorData.sourceReferences,
+            by: \.family
+        )
+        let expectedSourceFamilies: Set<OpalHedgeFixtureSourceFamily> = [
+            .anyHedgeContractMetadata,
+            .anyHedgeContractFunding,
+            .anyHedgeContractAutomatedPayout,
+            .priceOracle
+        ]
+
+        #expect(Set(sourceReferencesByFamily.keys) == expectedSourceFamilies)
+        #expect(sourceReferencesByFamily[.anyHedgeContractMetadata]?
+            .flatMap(\.coveredFixtureNames) == [
+                OpalHedgeAnyHedgeGoldenVectorData.upstreamHedgeTenWeekContractMetadataFixtureName
+            ])
+        #expect(sourceReferencesByFamily[.anyHedgeContractFunding]?
+            .flatMap(\.coveredFixtureNames) == [
+                OpalHedgeAnyHedgeGoldenVectorData.upstreamHedgeTenWeekContractFundingsFixtureName
+            ])
+        #expect(sourceReferencesByFamily[.anyHedgeContractAutomatedPayout]?
+            .flatMap(\.coveredFixtureNames) == [
+                OpalHedgeAnyHedgeGoldenVectorData.upstreamHedgeTenWeekContractSettlementFixtureName
+            ])
+        #expect(sourceReferencesByFamily[.priceOracle]?.flatMap(\.coveredFixtureNames) == [
+            "oraclePublicKeyHex",
+            "startingOracleMessageHex",
+            "startingOracleSignatureHex"
+        ])
     }
 
     private func hexText(_ data: Data) -> String {
