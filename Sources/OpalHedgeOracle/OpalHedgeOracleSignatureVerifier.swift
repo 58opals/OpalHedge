@@ -21,13 +21,20 @@ public enum OpalHedgeOracleSignatureVerifier {
         signature: Data,
         publicKey: Data
     ) throws -> Bool {
-        let digest = OpalCrypto.Hashing.computeSHA256(message.rawData)
-
         do {
-            return try OpalCrypto.Signature.verifySchnorr(
-                signature: signature,
+            let digest = try OpalCrypto.Signature.Digest(
+                rawRepresentation: OpalCrypto.Hashing.sha256(message.rawData)
+            )
+            let schnorrSignature = try OpalCrypto.Signature.Schnorr(
+                rawRepresentation: signature
+            )
+            let verificationKey = try OpalCrypto.Signature.VerificationKey(
+                rawRepresentation: publicKey
+            )
+
+            return try schnorrSignature.verify(
                 digest: digest,
-                publicKey: publicKey
+                verificationKey: verificationKey
             )
         } catch let error as OpalCrypto.Signature.Error {
             throw mapSignatureError(error)
@@ -44,7 +51,10 @@ public enum OpalHedgeOracleSignatureVerifier {
              .invalidPublicKeyPrefix,
              .invalidPublicKey:
             return .invalidPublicKey
-        case .invalidSignatureLength:
+        case .invalidSignatureLength,
+             .invalidSignature,
+             .invalidDER,
+             .nonCanonicalDER:
             return .invalidSignature
         case .invalidDigestLength:
             return .invalidDigest

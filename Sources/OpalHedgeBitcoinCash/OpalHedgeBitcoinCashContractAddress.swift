@@ -30,7 +30,7 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws {
         try self.init(
-            scriptHash: OpalCrypto.Hashing.computeHash160(redeemScript),
+            scriptHash: OpalCrypto.Hashing.hash160(redeemScript),
             network: network
         )
     }
@@ -63,7 +63,7 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         payloadBytes.append(scriptHash)
 
         let payloadValues = fiveBitValues(from: payloadBytes)
-        let checksumValues = checksumValues(
+        let checksumValues = try checksumValues(
             prefix: network.cashAddrPrefix,
             payload: payloadValues
         )
@@ -71,9 +71,10 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         var encodedPayloadValues = Data(payloadValues)
         encodedPayloadValues.append(contentsOf: checksumValues)
 
-        let encodedPayload = try OpalCrypto.Encoding.encodeBase32(
-            encodedPayloadValues,
-            interpretedAsFiveBitValues: true
+        let encodedPayload = try OpalCrypto.Encoding.encodeBase32Values(
+            OpalCrypto.Encoding.FiveBitValues(
+                rawRepresentation: encodedPayloadValues
+            )
         )
 
         return "\(network.cashAddrPrefix):\(encodedPayload)"
@@ -105,13 +106,17 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         return values
     }
 
-    private static func checksumValues(prefix: String, payload: [UInt8]) -> [UInt8] {
+    private static func checksumValues(prefix: String, payload: [UInt8]) throws -> [UInt8] {
         var values = prefix.utf8.map { $0 & 0x1f }
         values.append(0)
         values.append(contentsOf: payload)
         values.append(contentsOf: Array(repeating: 0, count: checksumByteCount))
 
-        let checksum = OpalCrypto.Encoding.computePolymodChecksum(values)
+        let checksum = try OpalCrypto.Encoding.computePolymodChecksum(
+            OpalCrypto.Encoding.FiveBitValues(
+                rawRepresentation: Data(values)
+            )
+        )
 
         return (0..<checksumByteCount).map { index in
             UInt8((checksum >> (5 * (checksumByteCount - 1 - index))) & 0x1f)
