@@ -12,6 +12,7 @@ struct OpalHedgeCoreContractDataDocumentCompatibilityValidator {
         )
         let dictionary = try documentDictionary(for: document)
         let metadata = try #require(dictionary["metadata"] as? [String: Any])
+        let parameters = try #require(dictionary["parameters"] as? [String: Any])
         let fundings = try #require(dictionary["fundings"] as? [[String: Any]])
         let funding = try #require(fundings.first)
         let settlement = try #require(funding["settlement"] as? [String: Any])
@@ -22,6 +23,8 @@ struct OpalHedgeCoreContractDataDocumentCompatibilityValidator {
             .anyHedgeContractDataDocumentFieldNames)
         #expect(Set(metadata.keys) == OpalHedgeFixtureReferenceData
             .anyHedgeContractMetadataV1FieldNames)
+        #expect(Set(parameters.keys) == OpalHedgeFixtureReferenceData
+            .anyHedgeContractParametersV1FieldNames)
         #expect(Set(funding.keys) == OpalHedgeFixtureReferenceData
             .anyHedgeContractFundingWithSettlementV1FieldNames)
         #expect(Set(settlement.keys) == OpalHedgeFixtureReferenceData

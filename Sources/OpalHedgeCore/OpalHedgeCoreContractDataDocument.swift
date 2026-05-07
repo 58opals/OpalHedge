@@ -3,6 +3,7 @@
 import Foundation
 
 public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
+    public let draftData: OpalHedgeCoreContractDraftData
     public let jsonText: String
 
     public var utf8Data: Data {
@@ -15,6 +16,7 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
             options: [.sortedKeys]
         )
 
+        self.draftData = draftData
         self.jsonText = String(decoding: data, as: UTF8.self)
     }
 

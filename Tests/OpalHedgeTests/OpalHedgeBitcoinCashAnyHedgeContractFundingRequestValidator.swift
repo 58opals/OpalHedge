@@ -36,4 +36,42 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         #expect(request.contractDataDocument.jsonText == OpalHedgeFixtureData
             .upstreamHedgeTenWeekContractDataDocumentJsonText)
     }
+
+    @Test("Reconstructs AnyHedge contract funding request from data document")
+    func reconstructAnyHedgeContractFundingRequestFromDataDocument() throws {
+        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+            plan: OpalHedge.Core.ContractPlan(
+                from: OpalHedgeFixtureData.contractCreationContext
+            )
+        )
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: bundle.dataDocument.jsonText
+        )
+        let request = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRequest(
+            dataDocument: decodedDocument
+        )
+
+        #expect(request == bundle.fundingRequest)
+        #expect(request.contractDataDocument == decodedDocument)
+        #expect(request.fundingOutput.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
+    }
+
+    @Test("Creates AnyHedge contract funding request from data document with client context")
+    func createAnyHedgeContractFundingRequestFromDataDocumentWithClientContext() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let bundle = try clientContext.createAnyHedgeContractBundle(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: bundle.dataDocument.jsonText
+        )
+        let request = try clientContext.createAnyHedgeContractFundingRequest(
+            from: decodedDocument,
+            network: .regtest
+        )
+
+        #expect(request.contractDataDocument == decodedDocument)
+        #expect(request.fundingOutput.contractAddress.rawValue == "bchreg:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsr6pyr2gu")
+        #expect(request.redeemScriptBytecode == bundle.fundingRequest.redeemScriptBytecode)
+    }
 }

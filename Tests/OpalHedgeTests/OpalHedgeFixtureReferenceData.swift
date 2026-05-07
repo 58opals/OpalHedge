@@ -36,6 +36,22 @@ enum OpalHedgeFixtureReferenceData {
         "takerSide"
     ]
 
+    static let anyHedgeContractParametersV1FieldNames: Set<String> = [
+        "enableMutualRedemption",
+        "hedgeLockScript",
+        "hedgeMutualRedeemPublicKey",
+        "highLiquidationPrice",
+        "longLockScript",
+        "longMutualRedeemPublicKey",
+        "lowLiquidationPrice",
+        "maturityTimestamp",
+        "nominalUnitsXSatsPerBch",
+        "oraclePublicKey",
+        "payoutSats",
+        "satsForNominalUnitsAtHighLiquidation",
+        "startTimestamp"
+    ]
+
     static let anyHedgeContractFundingV1FieldNames: Set<String> = [
         "fundingOutputIndex",
         "fundingSatoshis",

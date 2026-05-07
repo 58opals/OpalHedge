@@ -30,4 +30,19 @@ extension OpalHedgeClientContext {
             fundingSatoshis: fundingSatoshis
         )
     }
+
+    public func createAnyHedgeContractFundingRecord(
+        from dataDocument: OpalHedgeCoreContractDataDocument,
+        fundingIndex: Int = 0,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet,
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
+            .anyHedgeV0_12
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractFundingRecord {
+        try OpalHedgeBitcoinCashAnyHedgeContractFundingRecord(
+            dataDocument: dataDocument,
+            fundingIndex: fundingIndex,
+            network: network,
+            scriptBytecode: scriptBytecode
+        )
+    }
 }

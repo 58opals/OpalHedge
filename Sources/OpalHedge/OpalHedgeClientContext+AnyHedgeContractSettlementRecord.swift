@@ -36,4 +36,19 @@ extension OpalHedgeClientContext {
             settlementTransactionHash: settlementTransactionHash
         )
     }
+
+    public func createAnyHedgeContractSettlementRecord(
+        from dataDocument: OpalHedgeCoreContractDataDocument,
+        fundingIndex: Int = 0,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet,
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
+            .anyHedgeV0_12
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
+        try OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord(
+            dataDocument: dataDocument,
+            fundingIndex: fundingIndex,
+            network: network,
+            scriptBytecode: scriptBytecode
+        )
+    }
 }

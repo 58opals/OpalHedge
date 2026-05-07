@@ -70,4 +70,27 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
         #expect(summary.fundingOutputIndex == 1)
         #expect(summary.dataDocument.jsonText.contains("\"satoshis\":1000"))
     }
+
+    @Test("Creates AnyHedge contract settlement summary from data document")
+    func createAnyHedgeContractSettlementSummaryFromDataDocument() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let record = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: OpalHedgeFixtureData.contractCreationContext,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof(),
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText
+        )
+        let summary = try clientContext.createAnyHedgeContractSettlementSummary(
+            from: decodedDocument
+        )
+
+        #expect(summary == record.settlementSummary)
+    }
 }

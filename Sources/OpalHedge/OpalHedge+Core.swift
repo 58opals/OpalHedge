@@ -10,6 +10,7 @@ extension OpalHedge {
         public typealias ContractConstraintPolicy = OpalHedgeCoreContractConstraintPolicy
         public typealias ContractCreationContext = OpalHedgeCoreContractCreationContext
         public typealias ContractDataDocument = OpalHedgeCoreContractDataDocument
+        public typealias ContractDataDocumentError = OpalHedgeCoreContractDataDocumentError
         public typealias ContractDraftData = OpalHedgeCoreContractDraftData
         public typealias ContractFeeData = OpalHedgeCoreContractFeeData
         public typealias ContractFunding = OpalHedgeCoreContractFunding

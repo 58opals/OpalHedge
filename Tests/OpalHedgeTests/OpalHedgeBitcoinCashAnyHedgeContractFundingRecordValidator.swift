@@ -44,6 +44,26 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
         #expect(record.draftData.fundings.count == 2)
     }
 
+    @Test("Reconstructs AnyHedge contract funding record from data document")
+    func reconstructAnyHedgeContractFundingRecordFromDataDocument() throws {
+        let bundle = try makeBundle()
+        let record = try bundle.createFundingRecord(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText
+        )
+        let reconstructedRecord = try OpalHedge.BitcoinCash
+            .AnyHedgeContractFundingRecord(
+                dataDocument: decodedDocument
+            )
+
+        #expect(reconstructedRecord == record)
+        #expect(reconstructedRecord.fundingOutput.contractAddress.rawValue ==
+            "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
+    }
+
     @Test("Rejects invalid AnyHedge contract funding record")
     func rejectInvalidAnyHedgeContractFundingRecord() throws {
         let bundle = try makeBundle()
@@ -64,6 +84,41 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
         #expect(hashError == .invalidFundingTransactionHash("zz"))
         #expect(
             satoshisError == .inconsistentFundingSatoshis(
+                expected: 5_651_049,
+                actual: 5_651_048
+            )
+        )
+    }
+
+    @Test("Rejects invalid AnyHedge contract funding record data document")
+    func rejectInvalidAnyHedgeContractFundingRecordDataDocument() throws {
+        let missingFundingDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
+        )
+        let missingFundingError = captureFundingRecordError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
+                dataDocument: missingFundingDocument
+            )
+        }
+        let record = try makeBundle().createFundingRecord(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let invalidSatoshisDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText.replacingOccurrences(
+                of: #""fundingSatoshis":5651049"#,
+                with: #""fundingSatoshis":5651048"#
+            )
+        )
+        let invalidSatoshisError = captureFundingRecordError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
+                dataDocument: invalidSatoshisDocument
+            )
+        }
+
+        #expect(missingFundingError == .missingFundingRecord(index: 0))
+        #expect(
+            invalidSatoshisError == .inconsistentFundingSatoshis(
                 expected: 5_651_049,
                 actual: 5_651_048
             )

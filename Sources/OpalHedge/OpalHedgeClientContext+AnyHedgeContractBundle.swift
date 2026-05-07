@@ -40,4 +40,17 @@ extension OpalHedgeClientContext {
             fees: fees
         ).fundingRequest
     }
+
+    public func createAnyHedgeContractFundingRequest(
+        from dataDocument: OpalHedgeCoreContractDataDocument,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet,
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
+            .anyHedgeV0_12
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
+        try OpalHedgeBitcoinCashAnyHedgeContractFundingRequest(
+            dataDocument: dataDocument,
+            network: network,
+            scriptBytecode: scriptBytecode
+        )
+    }
 }

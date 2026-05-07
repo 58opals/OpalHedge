@@ -74,4 +74,30 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
         #expect(record.draftData.fundings.last == record.funding)
         #expect(record.draftData.fees == [feeData])
     }
+
+    @Test("Creates AnyHedge contract settlement record from data document")
+    func createAnyHedgeContractSettlementRecordFromDataDocument() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let expectedRecord = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: OpalHedgeFixtureData.contractCreationContext,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof(
+                    messageTimestamp: 6_663_643,
+                    priceValue: 23_500
+                ),
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: expectedRecord.dataDocument.jsonText
+        )
+        let record = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: decodedDocument
+        )
+
+        #expect(record == expectedRecord)
+    }
 }

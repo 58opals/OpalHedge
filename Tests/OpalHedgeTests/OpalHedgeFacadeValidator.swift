@@ -94,6 +94,55 @@ struct OpalHedgeFacadeValidator {
         #expect(settlementRecord.lifecycleState == .settled(settlementRecord))
     }
 
+    @Test("Uses Bitcoin Cash data document reconstruction facade aliases")
+    func useBitcoinCashDataDocumentReconstructionFacadeAliases() throws {
+        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+            plan: try OpalHedge.Core.ContractPlan(
+                from: OpalHedgeFixtureData.contractCreationContext
+            )
+        )
+        let fundingRecord = try bundle.createFundingRecord(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let settlementRequest = try fundingRecord.createSettlementRequest(
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof()
+        )
+        let settlementRecord = try settlementRequest.createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+
+        let fundingRequestDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: bundle.dataDocument.jsonText
+        )
+        let fundingRecordDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: fundingRecord.dataDocument.jsonText
+        )
+        let settlementRecordDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: settlementRecord.dataDocument.jsonText
+        )
+
+        let reconstructedFundingRequest = try OpalHedge.BitcoinCash
+            .AnyHedgeContractFundingRequest(dataDocument: fundingRequestDocument)
+        let reconstructedFundingRecord = try OpalHedge.BitcoinCash
+            .AnyHedgeContractFundingRecord(dataDocument: fundingRecordDocument)
+        let reconstructedSettlementRecord = try OpalHedge.BitcoinCash
+            .AnyHedgeContractSettlementRecord(dataDocument: settlementRecordDocument)
+        let reconstructedLifecycleState = try OpalHedge.BitcoinCash
+            .AnyHedgeContractLifecycleState(dataDocument: settlementRecordDocument)
+        let reconstructedSummary = try OpalHedge.BitcoinCash
+            .AnyHedgeContractSettlementSummary(dataDocument: settlementRecordDocument)
+
+        #expect(reconstructedFundingRequest == bundle.fundingRequest)
+        #expect(reconstructedFundingRecord == fundingRecord)
+        #expect(reconstructedSettlementRecord == settlementRecord)
+        #expect(reconstructedLifecycleState == .settled(settlementRecord))
+        #expect(reconstructedSummary == settlementRecord.settlementSummary)
+    }
+
     @Test("Uses Oracle facade aliases")
     func useOracleFacadeAliases() throws {
         let message = try OpalHedge.Oracle.PriceMessage.parse(

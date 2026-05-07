@@ -75,6 +75,34 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
         #expect(summary.settlementOracleMessageTimestamp == 615_644)
     }
 
+    @Test("Reconstructs AnyHedge contract settlement summary from data document")
+    func reconstructAnyHedgeContractSettlementSummaryFromDataDocument() throws {
+        let record = try makeSettlementRecord()
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText
+        )
+        let summary = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementSummary(
+            dataDocument: decodedDocument
+        )
+
+        #expect(summary == record.settlementSummary)
+        #expect(summary.dataDocument == decodedDocument)
+        #expect(summary.settlementKind == .maturation)
+        #expect(summary.settlementPrice == 23_500)
+    }
+
+    @Test("Rejects AnyHedge contract settlement summary without settlement data")
+    func rejectAnyHedgeContractSettlementSummaryWithoutSettlementData() throws {
+        let fundingRecord = try makeFundingRecord()
+        let error = captureSettlementRecordError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementSummary(
+                dataDocument: fundingRecord.dataDocument
+            )
+        }
+
+        #expect(error == .missingSettlement(index: 0))
+    }
+
     @Test("Reads AnyHedge maturation automated payout data from settlement summary document")
     func readAnyHedgeMaturationAutomatedPayoutDataFromSettlementSummaryDocument() throws {
         let summary = try makeSettlementRecord().settlementSummary
@@ -158,5 +186,19 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
             Int(summary.hedgePayoutInSatoshis))
         #expect(settlement["longPayoutInSatoshis"] as? Int ==
             Int(summary.longPayoutInSatoshis))
+    }
+
+    private func captureSettlementRecordError(
+        _ operation: () throws -> Void
+    ) -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecordError? {
+        do {
+            try operation()
+        } catch let error as OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecordError {
+            return error
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        return nil
     }
 }

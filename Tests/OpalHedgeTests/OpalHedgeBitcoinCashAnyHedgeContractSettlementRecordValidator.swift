@@ -62,6 +62,24 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
             .startingOracleSignatureHex)
     }
 
+    @Test("Reconstructs AnyHedge contract settlement record from data document")
+    func reconstructAnyHedgeContractSettlementRecordFromDataDocument() throws {
+        let record = try makeSettlementRequest().createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let decodedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText
+        )
+        let reconstructedRecord = try OpalHedge.BitcoinCash
+            .AnyHedgeContractSettlementRecord(
+                dataDocument: decodedDocument
+            )
+
+        #expect(reconstructedRecord == record)
+        #expect(reconstructedRecord.settlementSummary == record.settlementSummary)
+        #expect(reconstructedRecord.lifecycleState == record.lifecycleState)
+    }
+
     @Test("Rejects invalid AnyHedge contract settlement record")
     func rejectInvalidAnyHedgeContractSettlementRecord() throws {
         let error = captureSettlementRecordError {
@@ -71,6 +89,40 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         }
 
         #expect(error == .invalidSettlementTransactionHash("zz"))
+    }
+
+    @Test("Rejects invalid AnyHedge contract settlement record data document")
+    func rejectInvalidAnyHedgeContractSettlementRecordDataDocument() throws {
+        let fundingRecord = try makeFundingRecord()
+        let missingSettlementError = captureSettlementRecordError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord(
+                dataDocument: fundingRecord.dataDocument
+            )
+        }
+        let record = try makeSettlementRequest().createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let invalidPayoutDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText.replacingOccurrences(
+                of: #""hedgePayoutInSatoshis":4255319"#,
+                with: #""hedgePayoutInSatoshis":4255318"#
+            )
+        )
+        let actualSettlement = try #require(invalidPayoutDocument.draftData
+            .fundings.first?.settlement)
+        let invalidPayoutError = captureSettlementRecordError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord(
+                dataDocument: invalidPayoutDocument
+            )
+        }
+
+        #expect(missingSettlementError == .missingSettlement(index: 0))
+        #expect(
+            invalidPayoutError == .inconsistentSettlement(
+                expected: record.settlement,
+                actual: actualSettlement
+            )
+        )
     }
 
     private func makeSettlementRequest() throws

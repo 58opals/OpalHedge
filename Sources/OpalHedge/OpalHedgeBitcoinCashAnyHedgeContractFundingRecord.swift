@@ -1,5 +1,6 @@
 // OpalHedgeBitcoinCashAnyHedgeContractFundingRecord.swift
 
+import OpalHedgeBitcoinCash
 import OpalHedgeCore
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecord: Sendable, Equatable {
@@ -68,6 +69,54 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecord: Sendable, Equat
         self.dataDocument = try OpalHedgeCoreContractDataDocument(
             draftData: draftData
         )
+    }
+
+    public init(
+        dataDocument: OpalHedgeCoreContractDataDocument,
+        fundingIndex: Int = 0,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet,
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
+            .anyHedgeV0_12
+    ) throws {
+        let draftData = dataDocument.draftData
+        guard draftData.fundings.indices.contains(fundingIndex) else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
+                .missingFundingRecord(index: fundingIndex)
+        }
+
+        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
+            from: draftData.parameters
+        )
+        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
+            parameters: parameterData,
+            scriptBytecode: scriptBytecode
+        )
+        let contractAddress = try bytecode.deriveContractAddress(network: network)
+        let fundingOutput = try OpalHedgeBitcoinCashAnyHedgeContractFundingOutput(
+            contractAddress: contractAddress,
+            payoutSatoshis: draftData.parameters.payoutSats,
+            dustReserveSatoshis: OpalHedgeCoreContractConstraintPolicy
+                .dustLimitSatoshis
+        )
+        let funding = draftData.fundings[fundingIndex]
+
+        try Self.validateFundingTransactionHash(funding.fundingTransactionHash)
+        guard funding.fundingOutputIndex >= 0 else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
+                .invalidFundingOutputIndex(funding.fundingOutputIndex)
+        }
+        guard funding.fundingSatoshis == fundingOutput.satoshis else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
+                .inconsistentFundingSatoshis(
+                    expected: fundingOutput.satoshis,
+                    actual: funding.fundingSatoshis
+                )
+        }
+
+        self.fundingOutput = fundingOutput
+        self.funding = funding
+        self.draftData = draftData
+        self.dataDocument = dataDocument
     }
 
     private static func validateFundingTransactionHash(_ value: String) throws {
