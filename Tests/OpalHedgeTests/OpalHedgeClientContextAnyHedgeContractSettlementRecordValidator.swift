@@ -36,6 +36,41 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
         #expect(record.settlement.kind == .maturation)
     }
 
+    @Test("Creates AnyHedge contract settlement record from contract plan")
+    func createAnyHedgeContractSettlementRecordFromContractPlan() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let previousOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeStartingSettlementOracleProof()
+        let settlementOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeSettlementOracleProof()
+        let record = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: previousOracleProof,
+            settlementOracleProof: settlementOracleProof,
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let settlementRequest = try clientContext
+            .createAnyHedgeContractSettlementRequest(
+                from: plan,
+                fundingTransactionHash: String(repeating: "1", count: 64),
+                fundingOutputIndex: 0,
+                previousOracleProof: previousOracleProof,
+                settlementOracleProof: settlementOracleProof
+            )
+        let expectedRecord = try settlementRequest.createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+
+        #expect(record == expectedRecord)
+        #expect(record.draftData.parameters == plan.parameters)
+        #expect(record.settlement.kind == .maturation)
+    }
+
     @Test("Passes AnyHedge contract settlement record options through client context")
     func passAnyHedgeContractSettlementRecordOptionsThroughClientContext() throws {
         let previousOracleProof = try OpalHedgeContractFixtureBuilder

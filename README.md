@@ -76,7 +76,7 @@ let startingProof = try OpalHedge.Oracle.verifyStartingPriceProof(
 )
 ```
 
-Create a contract creation context:
+Create a contract creation context and derive a reusable contract plan:
 
 ```swift
 let creationContext = try OpalHedge.Core.ContractCreationContext(
@@ -97,18 +97,21 @@ let creationContext = try OpalHedge.Core.ContractCreationContext(
     longMutualRedeemPublicKeyHex: longMutualRedeemPublicKeyHex,
     minerCostInSatoshis: 632
 )
+
+let contractPlan = try OpalHedge.Core.ContractPlan(
+    from: creationContext
+)
 ```
 
 Build AnyHedge-compatible funding data:
 
 ```swift
 let clientContext = OpalHedge.Client.Context()
-let bundle = try clientContext.createAnyHedgeContractBundle(
-    from: creationContext,
+let fundingRequest = try clientContext.createAnyHedgeContractFundingRequest(
+    from: contractPlan,
     network: .mainnet
 )
 
-let fundingRequest = bundle.fundingRequest
 let fundingOutput = fundingRequest.fundingOutput
 
 print(fundingOutput.contractAddress.rawValue)
@@ -120,7 +123,7 @@ Record the funding transaction output after it exists:
 
 ```swift
 let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
-    from: creationContext,
+    from: contractPlan,
     fundingTransactionHash: fundingTransactionHash,
     fundingOutputIndex: fundingOutputIndex
 )
@@ -141,7 +144,7 @@ let settlementOracleProof = try OpalHedge.Oracle.verifySettlementOracleProof(
 )
 
 let settlementSummary = try clientContext.createAnyHedgeContractSettlementSummary(
-    from: creationContext,
+    from: contractPlan,
     fundingTransactionHash: fundingTransactionHash,
     fundingOutputIndex: fundingOutputIndex,
     previousOracleProof: previousOracleProof,

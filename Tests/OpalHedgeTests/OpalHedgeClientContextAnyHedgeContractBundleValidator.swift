@@ -21,6 +21,25 @@ struct OpalHedgeClientContextAnyHedgeContractBundleValidator {
         #expect(bundle.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
     }
 
+    @Test("Creates AnyHedge contract bundle from contract plan")
+    func createAnyHedgeContractBundleFromContractPlan() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let bundle = try clientContext.createAnyHedgeContractBundle(
+            from: plan
+        )
+        let expectedBundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+            plan: plan
+        )
+
+        #expect(bundle == expectedBundle)
+        #expect(bundle.plan == plan)
+        #expect(bundle.dataDocument.jsonText == OpalHedgeFixtureData
+            .upstreamHedgeTenWeekContractDataDocumentJsonText)
+    }
+
     @Test("Passes AnyHedge contract bundle options through client context")
     func passAnyHedgeContractBundleOptionsThroughClientContext() throws {
         let funding = OpalHedge.Core.ContractFunding(

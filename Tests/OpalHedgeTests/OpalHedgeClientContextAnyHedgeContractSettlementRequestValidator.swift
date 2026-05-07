@@ -34,6 +34,38 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
         #expect(request.settlementPrice == 23_500)
     }
 
+    @Test("Creates AnyHedge contract settlement request from contract plan")
+    func createAnyHedgeContractSettlementRequestFromContractPlan() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let previousOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeStartingSettlementOracleProof()
+        let settlementOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeSettlementOracleProof()
+        let request = try clientContext.createAnyHedgeContractSettlementRequest(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: previousOracleProof,
+            settlementOracleProof: settlementOracleProof
+        )
+        let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let expectedRequest = try fundingRecord.createSettlementRequest(
+            previousOracleProof: previousOracleProof,
+            settlementOracleProof: settlementOracleProof
+        )
+
+        #expect(request == expectedRequest)
+        #expect(request.fundingRecord.draftData.parameters == plan.parameters)
+        #expect(request.settlementKind == .maturation)
+    }
+
     @Test("Passes AnyHedge contract settlement request options through client context")
     func passAnyHedgeContractSettlementRequestOptionsThroughClientContext() throws {
         let previousOracleProof = try OpalHedgeContractFixtureBuilder

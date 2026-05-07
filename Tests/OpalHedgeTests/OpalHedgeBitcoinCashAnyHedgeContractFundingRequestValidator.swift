@@ -37,6 +37,24 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
             .upstreamHedgeTenWeekContractDataDocumentJsonText)
     }
 
+    @Test("Creates AnyHedge contract funding request from contract plan with client context")
+    func createAnyHedgeContractFundingRequestFromContractPlanWithClientContext() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let request = try clientContext.createAnyHedgeContractFundingRequest(
+            from: plan
+        )
+        let bundle = try clientContext.createAnyHedgeContractBundle(
+            from: plan
+        )
+
+        #expect(request == bundle.fundingRequest)
+        #expect(request.contractDataDocument.draftData.parameters == plan.parameters)
+        #expect(request.fundingOutput.contractAddress == bundle.contractAddress)
+    }
+
     @Test("Reconstructs AnyHedge contract funding request from data document")
     func reconstructAnyHedgeContractFundingRequestFromDataDocument() throws {
         let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(

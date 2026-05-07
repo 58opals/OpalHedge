@@ -25,6 +25,30 @@ struct OpalHedgeClientContextAnyHedgeContractFundingRecordValidator {
         #expect(record.dataDocument.jsonText.contains("\"fundingTransactionHash\""))
     }
 
+    @Test("Creates AnyHedge contract funding record from contract plan")
+    func createAnyHedgeContractFundingRecordFromContractPlan() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let record = try clientContext.createAnyHedgeContractFundingRecord(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let bundle = try clientContext.createAnyHedgeContractBundle(
+            from: plan
+        )
+        let expectedRecord = try bundle.createFundingRecord(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+
+        #expect(record == expectedRecord)
+        #expect(record.draftData.parameters == plan.parameters)
+        #expect(record.dataDocument.draftData.fundings == [record.funding])
+    }
+
     @Test("Passes AnyHedge contract funding record options through client context")
     func passAnyHedgeContractFundingRecordOptionsThroughClientContext() throws {
         let existingFunding = OpalHedge.Core.ContractFunding(

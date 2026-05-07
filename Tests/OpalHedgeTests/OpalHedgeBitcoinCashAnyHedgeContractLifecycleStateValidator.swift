@@ -112,6 +112,46 @@ struct OpalHedgeBitcoinCashAnyHedgeContractLifecycleStateValidator {
         #expect(state.settlementSummary == settlementRecord.settlementSummary)
     }
 
+    @Test("Creates unfunded AnyHedge contract lifecycle state from contract plan with client context")
+    func createUnfundedAnyHedgeContractLifecycleStateFromContractPlanWithClientContext() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let state = try clientContext.createAnyHedgeContractLifecycleState(
+            from: plan
+        )
+        let bundle = try clientContext.createAnyHedgeContractBundle(
+            from: plan
+        )
+
+        #expect(state == bundle.lifecycleState)
+        #expect(state.fundingRequest == bundle.fundingRequest)
+        #expect(!state.isFunded)
+    }
+
+    @Test("Creates funded AnyHedge contract lifecycle state from contract plan with funding data")
+    func createFundedAnyHedgeContractLifecycleStateFromContractPlanWithFundingData() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let state = try clientContext.createAnyHedgeContractLifecycleState(
+            from: plan,
+            fundings: [fundingRecord.funding]
+        )
+
+        #expect(state == fundingRecord.lifecycleState)
+        #expect(state.fundingRecord == fundingRecord)
+        #expect(state.isFunded)
+        #expect(!state.isSettled)
+    }
+
     @Test("Rejects missing AnyHedge contract lifecycle funding index")
     func rejectMissingAnyHedgeContractLifecycleFundingIndex() throws {
         let fundingRecord = try makeFundingRecord()

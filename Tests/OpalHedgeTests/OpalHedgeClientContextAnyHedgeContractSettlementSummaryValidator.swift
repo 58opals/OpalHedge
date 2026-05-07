@@ -34,6 +34,38 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
         #expect(summary.settlementTransactionHash == String(repeating: "2", count: 64))
     }
 
+    @Test("Creates AnyHedge contract settlement summary from contract plan")
+    func createAnyHedgeContractSettlementSummaryFromContractPlan() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let plan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeFixtureData.contractCreationContext
+        )
+        let previousOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeStartingSettlementOracleProof()
+        let settlementOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeSettlementOracleProof()
+        let summary = try clientContext.createAnyHedgeContractSettlementSummary(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: previousOracleProof,
+            settlementOracleProof: settlementOracleProof,
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let record = try clientContext.createAnyHedgeContractSettlementRecord(
+            from: plan,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            previousOracleProof: previousOracleProof,
+            settlementOracleProof: settlementOracleProof,
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+
+        #expect(summary == record.settlementSummary)
+        #expect(summary.dataDocument.draftData.parameters == plan.parameters)
+        #expect(summary.settlementKind == .maturation)
+    }
+
     @Test("Passes AnyHedge contract settlement summary options through client context")
     func passAnyHedgeContractSettlementSummaryOptionsThroughClientContext() throws {
         let existingFunding = OpalHedge.Core.ContractFunding(

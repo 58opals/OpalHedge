@@ -15,6 +15,23 @@ extension OpalHedgeClientContext {
     ) throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {
         let plan = try OpalHedgeCoreContractPlan(from: creationContext)
 
+        return try createAnyHedgeContractBundle(
+            from: plan,
+            network: network,
+            scriptBytecode: scriptBytecode,
+            fundings: fundings,
+            fees: fees
+        )
+    }
+
+    public func createAnyHedgeContractBundle(
+        from plan: OpalHedgeCoreContractPlan,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet,
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
+            .anyHedgeV0_12,
+        fundings: [OpalHedgeCoreContractFunding] = [],
+        fees: [OpalHedgeCoreContractFeeData] = []
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {
         return try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: plan,
             network: network,
@@ -34,6 +51,23 @@ extension OpalHedgeClientContext {
     ) throws -> OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
         try createAnyHedgeContractBundle(
             from: creationContext,
+            network: network,
+            scriptBytecode: scriptBytecode,
+            fundings: fundings,
+            fees: fees
+        ).fundingRequest
+    }
+
+    public func createAnyHedgeContractFundingRequest(
+        from plan: OpalHedgeCoreContractPlan,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet,
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
+            .anyHedgeV0_12,
+        fundings: [OpalHedgeCoreContractFunding] = [],
+        fees: [OpalHedgeCoreContractFeeData] = []
+    ) throws -> OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
+        try createAnyHedgeContractBundle(
+            from: plan,
             network: network,
             scriptBytecode: scriptBytecode,
             fundings: fundings,
