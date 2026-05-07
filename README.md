@@ -8,6 +8,8 @@ Opal Hedge is an open-source Swift package for building AnyHedge-compatible Bitc
 
 This package is beta-ready for Opal Wallet integration as a protocol and data library. The current focus is deterministic AnyHedge-compatible data, oracle proof handling, payout math, contract bytecode artifacts, funding data, settlement data, and plan-first client APIs.
 
+For the Opal Wallet beta path, the intended dependency route is `OpalHedge` into `OpalBase`, then Opal Wallet consumes the wallet-facing hedge facade exposed by Opal Base. Opal Hedge owns protocol data and verification. Opal Base owns reusable wallet integration, transaction construction, signing, broadcast, and Bitcoin Cash app-domain adapters. Opal Wallet owns product UI, beta gates, copy, routing, and app persistence policy.
+
 Currently supported:
 
 - AnyHedge-compatible metadata, parameter, funding, fee, and settlement data.
@@ -32,7 +34,7 @@ See [Opal Wallet Beta Integration](Docs/OpalWalletBetaIntegration.md) for the su
 
 ## Installation
 
-Add Opal Hedge as a SwiftPM dependency:
+Add Opal Hedge as a SwiftPM dependency from reusable Bitcoin Cash infrastructure packages, integration test harnesses, or server-side Swift code:
 
 ```swift
 .package(
@@ -52,6 +54,8 @@ The package exposes one umbrella module:
 ```swift
 import OpalHedge
 ```
+
+Opal Wallet should normally consume Opal Hedge through Opal Base rather than adding this package directly to the app target. A direct Opal Wallet dependency is appropriate only for a short-lived spike or fixture comparison before the Opal Base adapter exists.
 
 ## Public API Shape
 
