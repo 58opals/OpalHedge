@@ -12,8 +12,8 @@ struct OpalHedgeFacadeValidator {
         _ = OpalHedge.Client.Context()
     }
 
-    @Test("Uses facade aliases")
-    func useFacadeAliases() throws {
+    @Test("Uses Core facade aliases")
+    func useCoreFacadeAliases() throws {
         let message = try OpalHedge.Oracle.PriceMessage.parse(
             hex: OpalHedgeFixtureData.startingOracleMessageHex
         )
@@ -24,5 +24,87 @@ struct OpalHedgeFacadeValidator {
         )
 
         #expect(outcome.shortPayoutSatsSafe == 4_237_288)
+    }
+
+    @Test("Uses Core settlement facade aliases")
+    func useCoreSettlementFacadeAliases() throws {
+        let payoutAmounts = OpalHedge.Core.ContractSettlementPayoutAmounts(
+            shortPayoutInSatoshis: 4_255_319,
+            longPayoutInSatoshis: 1_394_398
+        )
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: OpalHedge.Core.SettlementKind.maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            payoutAmounts: payoutAmounts,
+            settlementMessageHex: OpalHedgeFixtureData.startingOracleMessageHex,
+            settlementSignatureHex: OpalHedgeFixtureData.startingOracleSignatureHex,
+            previousMessageHex: OpalHedgeFixtureData.startingOracleMessageHex,
+            previousSignatureHex: OpalHedgeFixtureData.startingOracleSignatureHex,
+            settlementPrice: 23_500
+        )
+        let funding = OpalHedge.Core.ContractFunding(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            fundingSatoshis: 5_651_049,
+            settlement: settlement
+        )
+        let draftData = OpalHedge.Core.ContractDraftData(
+            plan: try OpalHedge.Core.ContractPlan(
+                from: OpalHedgeFixtureData.contractCreationContext
+            ),
+            fundings: [funding]
+        )
+        let document = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+
+        #expect(document.jsonText.contains("\"settlement\""))
+        #expect(settlement.totalPayoutInSatoshis == 5_649_717)
+    }
+
+    @Test("Uses Bitcoin Cash settlement facade aliases")
+    func useBitcoinCashSettlementFacadeAliases() throws {
+        let bundle = try OpalHedge.BitcoinCash.AnyHedgeContractBundle(
+            plan: try OpalHedge.Core.ContractPlan(
+                from: OpalHedgeFixtureData.contractCreationContext
+            )
+        )
+        let fundingRecord = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
+            bundle: bundle,
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let settlementRequest = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest(
+            fundingRecord: fundingRecord,
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof()
+        )
+        let settlementRecord = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord(
+            settlementRequest: settlementRequest,
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let summary = OpalHedge.BitcoinCash.AnyHedgeContractSettlementSummary(
+            settlementRecord: settlementRecord
+        )
+
+        #expect(summary.settlementPayoutAmounts ==
+            OpalHedge.BitcoinCash.AnyHedgeContractSettlementPayoutAmounts(
+                settlementOutcome: settlementRequest.settlementOutcome
+            ))
+        #expect(settlementRecord.lifecycleState == .settled(settlementRecord))
+    }
+
+    @Test("Uses Oracle facade aliases")
+    func useOracleFacadeAliases() throws {
+        let message = try OpalHedge.Oracle.PriceMessage.parse(
+            hex: OpalHedgeFixtureData.startingOracleMessageHex
+        )
+        let isSignatureValid = try OpalHedge.Oracle.SignatureVerifier.verify(
+            message: message,
+            signatureHex: OpalHedgeFixtureData.startingOracleSignatureHex,
+            publicKeyHex: OpalHedgeFixtureData.oraclePublicKeyHex
+        )
+
+        #expect(isSignatureValid)
     }
 }

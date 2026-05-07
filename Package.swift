@@ -37,7 +37,12 @@ let package = Package(
                 .product(name: "OpalCrypto", package: "OpalCrypto")
             ]
         ),
-        .target(name: "OpalHedgeBitcoinCash"),
+        .target(
+            name: "OpalHedgeBitcoinCash",
+            dependencies: [
+                .product(name: "OpalCrypto", package: "OpalCrypto")
+            ]
+        ),
         .target(name: "OpalHedgeClient"),
         .testTarget(
             name: "OpalHedgeTests",

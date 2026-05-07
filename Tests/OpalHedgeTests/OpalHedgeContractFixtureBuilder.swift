@@ -18,6 +18,33 @@ enum OpalHedgeContractFixtureBuilder {
         )
     }
 
+    static func makeStartingSettlementOracleProof(
+        signatureHex: String = OpalHedgeFixtureData.startingOracleSignatureHex
+    ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
+        try OpalHedge.Core.ContractSettlementOracleProof(
+            messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
+            signatureHex: signatureHex
+        )
+    }
+
+    static func makeSettlementOracleProof(
+        messageTimestamp: Int64 = 6_663_643,
+        messageSequence: Int64 = 2,
+        priceSequence: Int64 = 2,
+        priceValue: Int64 = 23_500,
+        signatureHex: String = OpalHedgeFixtureData.startingOracleSignatureHex
+    ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
+        try OpalHedge.Core.ContractSettlementOracleProof(
+            messageHex: makeOracleMessageHex(
+                messageTimestamp: messageTimestamp,
+                messageSequence: messageSequence,
+                priceSequence: priceSequence,
+                priceValue: priceValue
+            ),
+            signatureHex: signatureHex
+        )
+    }
+
     static func makeCreationContext(
         takerSide: OpalHedge.Core.ContractSide = .short,
         makerSide: OpalHedge.Core.ContractSide = .long,
@@ -92,5 +119,39 @@ enum OpalHedgeContractFixtureBuilder {
             shortMutualRedeemPublicKey: shortMutualRedeemPublicKey,
             longMutualRedeemPublicKey: longMutualRedeemPublicKey
         )
+    }
+
+    private static func makeOracleMessageHex(
+        messageTimestamp: Int64,
+        messageSequence: Int64,
+        priceSequence: Int64,
+        priceValue: Int64
+    ) -> String {
+        [
+            messageTimestamp,
+            messageSequence,
+            priceSequence,
+            priceValue
+        ]
+        .flatMap(encodeLittleEndianInteger)
+        .map(makeByteHex)
+        .joined()
+    }
+
+    private static func encodeLittleEndianInteger(_ value: Int64) -> [UInt8] {
+        let integer = UInt32(bitPattern: Int32(value))
+
+        return [
+            UInt8(integer & 0xff),
+            UInt8((integer >> 8) & 0xff),
+            UInt8((integer >> 16) & 0xff),
+            UInt8((integer >> 24) & 0xff)
+        ]
+    }
+
+    private static func makeByteHex(_ byte: UInt8) -> String {
+        let text = String(byte, radix: 16)
+
+        return text.count == 1 ? "0" + text : text
     }
 }

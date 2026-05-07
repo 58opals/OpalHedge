@@ -31,4 +31,18 @@ enum OpalHedgeTypedErrorCapture {
 
         return nil
     }
+
+    static func captureSettlementOracleProofError(
+        _ operation: () throws -> Void
+    ) -> OpalHedge.Oracle.SettlementOracleProofError? {
+        do {
+            try operation()
+        } catch let error as OpalHedge.Oracle.SettlementOracleProofError {
+            return error
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        return nil
+    }
 }
