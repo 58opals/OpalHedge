@@ -6,7 +6,7 @@ Opal Hedge is an open-source Swift package for building AnyHedge-compatible Bitc
 
 ## Status
 
-This package is in early protocol-compatibility development. The current focus is deterministic AnyHedge-compatible data, oracle proof handling, payout math, contract bytecode artifacts, funding data, and settlement data.
+This package is beta-ready for Opal Wallet integration as a protocol and data library. The current focus is deterministic AnyHedge-compatible data, oracle proof handling, payout math, contract bytecode artifacts, funding data, settlement data, and plan-first client APIs.
 
 Currently supported:
 
@@ -27,6 +27,8 @@ Not yet supported:
 - Liquidity provider discovery.
 - Merchant invoicing.
 - Early settlement user flows.
+
+See [Opal Wallet Beta Integration](Docs/OpalWalletBetaIntegration.md) for the supported integration boundary and checklist.
 
 ## Installation
 
