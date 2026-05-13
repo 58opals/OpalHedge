@@ -44,6 +44,14 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
             oraclePublicKey,
             name: "oraclePublicKey"
         )
+        try Self.validatePayToPublicKeyHashLockScript(
+            shortLockScript,
+            name: "shortLockScript"
+        )
+        try Self.validatePayToPublicKeyHashLockScript(
+            longLockScript,
+            name: "longLockScript"
+        )
         try Self.validateBooleanInteger(
             enableMutualRedemption,
             name: "enableMutualRedemption"
@@ -134,6 +142,19 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
         }
     }
 
+    private static func validatePayToPublicKeyHashLockScript(
+        _ value: Data,
+        name: String
+    ) throws {
+        guard value.count == payToPublicKeyHashLockScriptByteCount,
+              value.starts(with: payToPublicKeyHashLockScriptPrefix),
+              value.suffix(payToPublicKeyHashLockScriptSuffix.count) ==
+              payToPublicKeyHashLockScriptSuffix else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
+                .invalidLockScript(name: name, byteCount: value.count)
+        }
+    }
+
     private static func validatePositiveInteger(_ value: Int64, name: String) throws {
         guard value > 0 else {
             throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
@@ -156,6 +177,15 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
     }
 
     private static let compressedPublicKeyByteCount = 33
+    private static let payToPublicKeyHashLockScriptByteCount = 25
+
+    private static var payToPublicKeyHashLockScriptPrefix: Data {
+        Data([0x76, 0xa9, 0x14])
+    }
+
+    private static var payToPublicKeyHashLockScriptSuffix: Data {
+        Data([0x88, 0xac])
+    }
 
     private static var compressedPublicKeyPrefixes: Set<UInt8> {
         [0x02, 0x03]

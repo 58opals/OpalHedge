@@ -22,17 +22,26 @@ public enum OpalHedgeCoreSettlementCalculator {
             parameters.lowLiquidationPrice
         )
         let satsForNominalUnits = parameters.nominalUnitsXSatsPerBch / clampedPrice
-        let shortPayoutSatsUnsafe = satsForNominalUnits - parameters.satsForNominalUnitsAtHighLiquidation
+        let shortPayoutSatsUnsafe = try subtractingSatoshis(
+            satsForNominalUnits,
+            parameters.satsForNominalUnitsAtHighLiquidation
+        )
         let shortPayoutSatsSafe = max(
             OpalHedgeCoreContractConstraintPolicy.dustLimitSatoshis,
             shortPayoutSatsUnsafe
         )
-        let longPayoutSatsUnsafe = parameters.payoutSats - shortPayoutSatsSafe
+        let longPayoutSatsUnsafe = try subtractingSatoshis(
+            parameters.payoutSats,
+            shortPayoutSatsSafe
+        )
         let longPayoutSatsSafe = max(
             OpalHedgeCoreContractConstraintPolicy.dustLimitSatoshis,
             longPayoutSatsUnsafe
         )
-        let totalPayoutSatsSafe = shortPayoutSatsSafe + longPayoutSatsSafe
+        let totalPayoutSatsSafe = try addingSatoshis(
+            shortPayoutSatsSafe,
+            longPayoutSatsSafe
+        )
         guard fundingSatoshis >= totalPayoutSatsSafe else {
             throw OpalHedgeCoreSettlementCalculationError.insufficientFundingSatoshis(
                 fundingSatoshis: fundingSatoshis,
@@ -50,5 +59,27 @@ public enum OpalHedgeCoreSettlementCalculator {
             satsForNominalUnits: satsForNominalUnits,
             minerFeeSats: minerFeeSats
         )
+    }
+
+    private static func subtractingSatoshis(
+        _ lhs: Int64,
+        _ rhs: Int64
+    ) throws -> Int64 {
+        let result = lhs.subtractingReportingOverflow(rhs)
+        guard !result.overflow else {
+            throw OpalHedgeCoreSettlementCalculationError.payoutSatoshisOverflow
+        }
+        return result.partialValue
+    }
+
+    private static func addingSatoshis(
+        _ lhs: Int64,
+        _ rhs: Int64
+    ) throws -> Int64 {
+        let result = lhs.addingReportingOverflow(rhs)
+        guard !result.overflow else {
+            throw OpalHedgeCoreSettlementCalculationError.payoutSatoshisOverflow
+        }
+        return result.partialValue
     }
 }

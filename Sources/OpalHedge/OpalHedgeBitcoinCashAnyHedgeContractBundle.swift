@@ -42,13 +42,13 @@ package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
         fundings: [OpalHedgeCoreContractFunding] = [],
         fees: [OpalHedgeCoreContractFeeData] = []
     ) throws {
-        try network.validatePayoutAddressNetworks(in: plan)
-
         let draftData = OpalHedgeCoreContractDraftData(
             plan: plan,
             fundings: fundings,
             fees: fees
         )
+        try network.validatePayoutAddressNetworks(in: draftData)
+
         let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
             from: plan
         )

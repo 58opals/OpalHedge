@@ -102,6 +102,22 @@ struct OpalHedgeCoreContractPlannerValidator {
         #expect(fundingAmounts.payoutSats == 5_649_717)
     }
 
+    @Test("Rejects funding amounts above maximum contract satoshis")
+    func rejectFundingAmountsAboveMaximumContractSatoshis() {
+        let context = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            nominalUnits: 2_000_000_000,
+            maturityTimestamp: 6_663_643,
+            isSimpleHedge: 1,
+            highLiquidationPriceMultiplier: 10,
+            lowLiquidationPriceMultiplier: 0.75
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractFundingAmounts(from: context)
+        }
+
+        #expect(error == .contractSatoshisExceedMaximum(11_299_435_028_248))
+    }
+
     @Test("Derives upstream hedge10week contract metadata")
     func deriveUpstreamHedgeTenWeekContractMetadata() throws {
         let plan = try OpalHedge.Core.ContractPlanner.createPlan(

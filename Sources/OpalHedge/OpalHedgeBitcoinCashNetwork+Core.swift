@@ -14,6 +14,7 @@ extension OpalHedgeBitcoinCashNetwork {
         in draftData: OpalHedgeCoreContractDraftData
     ) throws {
         try validatePayoutAddressNetworks(in: draftData.metadata)
+        try validateFeeAddressNetworks(in: draftData.fees)
     }
 
     private func validatePayoutAddressNetworks(
@@ -34,6 +35,17 @@ extension OpalHedgeBitcoinCashNetwork {
                     expectedCashAddrPrefix: cashAddrPrefix,
                     actualCashAddrPrefix: address.cashAddrPrefix
                 )
+        }
+    }
+
+    private func validateFeeAddressNetworks(
+        in fees: [OpalHedgeCoreContractFeeData]
+    ) throws {
+        for (index, fee) in fees.enumerated() {
+            try validate(
+                OpalHedgeCoreContractPayoutAddress(fee.address),
+                name: "fees[\(index)].address"
+            )
         }
     }
 }

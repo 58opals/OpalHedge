@@ -10,17 +10,23 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
         scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode =
             .anyHedgeV0_12
     ) throws {
-        try network.validatePayoutAddressNetworks(in: dataDocument.draftData)
-        try Self.validateNoExistingFundings(dataDocument.draftData.fundings)
+        let draftData = dataDocument.draftData
+        try network.validatePayoutAddressNetworks(in: draftData)
+        _ = try OpalHedge.Oracle.verifyStartingPriceProof(
+            messageHex: draftData.metadata.startingOracleMessageHex,
+            signatureHex: draftData.metadata.startingOracleSignatureHex,
+            publicKeyHex: draftData.parameters.oraclePublicKeyHex
+        )
+        try Self.validateNoExistingFundings(draftData.fundings)
 
         let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
-            from: dataDocument.draftData.parameters,
+            from: draftData.parameters,
             scriptBytecode: scriptBytecode
         )
         let contractAddress = try bytecode.deriveContractAddress(network: network)
         let fundingOutput = try OpalHedgeBitcoinCashAnyHedgeContractFundingOutput(
             contractAddress: contractAddress,
-            payoutSatoshis: dataDocument.draftData.parameters.payoutSats,
+            payoutSatoshis: draftData.parameters.payoutSats,
             dustReserveSatoshis: OpalHedgeCoreContractConstraintPolicy
                 .dustLimitSatoshis
         )

@@ -42,12 +42,6 @@ public struct OpalHedgeCoreContractFundingAmounts: Sendable, Equatable {
             - satsForNominalUnitsAtHighLiquidation
         let longInputInSatoshis = payoutSats - shortInputInSatoshis
 
-        try OpalHedgeCoreContractConstraintEvaluator.validateDerivedFunding(
-            shortInputInSatoshis: shortInputInSatoshis,
-            longInputInSatoshis: longInputInSatoshis,
-            payoutSats: payoutSats
-        )
-
         self.lowLiquidationPrice = lowLiquidationPrice
         self.highLiquidationPrice = highLiquidationPrice
         self.nominalUnitsXSatsPerBitcoinCash = nominalUnitsXSatsPerBitcoinCash
@@ -57,5 +51,7 @@ public struct OpalHedgeCoreContractFundingAmounts: Sendable, Equatable {
         self.shortInputInSatoshis = shortInputInSatoshis
         self.longInputInSatoshis = longInputInSatoshis
         self.payoutSats = payoutSats
+
+        try OpalHedgeCoreContractConstraintEvaluator.validateFundingAmounts(self)
     }
 }

@@ -132,7 +132,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingIndexValidator {
     ) throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {
         try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
+                from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
             ),
             fundings: fundings
         )
@@ -161,9 +161,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingIndexValidator {
         -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord {
         let request = try makeSecondFundingRecord().createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof()
+                .makeVerifiedSettlementOracleProof()
         )
 
         return try request.createSettlementRecord(

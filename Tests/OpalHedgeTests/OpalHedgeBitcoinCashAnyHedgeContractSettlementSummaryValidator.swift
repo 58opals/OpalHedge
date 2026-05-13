@@ -35,19 +35,19 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
         #expect(summary.dataDocument == record.dataDocument)
         #expect(summary.previousOracleMessageHex == OpalHedgeFixtureData
             .startingOracleMessageHex)
-        #expect(summary.previousOracleSignatureHex == OpalHedgeFixtureData
-            .startingOracleSignatureHex)
+        #expect(summary.previousOracleSignatureHex == (try OpalHedgeContractFixtureBuilder
+            .makeVerifiedStartingSettlementOracleProof()).signatureHex)
         #expect(summary.previousOracleMessageTimestamp == 615_643)
         #expect(summary.previousOracleMessageSequence == 1)
-        #expect(summary.settlementOracleMessageHex == (try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof(
+        let settlementOracleProof = try OpalHedgeContractFixtureBuilder
+            .makeVerifiedSettlementOracleProof(
                 messageTimestamp: 6_663_643,
                 messageSequence: 2,
                 priceSequence: 2,
                 priceValue: 23_500
-            )).messageHex)
-        #expect(summary.settlementOracleSignatureHex == OpalHedgeFixtureData
-            .startingOracleSignatureHex)
+            )
+        #expect(summary.settlementOracleMessageHex == settlementOracleProof.messageHex)
+        #expect(summary.settlementOracleSignatureHex == settlementOracleProof.signatureHex)
         #expect(summary.settlementOracleMessageTimestamp == 6_663_643)
         #expect(summary.settlementOracleMessageSequence == 2)
     }
@@ -127,9 +127,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
     ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord {
         let request = try makeFundingRecord().createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof(
+                .makeVerifiedSettlementOracleProof(
                     messageTimestamp: settlementTimestamp,
                     priceValue: settlementPrice
                 )
@@ -143,7 +143,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
     private func makeFundingRecord() throws -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord {
         let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
+                from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
             )
         )
 

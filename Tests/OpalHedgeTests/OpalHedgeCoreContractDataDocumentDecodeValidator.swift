@@ -120,6 +120,26 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
         )
     }
 
+    @Test("Rejects duration drift from contract timestamps when decoding")
+    func rejectDurationDriftFromContractTimestampsWhenDecoding() throws {
+        let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
+            replacingFieldAt: .metadata("durationInSeconds"),
+            with: 1,
+            in: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
+        }
+
+        #expect(
+            error == .inconsistentOracleMessageComponent(
+                name: "durationInSeconds",
+                expected: 6_048_000,
+                actual: 1
+            )
+        )
+    }
+
     @Test("Rejects funding input drift when decoding")
     func rejectFundingInputDriftWhenDecoding() throws {
         let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(

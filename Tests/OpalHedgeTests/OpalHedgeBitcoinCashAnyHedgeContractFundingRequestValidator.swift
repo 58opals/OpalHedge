@@ -75,6 +75,38 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         #expect(request.fundingOutput.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
     }
 
+    @Test("Rejects unverified starting oracle signature in data document")
+    func rejectUnverifiedStartingOracleSignatureInDataDocument() throws {
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
+            plan: OpalHedge.Core.ContractPlan(
+                from: OpalHedgeFixtureData.contractCreationContext
+            )
+        )
+        let tamperedSignatureHex = "0" + String(
+            OpalHedgeFixtureData.startingOracleSignatureHex.dropFirst()
+        )
+        let tamperedJsonText = try OpalHedgeContractDataDocumentMutationTool
+            .makeJsonText(
+                replacingFieldAt: .metadata("startingOracleSignature"),
+                with: tamperedSignatureHex,
+                in: bundle.dataDocument.jsonText
+            )
+        let tamperedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: tamperedJsonText
+        )
+
+        var didRejectTamperedProof = false
+        do {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRequest(
+                dataDocument: tamperedDocument
+            )
+        } catch {
+            didRejectTamperedProof = true
+        }
+
+        #expect(didRejectTamperedProof)
+    }
+
     @Test("Creates AnyHedge contract funding request from data document with client context")
     func createAnyHedgeContractFundingRequestFromDataDocumentWithClientContext() throws {
         let clientContext = OpalHedge.Client.Context()

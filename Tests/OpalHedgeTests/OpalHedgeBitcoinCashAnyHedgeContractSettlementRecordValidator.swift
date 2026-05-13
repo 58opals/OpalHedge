@@ -59,8 +59,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         #expect(settlement["settlementPrice"] as? Int == 23_500)
         #expect(settlement["previousMessage"] as? String == OpalHedgeFixtureData
             .startingOracleMessageHex)
-        #expect(settlement["previousSignature"] as? String == OpalHedgeFixtureData
-            .startingOracleSignatureHex)
+        #expect(settlement["previousSignature"] as? String ==
+            record.settlement.previousSignatureHex)
     }
 
     @Test("Reconstructs AnyHedge contract settlement record from data document")
@@ -79,6 +79,35 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         #expect(reconstructedRecord == record)
         #expect(reconstructedRecord.settlementSummary == record.settlementSummary)
         #expect(reconstructedRecord.lifecycleState == record.lifecycleState)
+    }
+
+    @Test("Rejects unverified settlement oracle signature in data document")
+    func rejectUnverifiedSettlementOracleSignatureInDataDocument() throws {
+        let record = try makeSettlementRequest().createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+        let signatureHex = try #require(record.settlement.settlementSignatureHex)
+        let tamperedSignatureHex = "0" + String(signatureHex.dropFirst())
+        let tamperedJsonText = try OpalHedgeContractDataDocumentMutationTool
+            .makeJsonText(
+                replacingFieldAt: .firstFundingSettlement("settlementSignature"),
+                with: tamperedSignatureHex,
+                in: record.dataDocument.jsonText
+            )
+        let tamperedDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: tamperedJsonText
+        )
+
+        var didRejectTamperedProof = false
+        do {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecord(
+                dataDocument: tamperedDocument
+            )
+        } catch {
+            didRejectTamperedProof = true
+        }
+
+        #expect(didRejectTamperedProof)
     }
 
     @Test("Settles selected funding when duplicate funding records exist")
@@ -165,9 +194,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
     ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest {
         return try fundingRecord.createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof(
+                .makeVerifiedSettlementOracleProof(
                     messageTimestamp: 6_663_643,
                     priceValue: 23_500
                 )
@@ -177,7 +206,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
     private func makeFundingRecord() throws -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord {
         let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
+                from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
             )
         )
 

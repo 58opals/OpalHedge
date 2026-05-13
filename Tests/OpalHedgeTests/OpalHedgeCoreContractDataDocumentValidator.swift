@@ -158,6 +158,55 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         #expect(document.jsonText.contains("\"satoshis\":1000"))
     }
 
+    @Test("Rejects negative fee satoshis when creating contract data document")
+    func rejectNegativeFeeSatoshisWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData(
+            fees: [
+                OpalHedge.Core.ContractFeeData(
+                    name: "settlement",
+                    description: "Settlement service fee",
+                    address: OpalHedgeFixtureData.longPayoutAddress,
+                    satoshis: -1
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(error == .invalidNonnegativeInteger(name: "fees[0].satoshis", value: -1))
+    }
+
+    @Test("Rejects negative settlement payout satoshis when creating contract data document")
+    func rejectNegativeSettlementPayoutSatoshisWhenCreatingContractDataDocument() throws {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            shortPayoutInSatoshis: -1,
+            longPayoutInSatoshis: 1_412_429
+        )
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_651_049,
+                    settlement: settlement
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidNonnegativeInteger(
+                name: "fundings[0].settlement.hedgePayoutInSatoshis",
+                value: -1
+            )
+        )
+    }
+
     @Test("Rejects non-finite metadata numbers when creating contract data document")
     func rejectNonFiniteMetadataNumbersWhenCreatingContractDataDocument() throws {
         let draftData = try makeDraftData()

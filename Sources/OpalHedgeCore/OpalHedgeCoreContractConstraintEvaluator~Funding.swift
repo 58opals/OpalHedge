@@ -4,11 +4,14 @@ extension OpalHedgeCoreContractConstraintEvaluator {
     public static func validatePlanDerivationContext(
         _ context: OpalHedgeCoreContractPlanDerivationContext
     ) throws {
-        try validateCreationContext(context.creationContext)
+        let expectedFundingAmounts = try OpalHedgeCoreContractFundingAmounts(
+            from: context.creationContext
+        )
+
         try validateFundingAmounts(context.fundingAmounts)
         try validateFundingAmounts(
             context.fundingAmounts,
-            match: OpalHedgeCoreContractFundingAmounts(from: context.creationContext)
+            match: expectedFundingAmounts
         )
     }
 
@@ -29,6 +32,13 @@ extension OpalHedgeCoreContractConstraintEvaluator {
             amounts.satsForNominalUnitsAtLowLiquidation,
             name: "satsForNominalUnitsAtLowLiquidation"
         )
+        guard amounts.satsForNominalUnitsAtLowLiquidation <=
+              OpalHedgeCoreContractConstraintPolicy.maxContractSatoshis else {
+            throw OpalHedgeCoreContractConstraintError
+                .contractSatoshisExceedMaximum(
+                    amounts.satsForNominalUnitsAtLowLiquidation
+                )
+        }
         try validatePositiveInteger(
             amounts.satsForNominalUnitsAtStart,
             name: "satsForNominalUnitsAtStart"

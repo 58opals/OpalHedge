@@ -39,7 +39,7 @@ extension OpalHedgeCoreContractConstraintEvaluator {
         let roundedValue = value.rounded()
         guard roundedValue.isFinite,
               roundedValue > 0,
-              roundedValue <= Double(Int64.max) else {
+              roundedValue < Double(Int64.max) else {
             throw OpalHedgeCoreContractConstraintError.invalidRoundedInteger(
                 name: name,
                 value: value

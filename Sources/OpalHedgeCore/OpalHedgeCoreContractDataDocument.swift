@@ -178,6 +178,8 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
         _ draftData: OpalHedgeCoreContractDraftData
     ) throws {
         try validateFiniteMetadataNumbers(draftData.metadata)
+        try validateFees(draftData.fees)
+        try validateFundings(draftData.fundings)
         try validateStartingOracleMetadata(
             draftData.metadata,
             matches: draftData.parameters
@@ -195,6 +197,36 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
             draftData.metadata,
             matches: draftData.parameters
         )
+    }
+
+    private static func validateFees(
+        _ fees: [OpalHedgeCoreContractFeeData]
+    ) throws {
+        for (index, fee) in fees.enumerated() {
+            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+                fee.satoshis,
+                name: "fees[\(index)].satoshis"
+            )
+        }
+    }
+
+    private static func validateFundings(
+        _ fundings: [OpalHedgeCoreContractFunding]
+    ) throws {
+        for (index, funding) in fundings.enumerated() {
+            guard let settlement = funding.settlement else {
+                continue
+            }
+
+            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+                settlement.shortPayoutInSatoshis,
+                name: "fundings[\(index)].settlement.hedgePayoutInSatoshis"
+            )
+            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+                settlement.longPayoutInSatoshis,
+                name: "fundings[\(index)].settlement.longPayoutInSatoshis"
+            )
+        }
     }
 
     private static func validateStartingOracleMetadata(
@@ -230,6 +262,16 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
         _ metadata: OpalHedgeCoreContractMetadata,
         matches parameters: OpalHedgeCoreContractParameters
     ) throws {
+        let expectedDuration = parameters.maturityTimestamp - parameters.startTimestamp
+        guard metadata.durationInSeconds == expectedDuration else {
+            throw OpalHedgeCoreContractConstraintError
+                .inconsistentOracleMessageComponent(
+                    name: "durationInSeconds",
+                    expected: expectedDuration,
+                    actual: metadata.durationInSeconds
+                )
+        }
+
         try OpalHedgeCoreContractConstraintEvaluator.validatePayoutAddress(
             metadata.shortPayoutAddress,
             matches: parameters.shortLockScript,

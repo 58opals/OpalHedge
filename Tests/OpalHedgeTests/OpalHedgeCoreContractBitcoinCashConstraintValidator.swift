@@ -156,4 +156,33 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
             )
         )
     }
+
+    @Test("Rejects fee payout address network mismatch at funding boundary")
+    func rejectFeePayoutAddressNetworkMismatchAtFundingBoundary() {
+        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
+            longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
+        )
+        let feeData = OpalHedge.Core.ContractFeeData(
+            name: "settlement",
+            description: "Settlement service fee",
+            address: OpalHedgeFixtureData.longPayoutAddress,
+            satoshis: 1_000
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Client.Context().createAnyHedgeContractFundingRequest(
+                from: creationContext,
+                network: .regtest,
+                fees: [feeData]
+            )
+        }
+
+        #expect(
+            error == .inconsistentPayoutAddressNetwork(
+                name: "fees[0].address",
+                expectedCashAddrPrefix: "bchreg",
+                actualCashAddrPrefix: "bitcoincash"
+            )
+        )
+    }
 }

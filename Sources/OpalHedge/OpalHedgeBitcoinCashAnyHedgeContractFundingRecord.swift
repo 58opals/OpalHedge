@@ -80,6 +80,11 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecord: Sendable, Equat
     ) throws {
         let draftData = dataDocument.draftData
         try network.validatePayoutAddressNetworks(in: draftData)
+        _ = try OpalHedge.Oracle.verifyStartingPriceProof(
+            messageHex: draftData.metadata.startingOracleMessageHex,
+            signatureHex: draftData.metadata.startingOracleSignatureHex,
+            publicKeyHex: draftData.parameters.oraclePublicKeyHex
+        )
 
         guard draftData.fundings.indices.contains(fundingIndex) else {
             throw OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError

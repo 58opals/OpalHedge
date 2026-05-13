@@ -1,8 +1,16 @@
 // OpalHedgeContractFixtureBuilder.swift
 
+import Foundation
 import OpalHedge
+import OpalCrypto
 
 enum OpalHedgeContractFixtureBuilder {
+    static let verifiedOraclePublicKeyHex = try! hexText(
+        OpalCrypto.Secp256k1.derivePublicKey(
+            from: verifiedOraclePrivateKey
+        ).compressedRepresentation
+    )
+
     static func makeStartingOracleProof(
         oraclePublicKey: OpalHedge.Core.ContractPublicKey =
             OpalHedgeFixtureData.oracleContractPublicKey,
@@ -18,12 +26,38 @@ enum OpalHedgeContractFixtureBuilder {
         )
     }
 
+    static func makeVerifiedStartingOracleProof() throws
+        -> OpalHedge.Core.ContractStartingOracleProof {
+        let messageHex = makeOracleMessageHex(
+            messageTimestamp: 615_643,
+            messageSequence: 1,
+            priceSequence: 1,
+            priceValue: 23_600
+        )
+
+        return try OpalHedge.Oracle.verifyStartingPriceProof(
+            messageHex: messageHex,
+            signatureHex: makeOracleSignatureHex(messageHex: messageHex),
+            publicKeyHex: verifiedOraclePublicKeyHex
+        )
+    }
+
     static func makeStartingSettlementOracleProof(
         signatureHex: String = OpalHedgeFixtureData.startingOracleSignatureHex
     ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
         try OpalHedge.Core.ContractSettlementOracleProof(
             messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
             signatureHex: signatureHex
+        )
+    }
+
+    static func makeVerifiedStartingSettlementOracleProof() throws
+        -> OpalHedge.Core.ContractSettlementOracleProof {
+        try makeVerifiedSettlementOracleProof(
+            messageTimestamp: 615_643,
+            messageSequence: 1,
+            priceSequence: 1,
+            priceValue: 23_600
         )
     }
 
@@ -42,6 +76,58 @@ enum OpalHedgeContractFixtureBuilder {
                 priceValue: priceValue
             ),
             signatureHex: signatureHex
+        )
+    }
+
+    static func makeVerifiedSettlementOracleProof(
+        messageTimestamp: Int64 = 6_663_643,
+        messageSequence: Int64 = 2,
+        priceSequence: Int64 = 2,
+        priceValue: Int64 = 23_500
+    ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
+        let messageHex = makeOracleMessageHex(
+            messageTimestamp: messageTimestamp,
+            messageSequence: messageSequence,
+            priceSequence: priceSequence,
+            priceValue: priceValue
+        )
+
+        return try OpalHedge.Oracle.verifySettlementOracleProof(
+            messageHex: messageHex,
+            signatureHex: makeOracleSignatureHex(messageHex: messageHex),
+            publicKeyHex: verifiedOraclePublicKeyHex
+        )
+    }
+
+    static func makeVerifiedCreationContext() throws
+        -> OpalHedge.Core.ContractCreationContext {
+        OpalHedge.Core.ContractCreationContext(
+            takerSide: .short,
+            makerSide: .long,
+            startingOracleProof: try makeVerifiedStartingOracleProof(),
+            shortPayoutAddress: try! OpalHedge.Core.ContractPayoutAddress(
+                OpalHedgeFixtureData.shortPayoutAddress
+            ),
+            longPayoutAddress: try! OpalHedge.Core.ContractPayoutAddress(
+                OpalHedgeFixtureData.longPayoutAddress
+            ),
+            shortLockScript: try! OpalHedge.Core.ContractLockScript(
+                hex: OpalHedgeFixtureData.shortLockScriptHex
+            ),
+            longLockScript: try! OpalHedge.Core.ContractLockScript(
+                hex: OpalHedgeFixtureData.longLockScriptHex
+            ),
+            nominalUnits: 1_000,
+            maturityTimestamp: 6_663_643,
+            isSimpleHedge: 1,
+            highLiquidationPriceMultiplier: 10,
+            lowLiquidationPriceMultiplier: 0.75,
+            enableMutualRedemption: 1,
+            shortMutualRedeemPublicKey: OpalHedgeFixtureData
+                .shortMutualRedeemPublicKey,
+            longMutualRedeemPublicKey: OpalHedgeFixtureData
+                .longMutualRedeemPublicKey,
+            minerCostInSatoshis: 632
         )
     }
 
@@ -153,5 +239,34 @@ enum OpalHedgeContractFixtureBuilder {
         let text = String(byte, radix: 16)
 
         return text.count == 1 ? "0" + text : text
+    }
+
+    private static let verifiedOraclePrivateKey = try! OpalCrypto.Secp256k1
+        .PrivateKey(
+            rawRepresentation: Data(
+                [
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1
+                ]
+            )
+        )
+
+    private static func makeOracleSignatureHex(messageHex: String) throws -> String {
+        let message = try OpalHedge.Oracle.PriceMessage.parse(hex: messageHex)
+        let digest = try OpalCrypto.Signature.Digest(
+            rawRepresentation: OpalCrypto.Hashing.sha256(message.rawData)
+        )
+        let signature = try OpalCrypto.Signature.Schnorr.sign(
+            digest: digest,
+            privateKey: verifiedOraclePrivateKey
+        )
+
+        return hexText(signature.rawRepresentation)
+    }
+
+    private static func hexText(_ data: Data) -> String {
+        data.map(makeByteHex).joined()
     }
 }

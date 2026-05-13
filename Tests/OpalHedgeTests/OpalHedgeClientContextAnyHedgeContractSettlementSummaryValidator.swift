@@ -111,13 +111,13 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
     func createAnyHedgeContractSettlementSummaryFromDataDocument() throws {
         let clientContext = OpalHedge.Client.Context()
         let record = try clientContext.createAnyHedgeContractSettlementRecord(
-            from: OpalHedgeFixtureData.contractCreationContext,
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext(),
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof(),
+                .makeVerifiedSettlementOracleProof(),
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
         let decodedDocument = try OpalHedge.Core.ContractDataDocument(

@@ -33,6 +33,7 @@ extension OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
             previousOracleProof: try Self.oracleProof(
                 messageHex: settlement.previousMessageHex,
                 signatureHex: settlement.previousSignatureHex,
+                publicKeyHex: draftData.parameters.oraclePublicKeyHex,
                 messageName: "previousMessage",
                 signatureName: "previousSignature",
                 fundingIndex: fundingIndex
@@ -40,6 +41,7 @@ extension OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
             settlementOracleProof: try Self.oracleProof(
                 messageHex: settlement.settlementMessageHex,
                 signatureHex: settlement.settlementSignatureHex,
+                publicKeyHex: draftData.parameters.oraclePublicKeyHex,
                 messageName: "settlementMessage",
                 signatureName: "settlementSignature",
                 fundingIndex: fundingIndex
@@ -93,6 +95,7 @@ extension OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
     private static func oracleProof(
         messageHex: String?,
         signatureHex: String?,
+        publicKeyHex: String,
         messageName: String,
         signatureName: String,
         fundingIndex: Int
@@ -106,9 +109,10 @@ extension OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
                 .missingSettlementField(name: signatureName, fundingIndex: fundingIndex)
         }
 
-        return try OpalHedgeCoreContractSettlementOracleProof(
+        return try OpalHedge.Oracle.verifySettlementOracleProof(
             messageHex: messageHex,
-            signatureHex: signatureHex
+            signatureHex: signatureHex,
+            publicKeyHex: publicKeyHex
         )
     }
 }

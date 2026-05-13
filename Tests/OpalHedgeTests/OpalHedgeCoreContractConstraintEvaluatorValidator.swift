@@ -86,6 +86,27 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
         )
     }
 
+    @Test("Rejects rounded integer overflow without trapping")
+    func rejectRoundedIntegerOverflowWithoutTrapping() {
+        let nominalUnits = Double(Int64.max) / Double(
+            OpalHedge.Core.ContractConstraintPolicy.satoshisPerBitcoinCash
+        )
+        let context = OpalHedgeContractFixtureBuilder.makeCreationContext(
+            nominalUnits: nominalUnits
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            try OpalHedge.Core.ContractConstraintEvaluator.validateCreationContext(context)
+        }
+
+        guard case .invalidRoundedInteger(let name, let value)? = error else {
+            Issue.record("Unexpected error: \(String(describing: error))")
+            return
+        }
+
+        #expect(name == "nominalUnitsXSatsPerBch")
+        #expect(value >= Double(Int64.max))
+    }
+
     @Test("Rejects unsafe long payout at low liquidation")
     func rejectUnsafeLongPayoutAtLowLiquidation() {
         let parameters = OpalHedgeContractFixtureBuilder.makeParameters(payoutSats: 1_332)

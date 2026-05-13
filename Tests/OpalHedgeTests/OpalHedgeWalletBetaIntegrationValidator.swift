@@ -44,13 +44,17 @@ struct OpalHedgeWalletBetaIntegrationValidator {
     @Test("Summarizes Opal Wallet beta settlement outcome from persisted document")
     func summarizeOpalWalletBetaSettlementOutcomeFromPersistedDocument() throws {
         let clientContext = OpalHedge.Client.Context()
-        let contractPlan = try makeContractPlan()
+        let contractPlan = try OpalHedge.Core.ContractPlan(
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
+        )
         let settlementSummary = try clientContext.createAnyHedgeContractSettlementSummary(
             from: contractPlan,
             fundingTransactionHash: fundingTransactionHash,
             fundingOutputIndex: 0,
-            previousOracleProof: try makePreviousOracleProof(),
-            settlementOracleProof: try makeSettlementOracleProof(),
+            previousOracleProof: try OpalHedgeContractFixtureBuilder
+                .makeVerifiedStartingSettlementOracleProof(),
+            settlementOracleProof: try OpalHedgeContractFixtureBuilder
+                .makeVerifiedSettlementOracleProof(),
             settlementTransactionHash: settlementTransactionHash
         )
         let persistedDocument = try OpalHedge.Core.ContractDataDocument(

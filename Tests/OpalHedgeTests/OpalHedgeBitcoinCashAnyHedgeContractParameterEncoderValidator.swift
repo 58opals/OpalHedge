@@ -64,6 +64,15 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterEncoderValidator {
         #expect(error == .invalidCompressedPublicKey(name: "oraclePublicKey", byteCount: 33))
     }
 
+    @Test("Rejects invalid AnyHedge constructor lock script")
+    func rejectInvalidAnyHedgeConstructorLockScript() {
+        let error = captureParameterError {
+            _ = try makeParameterData(shortLockScriptHex: "00")
+        }
+
+        #expect(error == .invalidLockScript(name: "shortLockScript", byteCount: 1))
+    }
+
     @Test("Rejects invalid AnyHedge constructor integer")
     func rejectInvalidAnyHedgeConstructorInteger() {
         let error = captureParameterError {

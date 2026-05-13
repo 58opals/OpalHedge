@@ -54,6 +54,37 @@ struct OpalHedgeCoreSettlementCalculatorValidator {
         )
     }
 
+    @Test("Rejects settlement payout overflow without trapping")
+    func rejectSettlementPayoutOverflowWithoutTrapping() {
+        let parameters = OpalHedge.Core.ContractParameters(
+            oraclePublicKey: OpalHedgeFixtureData.contractParameters.oraclePublicKey,
+            lowLiquidationPrice: 1,
+            highLiquidationPrice: 2,
+            startTimestamp: OpalHedgeFixtureData.contractParameters.startTimestamp,
+            maturityTimestamp: OpalHedgeFixtureData.contractParameters.maturityTimestamp,
+            nominalUnitsXSatsPerBch: Int64.max,
+            satsForNominalUnitsAtHighLiquidation: 0,
+            payoutSats: 0,
+            shortLockScript: OpalHedgeFixtureData.contractParameters.shortLockScript,
+            longLockScript: OpalHedgeFixtureData.contractParameters.longLockScript,
+            enableMutualRedemption: OpalHedgeFixtureData.contractParameters
+                .enableMutualRedemption,
+            shortMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
+                .shortMutualRedeemPublicKey,
+            longMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
+                .longMutualRedeemPublicKey
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
+            _ = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
+                parameters: parameters,
+                fundingSatoshis: Int64.max,
+                redeemPrice: 1
+            )
+        }
+
+        #expect(error == .payoutSatoshisOverflow)
+    }
+
     @Test("Rejects empty liquidation range")
     func rejectEmptyLiquidationRange() {
         let parameters = OpalHedge.Core.ContractParameters(

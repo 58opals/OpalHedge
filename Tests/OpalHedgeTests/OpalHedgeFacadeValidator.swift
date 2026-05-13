@@ -106,7 +106,7 @@ struct OpalHedgeFacadeValidator {
     func useBitcoinCashDataDocumentReconstructionFacadeAliases() throws {
         let clientContext = OpalHedge.Client.Context()
         let contractPlan = try OpalHedge.Core.ContractPlan(
-            from: OpalHedgeFixtureData.contractCreationContext
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
         )
         let fundingRequest = try clientContext.createAnyHedgeContractFundingRequest(
             from: contractPlan
@@ -121,8 +121,9 @@ struct OpalHedgeFacadeValidator {
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
-            settlementOracleProof: OpalHedgeContractFixtureBuilder.makeSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeVerifiedSettlementOracleProof(),
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
 
