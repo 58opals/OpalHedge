@@ -11,7 +11,7 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
     }
 
     public init(draftData: OpalHedgeCoreContractDraftData) throws {
-        try Self.validateFiniteMetadataNumbers(draftData.metadata)
+        try Self.validateDraftData(draftData)
 
         let data = try JSONSerialization.data(
             withJSONObject: Self.dictionary(for: draftData),
@@ -172,5 +172,73 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
                 expected: "finite number"
             )
         }
+    }
+
+    static func validateDraftData(
+        _ draftData: OpalHedgeCoreContractDraftData
+    ) throws {
+        try validateFiniteMetadataNumbers(draftData.metadata)
+        try validateStartingOracleMetadata(
+            draftData.metadata,
+            matches: draftData.parameters
+        )
+        try OpalHedgeCoreContractConstraintEvaluator.validateParameters(
+            draftData.parameters,
+            startPrice: draftData.metadata.startPrice
+        )
+        try OpalHedgeCoreContractConstraintEvaluator.validateDerivedFunding(
+            shortInputInSatoshis: draftData.metadata.shortInputInSatoshis,
+            longInputInSatoshis: draftData.metadata.longInputInSatoshis,
+            payoutSats: draftData.parameters.payoutSats
+        )
+        try validateMetadata(
+            draftData.metadata,
+            matches: draftData.parameters
+        )
+    }
+
+    private static func validateStartingOracleMetadata(
+        _ metadata: OpalHedgeCoreContractMetadata,
+        matches parameters: OpalHedgeCoreContractParameters
+    ) throws {
+        let startingOracleMessage = try OpalHedgeCoreContractOracleMessageData(
+            hex: metadata.startingOracleMessageHex
+        )
+        _ = try OpalHedgeCoreContractOracleSignature(
+            hex: metadata.startingOracleSignatureHex
+        )
+
+        guard metadata.startPrice == startingOracleMessage.priceValue else {
+            throw OpalHedgeCoreContractConstraintError
+                .inconsistentOracleMessageComponent(
+                    name: "startPrice",
+                    expected: startingOracleMessage.priceValue,
+                    actual: metadata.startPrice
+                )
+        }
+        guard parameters.startTimestamp == startingOracleMessage.messageTimestamp else {
+            throw OpalHedgeCoreContractConstraintError
+                .inconsistentOracleMessageComponent(
+                    name: "startTimestamp",
+                    expected: startingOracleMessage.messageTimestamp,
+                    actual: parameters.startTimestamp
+                )
+        }
+    }
+
+    private static func validateMetadata(
+        _ metadata: OpalHedgeCoreContractMetadata,
+        matches parameters: OpalHedgeCoreContractParameters
+    ) throws {
+        try OpalHedgeCoreContractConstraintEvaluator.validatePayoutAddress(
+            metadata.shortPayoutAddress,
+            matches: parameters.shortLockScript,
+            name: "shortPayoutAddress"
+        )
+        try OpalHedgeCoreContractConstraintEvaluator.validatePayoutAddress(
+            metadata.longPayoutAddress,
+            matches: parameters.longLockScript,
+            name: "longPayoutAddress"
+        )
     }
 }

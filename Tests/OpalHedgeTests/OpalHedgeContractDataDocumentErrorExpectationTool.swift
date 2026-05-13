@@ -1,15 +1,15 @@
-// OpalHedgeContractDataDocumentErrorExpectation.swift
+// OpalHedgeContractDataDocumentErrorExpectationTool.swift
 
 import Testing
 import OpalHedge
 
-enum OpalHedgeContractDataDocumentErrorExpectation {
+enum OpalHedgeContractDataDocumentErrorExpectationTool {
     typealias ContractDataDocumentError =
         OpalHedge.Core.ContractDataDocumentError
 
     static func expectMissingField(
         _ error: ContractDataDocumentError?,
-        at fieldPath: OpalHedgeContractDataDocumentFieldPath
+        at fieldPath: OpalHedgeContractDataDocumentFieldPathData
     ) {
         #expect(
             error == .missingField(fieldPath.fieldName),
@@ -23,7 +23,7 @@ enum OpalHedgeContractDataDocumentErrorExpectation {
 
     static func expectInvalidFieldType(
         _ error: ContractDataDocumentError?,
-        at fieldPath: OpalHedgeContractDataDocumentFieldPath,
+        at fieldPath: OpalHedgeContractDataDocumentFieldPathData,
         expectedFieldType: String
     ) {
         #expect(

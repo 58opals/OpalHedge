@@ -1,6 +1,6 @@
-// OpalHedgeFixtureSourceFamily.swift
+// OpalHedgeFixtureSourceFamilyKind.swift
 
-enum OpalHedgeFixtureSourceFamily: Hashable {
+enum OpalHedgeFixtureSourceFamilyKind: Hashable {
     case anyHedgeContractMetadata
     case anyHedgeContractFunding
     case anyHedgeContractAutomatedPayout

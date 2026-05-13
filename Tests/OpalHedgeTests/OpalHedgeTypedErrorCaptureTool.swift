@@ -1,9 +1,9 @@
-// OpalHedgeTypedErrorCapture.swift
+// OpalHedgeTypedErrorCaptureTool.swift
 
 import Testing
 import OpalHedge
 
-enum OpalHedgeTypedErrorCapture {
+enum OpalHedgeTypedErrorCaptureTool {
     static func captureConstraintError(
         _ operation: () throws -> Void
     ) -> OpalHedge.Core.ContractConstraintError? {
@@ -52,6 +52,48 @@ enum OpalHedgeTypedErrorCapture {
         do {
             try operation()
         } catch let error as OpalHedge.Oracle.SettlementOracleProofError {
+            return error
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        return nil
+    }
+
+    static func captureSettlementConditionError(
+        _ operation: () throws -> Void
+    ) -> OpalHedge.Core.SettlementConditionError? {
+        do {
+            try operation()
+        } catch let error as OpalHedge.Core.SettlementConditionError {
+            return error
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        return nil
+    }
+
+    static func captureSettlementCalculationError(
+        _ operation: () throws -> Void
+    ) -> OpalHedge.Core.SettlementCalculationError? {
+        do {
+            try operation()
+        } catch let error as OpalHedge.Core.SettlementCalculationError {
+            return error
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        return nil
+    }
+
+    static func captureFundingRecordError(
+        _ operation: () throws -> Void
+    ) -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecordError? {
+        do {
+            try operation()
+        } catch let error as OpalHedge.BitcoinCash.AnyHedgeContractFundingRecordError {
             return error
         } catch {
             Issue.record("Unexpected error: \(error)")

@@ -18,7 +18,7 @@ struct OpalHedgeCoreContractCryptographyConstraintValidator {
 
     @Test("Rejects invalid oracle proof public key")
     func rejectInvalidOracleProofPublicKey() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractPublicKey(hex: invalidPublicKeyHex)
         }
 
@@ -32,7 +32,7 @@ struct OpalHedgeCoreContractCryptographyConstraintValidator {
 
     @Test("Rejects invalid oracle proof message hex")
     func rejectInvalidOracleProofMessageHex() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractOracleMessageData(
                 hex: "00",
                 messageTimestamp: 615_643,
@@ -47,7 +47,7 @@ struct OpalHedgeCoreContractCryptographyConstraintValidator {
 
     @Test("Rejects inconsistent oracle proof message component")
     func rejectInconsistentOracleProofMessageComponent() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractOracleMessageData(
                 hex: OpalHedgeFixtureData.startingOracleMessageHex,
                 messageTimestamp: 615_644,
@@ -68,7 +68,7 @@ struct OpalHedgeCoreContractCryptographyConstraintValidator {
 
     @Test("Rejects invalid oracle proof signature hex")
     func rejectInvalidOracleProofSignatureHex() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractOracleSignature(hex: "00")
         }
 
@@ -77,7 +77,7 @@ struct OpalHedgeCoreContractCryptographyConstraintValidator {
 
     @Test("Rejects invalid mutual redemption public key")
     func rejectInvalidMutualRedemptionPublicKey() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractCreationContext(
                 takerSide: .short,
                 makerSide: .long,
@@ -107,7 +107,7 @@ struct OpalHedgeCoreContractCryptographyConstraintValidator {
 
     @Test("Rejects invalid parameter oracle public key")
     func rejectInvalidParameterOraclePublicKey() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractParameters(
                 oraclePublicKeyHex: invalidPublicKeyHex,
                 lowLiquidationPrice: 17_700,

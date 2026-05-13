@@ -151,10 +151,14 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
         longInputInSatoshis: Int64,
         payoutSats: Int64
     ) throws {
+        let totalInput = shortInputInSatoshis.addingReportingOverflow(
+            longInputInSatoshis
+        )
         guard shortInputInSatoshis > 0,
               longInputInSatoshis > 0,
               payoutSats > 0,
-              shortInputInSatoshis + longInputInSatoshis == payoutSats else {
+              !totalInput.overflow,
+              totalInput.partialValue == payoutSats else {
             throw OpalHedgeCoreContractConstraintError.invalidContractFunding(
                 shortInput: shortInputInSatoshis,
                 longInput: longInputInSatoshis,

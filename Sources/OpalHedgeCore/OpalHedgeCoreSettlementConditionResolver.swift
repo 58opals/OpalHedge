@@ -12,7 +12,8 @@ public enum OpalHedgeCoreSettlementConditionResolver {
         guard previousSequence > 0 else {
             throw OpalHedgeCoreSettlementConditionError.metadataSequence(previousSequence)
         }
-        guard settlementSequence == previousSequence + 1 else {
+        guard previousSequence < Int64.max,
+              settlementSequence == previousSequence + 1 else {
             throw OpalHedgeCoreSettlementConditionError.sequenceGap(
                 previous: previousSequence,
                 settlement: settlementSequence

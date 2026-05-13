@@ -42,4 +42,16 @@ struct OpalHedgeOraclePriceMessageValidator {
 
         #expect(didThrow)
     }
+
+    @Test("Parses maximum positive script integer fields")
+    func parseMaximumPositiveScriptIntegerFields() throws {
+        let message = try OpalHedge.Oracle.PriceMessage.parse(
+            hex: "ffffff7fffffff7fffffff7fffffff7f"
+        )
+
+        #expect(message.messageTimestamp == 2_147_483_647)
+        #expect(message.messageSequence == 2_147_483_647)
+        #expect(message.priceSequence == 2_147_483_647)
+        #expect(message.priceValue == 2_147_483_647)
+    }
 }

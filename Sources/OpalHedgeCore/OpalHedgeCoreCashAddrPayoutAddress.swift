@@ -8,14 +8,17 @@ struct OpalHedgeCoreCashAddrPayoutAddress: Sendable, Equatable {
         _ value: String,
         name: String
     ) throws -> OpalHedgeCoreCashAddrPayoutAddress {
-        guard value == value.lowercased() else {
+        let isLowercase = value == value.lowercased()
+        let isUppercase = value == value.uppercased()
+        guard isLowercase || isUppercase else {
             throw OpalHedgeCoreContractConstraintError.invalidPayoutAddress(
                 name: name,
                 value: value
             )
         }
 
-        let parts = value.split(separator: ":", omittingEmptySubsequences: false)
+        let normalizedValue = value.lowercased()
+        let parts = normalizedValue.split(separator: ":", omittingEmptySubsequences: false)
         guard parts.count == 2 else {
             throw OpalHedgeCoreContractConstraintError.invalidPayoutAddress(
                 name: name,

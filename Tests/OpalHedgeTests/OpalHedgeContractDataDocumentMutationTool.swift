@@ -1,51 +1,51 @@
-// OpalHedgeContractDataDocumentJSONMutation.swift
+// OpalHedgeContractDataDocumentMutationTool.swift
 
 import Foundation
 import Testing
 
-enum OpalHedgeContractDataDocumentJSONMutation {
-    static func jsonText(
-        replacingFieldAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+enum OpalHedgeContractDataDocumentMutationTool {
+    static func makeJsonText(
+        replacingFieldAt fieldPath: OpalHedgeContractDataDocumentFieldPathData,
         with fieldValue: Any,
         in jsonText: String
     ) throws -> String {
         switch fieldPath {
         case .topLevel(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 replacingTopLevelField: fieldName,
                 with: fieldValue,
                 in: jsonText
             )
         case .parameter(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 replacingField: fieldName,
                 inTopLevelObject: "parameters",
                 with: fieldValue,
                 in: jsonText
             )
         case .metadata(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 replacingField: fieldName,
                 inTopLevelObject: "metadata",
                 with: fieldValue,
                 in: jsonText
             )
         case .firstFunding(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 replacingField: fieldName,
                 inFirstElementOf: "fundings",
                 with: fieldValue,
                 in: jsonText
             )
         case .firstFee(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 replacingField: fieldName,
                 inFirstElementOf: "fees",
                 with: fieldValue,
                 in: jsonText
             )
         case .firstFundingSettlement(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 replacingSettlementField: fieldName,
                 with: fieldValue,
                 in: jsonText
@@ -53,13 +53,13 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         }
     }
 
-    static func jsonText(
-        replacingFieldAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+    static func makeJsonText(
+        replacingFieldAt fieldPath: OpalHedgeContractDataDocumentFieldPathData,
         withRawJSONValue rawJSONValue: String,
         in jsonText: String
     ) throws -> String {
         let marker = "__OPAL_HEDGE_RAW_JSON_VALUE__"
-        let markerJsonText = try Self.jsonText(
+        let markerJsonText = try Self.makeJsonText(
             replacingFieldAt: fieldPath,
             with: marker,
             in: jsonText
@@ -71,7 +71,7 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         )
     }
 
-    static func jsonText(
+    static func makeJsonText(
         replacingTopLevelField name: String,
         with value: Any,
         in jsonText: String
@@ -79,10 +79,10 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         var dictionary = try topLevelDictionary(from: jsonText)
         dictionary[name] = value
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
+    static func makeJsonText(
         replacingField fieldName: String,
         inTopLevelObject objectName: String,
         with fieldValue: Any,
@@ -93,10 +93,10 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         object[fieldName] = fieldValue
         dictionary[objectName] = object
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
+    static func makeJsonText(
         replacingField fieldName: String,
         inFirstElementOf arrayName: String,
         with fieldValue: Any,
@@ -109,10 +109,10 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         elements[0] = element
         dictionary[arrayName] = elements
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
+    static func makeJsonText(
         replacingSettlementField fieldName: String,
         with fieldValue: Any,
         in jsonText: String
@@ -126,62 +126,62 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         fundings[0] = funding
         dictionary["fundings"] = fundings
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
-        removingFieldAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+    static func makeJsonText(
+        removingFieldAt fieldPath: OpalHedgeContractDataDocumentFieldPathData,
         from jsonText: String
     ) throws -> String {
         switch fieldPath {
         case .topLevel(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 removingTopLevelField: fieldName,
                 from: jsonText
             )
         case .parameter(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 removingField: fieldName,
                 inTopLevelObject: "parameters",
                 from: jsonText
             )
         case .metadata(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 removingField: fieldName,
                 inTopLevelObject: "metadata",
                 from: jsonText
             )
         case .firstFunding(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 removingField: fieldName,
                 inFirstElementOf: "fundings",
                 from: jsonText
             )
         case .firstFee(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 removingField: fieldName,
                 inFirstElementOf: "fees",
                 from: jsonText
             )
         case .firstFundingSettlement(let fieldName):
-            return try Self.jsonText(
+            return try Self.makeJsonText(
                 removingSettlementField: fieldName,
                 from: jsonText
             )
         }
     }
 
-    static func jsonText(
+    static func makeJsonText(
         removingTopLevelField name: String,
         from jsonText: String
     ) throws -> String {
         var dictionary = try topLevelDictionary(from: jsonText)
         dictionary.removeValue(forKey: name)
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
+    static func makeJsonText(
         removingField fieldName: String,
         inTopLevelObject objectName: String,
         from jsonText: String
@@ -191,10 +191,10 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         object.removeValue(forKey: fieldName)
         dictionary[objectName] = object
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
+    static func makeJsonText(
         removingField fieldName: String,
         inFirstElementOf arrayName: String,
         from jsonText: String
@@ -206,10 +206,10 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         elements[0] = element
         dictionary[arrayName] = elements
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
-    static func jsonText(
+    static func makeJsonText(
         removingSettlementField fieldName: String,
         from jsonText: String
     ) throws -> String {
@@ -222,7 +222,7 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         fundings[0] = funding
         dictionary["fundings"] = fundings
 
-        return try Self.jsonText(from: dictionary)
+        return try Self.makeJsonText(from: dictionary)
     }
 
     private static func topLevelDictionary(from jsonText: String) throws -> [String: Any] {
@@ -231,7 +231,7 @@ enum OpalHedgeContractDataDocumentJSONMutation {
         ) as? [String: Any])
     }
 
-    private static func jsonText(from dictionary: [String: Any]) throws -> String {
+    private static func makeJsonText(from dictionary: [String: Any]) throws -> String {
         let data = try JSONSerialization.data(
             withJSONObject: dictionary,
             options: [.sortedKeys]

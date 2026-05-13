@@ -26,9 +26,20 @@ struct OpalHedgeOracleStartingPriceProofValidator {
         #expect(proof == OpalHedgeFixtureData.contractStartingOracleProof)
     }
 
+    @Test("Normalizes verified starting price proof whitespace")
+    func normalizeVerifiedStartingPriceProofWhitespace() throws {
+        let proof = try OpalHedge.Oracle.verifyStartingPriceProof(
+            messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
+            signatureHex: " \(OpalHedgeFixtureData.startingOracleSignatureHex.uppercased())\n",
+            publicKeyHex: "\n\(OpalHedgeFixtureData.oraclePublicKeyHex.uppercased()) "
+        )
+
+        #expect(proof == OpalHedgeFixtureData.contractStartingOracleProof)
+    }
+
     @Test("Rejects invalid starting price signature")
     func rejectInvalidStartingPriceSignature() {
-        let error = OpalHedgeTypedErrorCapture.captureStartingPriceProofError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureStartingPriceProofError {
             _ = try OpalHedge.Oracle.verifyStartingPriceProof(
                 messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
                 signatureHex: invalidSignatureHex,

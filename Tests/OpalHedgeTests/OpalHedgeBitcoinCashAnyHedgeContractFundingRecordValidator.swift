@@ -68,17 +68,23 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
     @Test("Rejects invalid AnyHedge contract funding record")
     func rejectInvalidAnyHedgeContractFundingRecord() throws {
         let bundle = try makeBundle()
-        let hashError = captureFundingRecordError {
+        let hashError = OpalHedgeTypedErrorCaptureTool.captureFundingRecordError {
             _ = try bundle.createFundingRecord(
                 fundingTransactionHash: "zz",
                 fundingOutputIndex: 0
             )
         }
-        let satoshisError = captureFundingRecordError {
+        let satoshisError = OpalHedgeTypedErrorCaptureTool.captureFundingRecordError {
             _ = try bundle.createFundingRecord(
                 fundingTransactionHash: String(repeating: "1", count: 64),
                 fundingOutputIndex: 0,
                 fundingSatoshis: 5_651_048
+            )
+        }
+        let outputIndexError = OpalHedgeTypedErrorCaptureTool.captureFundingRecordError {
+            _ = try bundle.createFundingRecord(
+                fundingTransactionHash: String(repeating: "1", count: 64),
+                fundingOutputIndex: 4_294_967_296
             )
         }
 
@@ -89,6 +95,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
                 actual: 5_651_048
             )
         )
+        #expect(outputIndexError == .invalidFundingOutputIndex(4_294_967_296))
     }
 
     @Test("Rejects invalid AnyHedge contract funding record data document")
@@ -96,7 +103,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
         let missingFundingDocument = try OpalHedge.Core.ContractDataDocument(
             jsonText: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
         )
-        let missingFundingError = captureFundingRecordError {
+        let missingFundingError = OpalHedgeTypedErrorCaptureTool.captureFundingRecordError {
             _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
                 dataDocument: missingFundingDocument
             )
@@ -111,11 +118,23 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
                 with: #""fundingSatoshis":5651048"#
             )
         )
-        let invalidSatoshisError = captureFundingRecordError {
+        let invalidSatoshisError = OpalHedgeTypedErrorCaptureTool.captureFundingRecordError {
             _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
                 dataDocument: invalidSatoshisDocument
             )
         }
+        let invalidOutputIndexDocument = try OpalHedge.Core.ContractDataDocument(
+            jsonText: record.dataDocument.jsonText.replacingOccurrences(
+                of: #""fundingOutputIndex":0"#,
+                with: #""fundingOutputIndex":4294967296"#
+            )
+        )
+        let invalidOutputIndexError = OpalHedgeTypedErrorCaptureTool
+            .captureFundingRecordError {
+                _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
+                    dataDocument: invalidOutputIndexDocument
+                )
+            }
 
         #expect(missingFundingError == .missingFundingRecord(index: 0))
         #expect(
@@ -124,6 +143,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
                 actual: 5_651_048
             )
         )
+        #expect(invalidOutputIndexError == .invalidFundingOutputIndex(4_294_967_296))
     }
 
     @Test("Rejects settled funding record data document")
@@ -144,7 +164,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
         let settledDocument = try OpalHedge.Core.ContractDataDocument(
             jsonText: settlementRecord.dataDocument.jsonText
         )
-        let error = captureFundingRecordError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureFundingRecordError {
             _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
                 dataDocument: settledDocument
             )
@@ -162,19 +182,5 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
             ),
             fundings: fundings
         )
-    }
-
-    private func captureFundingRecordError(
-        _ operation: () throws -> Void
-    ) -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecordError? {
-        do {
-            try operation()
-        } catch let error as OpalHedge.BitcoinCash.AnyHedgeContractFundingRecordError {
-            return error
-        } catch {
-            Issue.record("Unexpected error: \(error)")
-        }
-
-        return nil
     }
 }

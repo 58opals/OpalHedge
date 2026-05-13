@@ -66,7 +66,7 @@ struct OpalHedgeCoreContractPlannerValidator {
             highLiquidationPriceMultiplier: 10,
             lowLiquidationPriceMultiplier: 0.75
         )
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             let fundingAmounts = try OpalHedge.Core.ContractFundingAmounts(
                 from: mismatchedContext
             )
@@ -155,7 +155,7 @@ struct OpalHedgeCoreContractPlannerValidator {
             highLiquidationPriceMultiplier: 10,
             lowLiquidationPriceMultiplier: 0.75
         )
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             let fundingAmounts = try OpalHedge.Core.ContractFundingAmounts(
                 from: mismatchedContext
             )

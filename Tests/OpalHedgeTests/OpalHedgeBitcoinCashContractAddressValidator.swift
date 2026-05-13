@@ -51,6 +51,20 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
         #expect(address.rawValue.hasPrefix("bchreg:p"))
     }
 
+    @Test("Derives contract address from uppercase redeem script hex")
+    func deriveContractAddressFromUppercaseRedeemScriptHex() throws {
+        let lowercaseAddress = try OpalHedgeBitcoinCashContractAddress(
+            redeemScriptHex: "6a0fabcd",
+            network: .regtest
+        )
+        let uppercaseAddress = try OpalHedgeBitcoinCashContractAddress(
+            redeemScriptHex: "6A0FABCD",
+            network: .regtest
+        )
+
+        #expect(uppercaseAddress == lowercaseAddress)
+    }
+
     @Test("Rejects invalid script hash length")
     func rejectInvalidScriptHashLength() {
         let error = captureContractAddressError {

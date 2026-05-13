@@ -98,4 +98,56 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         #expect(request.fundingOutput.contractAddress.rawValue == "bchreg:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsr6pyr2gu")
         #expect(request.redeemScriptBytecode == bundle.fundingRequest.redeemScriptBytecode)
     }
+
+    @Test("Rejects funding request from funded data document")
+    func rejectFundingRequestFromFundedDataDocument() throws {
+        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
+            plan: OpalHedge.Core.ContractPlan(
+                from: OpalHedgeFixtureData.contractCreationContext
+            )
+        )
+        let fundingRecord = try bundle.createFundingRecord(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0
+        )
+        let error = captureFundingRequestError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRequest(
+                dataDocument: fundingRecord.dataDocument
+            )
+        }
+
+        #expect(error == .contractAlreadyFunded(fundingCount: 1))
+    }
+
+    @Test("Rejects client funding request with existing fundings")
+    func rejectClientFundingRequestWithExistingFundings() throws {
+        let clientContext = OpalHedge.Client.Context()
+        let existingFunding = OpalHedge.Core.ContractFunding(
+            fundingTransactionHash: String(repeating: "1", count: 64),
+            fundingOutputIndex: 0,
+            fundingSatoshis: 5_651_049
+        )
+        let error = captureFundingRequestError {
+            _ = try clientContext.createAnyHedgeContractFundingRequest(
+                from: OpalHedgeFixtureData.contractCreationContext,
+                fundings: [existingFunding]
+            )
+        }
+
+        #expect(error == .contractAlreadyFunded(fundingCount: 1))
+    }
+
+    private func captureFundingRequestError(
+        _ operation: () throws -> Void
+    ) -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRequestError? {
+        do {
+            try operation()
+        } catch let error as OpalHedge.BitcoinCash.AnyHedgeContractFundingRequestError {
+            return error
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        return nil
+    }
 }

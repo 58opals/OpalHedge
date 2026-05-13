@@ -174,13 +174,13 @@ struct OpalHedgeCoreContractDataDocumentValidator {
                     with: value,
                     in: draftData
                 )
-                let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+                let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                     _ = try OpalHedge.Core.ContractDataDocument(
                         draftData: invalidDraftData
                     )
                 }
 
-                OpalHedgeContractDataDocumentErrorExpectation.expectInvalidFieldType(
+                OpalHedgeContractDataDocumentErrorExpectationTool.expectInvalidFieldType(
                     error,
                     at: fieldPath,
                     expectedFieldType: "finite number"
@@ -189,7 +189,32 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         }
     }
 
-    private var metadataNumberFieldPaths: [OpalHedgeContractDataDocumentFieldPath] {
+    @Test("Rejects start price drift when creating contract data document")
+    func rejectStartPriceDriftWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData()
+        let driftedMetadata = makeMetadata(
+            from: draftData.metadata,
+            startPrice: draftData.metadata.startPrice + 1
+        )
+        let invalidDraftData = OpalHedge.Core.ContractDraftData(
+            parameters: draftData.parameters,
+            metadata: driftedMetadata
+        )
+
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(
+                draftData: invalidDraftData
+            )
+        }
+
+        #expect(error == .inconsistentOracleMessageComponent(
+            name: "startPrice",
+            expected: draftData.metadata.startPrice,
+            actual: draftData.metadata.startPrice + 1
+        ))
+    }
+
+    private var metadataNumberFieldPaths: [OpalHedgeContractDataDocumentFieldPathData] {
         [
             .metadata("nominalUnits"),
             .metadata("lowLiquidationPriceMultiplier"),
@@ -224,7 +249,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
     }
 
     private func makeDraftData(
-        replacingMetadataNumberAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+        replacingMetadataNumberAt fieldPath: OpalHedgeContractDataDocumentFieldPathData,
         with value: Double,
         in draftData: OpalHedge.Core.ContractDraftData
     ) throws -> OpalHedge.Core.ContractDraftData {
@@ -243,7 +268,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
     }
 
     private func makeMetadata(
-        replacingNumberAt fieldPath: OpalHedgeContractDataDocumentFieldPath,
+        replacingNumberAt fieldPath: OpalHedgeContractDataDocumentFieldPathData,
         with value: Double,
         in metadata: OpalHedge.Core.ContractMetadata
     ) throws -> OpalHedge.Core.ContractMetadata {
@@ -266,6 +291,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
 
     private func makeMetadata(
         from metadata: OpalHedge.Core.ContractMetadata,
+        startPrice: Int64? = nil,
         nominalUnits: Double? = nil,
         lowLiquidationPriceMultiplier: Double? = nil,
         highLiquidationPriceMultiplier: Double? = nil,
@@ -279,7 +305,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
             longPayoutAddress: metadata.longPayoutAddress,
             startingOracleMessageHex: metadata.startingOracleMessageHex,
             startingOracleSignatureHex: metadata.startingOracleSignatureHex,
-            startPrice: metadata.startPrice,
+            startPrice: startPrice ?? metadata.startPrice,
             durationInSeconds: metadata.durationInSeconds,
             nominalUnits: nominalUnits ?? metadata.nominalUnits,
             lowLiquidationPriceMultiplier: lowLiquidationPriceMultiplier

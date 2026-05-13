@@ -9,7 +9,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
         let referenceDocument = try OpalHedge.Core.ContractDataDocument(
             jsonText: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
         )
-        let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+        let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
             replacingTopLevelField: "futureExtension",
             with: ["value": "ignored"],
             in: referenceDocument.jsonText
@@ -31,7 +31,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
         ]
 
         for fieldCase in cases {
-            let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 replacingField: fieldCase.fieldName,
                 inTopLevelObject: fieldCase.objectName,
                 with: "ignored",
@@ -53,7 +53,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
         ]
 
         for fieldCase in cases {
-            let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 replacingField: fieldCase.fieldName,
                 inFirstElementOf: fieldCase.arrayName,
                 with: "ignored",
@@ -69,7 +69,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
     @Test("Ignores unknown contract data document settlement fields")
     func ignoreUnknownContractDataDocumentSettlementFields() throws {
         let referenceDocument = try settledContractDataDocument()
-        let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+        let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
             replacingSettlementField: "futureSettlement",
             with: "ignored",
             in: referenceDocument.jsonText

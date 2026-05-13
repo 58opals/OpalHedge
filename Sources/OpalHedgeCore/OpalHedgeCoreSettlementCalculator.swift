@@ -10,7 +10,7 @@ public enum OpalHedgeCoreSettlementCalculator {
             throw OpalHedgeCoreSettlementCalculationError.invalidRedeemPrice(redeemPrice)
         }
         guard parameters.lowLiquidationPrice > 0,
-              parameters.highLiquidationPrice >= parameters.lowLiquidationPrice else {
+              parameters.highLiquidationPrice > parameters.lowLiquidationPrice else {
             throw OpalHedgeCoreSettlementCalculationError.invalidLiquidationRange(
                 low: parameters.lowLiquidationPrice,
                 high: parameters.highLiquidationPrice
@@ -33,6 +33,13 @@ public enum OpalHedgeCoreSettlementCalculator {
             longPayoutSatsUnsafe
         )
         let totalPayoutSatsSafe = shortPayoutSatsSafe + longPayoutSatsSafe
+        guard fundingSatoshis >= totalPayoutSatsSafe else {
+            throw OpalHedgeCoreSettlementCalculationError.insufficientFundingSatoshis(
+                fundingSatoshis: fundingSatoshis,
+                requiredSatoshis: totalPayoutSatsSafe
+            )
+        }
+
         let minerFeeSats = fundingSatoshis - totalPayoutSatsSafe
 
         return OpalHedgeCoreSettlementOutcome(

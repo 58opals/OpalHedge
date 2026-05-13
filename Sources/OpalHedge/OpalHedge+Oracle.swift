@@ -1,5 +1,6 @@
 // OpalHedge+Oracle.swift
 
+import Foundation
 import OpalHedgeCore
 import OpalHedgeOracle
 
@@ -30,13 +31,17 @@ extension OpalHedge {
 
             let proof = OpalHedge.Core.ContractStartingOracleProof(
                 oraclePublicKey: try OpalHedge.Core.ContractPublicKey(
-                    hex: publicKeyHex.lowercased()
+                    hex: publicKeyHex
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .lowercased()
                 ),
                 message: try OpalHedge.Core.ContractOracleMessageData(
                     hex: message.hex
                 ),
                 signature: try OpalHedge.Core.ContractOracleSignature(
-                    hex: signatureHex.lowercased()
+                    hex: signatureHex
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .lowercased()
                 )
             )
             try OpalHedgeCoreContractConstraintEvaluator.validateStartingOracleProof(proof)
@@ -64,7 +69,9 @@ extension OpalHedge {
                     hex: message.hex
                 ),
                 signature: try OpalHedge.Core.ContractOracleSignature(
-                    hex: signatureHex.lowercased()
+                    hex: signatureHex
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .lowercased()
                 )
             )
         }

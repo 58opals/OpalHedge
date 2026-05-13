@@ -106,7 +106,7 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
             grouping: OpalHedgeAnyHedgeGoldenVectorData.sourceReferences,
             by: \.family
         )
-        let expectedSourceFamilies: Set<OpalHedgeFixtureSourceFamily> = [
+        let expectedSourceFamilies: Set<OpalHedgeFixtureSourceFamilyKind> = [
             .anyHedgeContractMetadata,
             .anyHedgeContractFunding,
             .anyHedgeContractAutomatedPayout,

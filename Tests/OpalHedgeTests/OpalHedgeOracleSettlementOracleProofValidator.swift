@@ -18,9 +18,20 @@ struct OpalHedgeOracleSettlementOracleProofValidator {
         #expect(proof.signatureHex == OpalHedgeFixtureData.startingOracleSignatureHex)
     }
 
+    @Test("Normalizes verified settlement oracle proof signature whitespace")
+    func normalizeVerifiedSettlementOracleProofSignatureWhitespace() throws {
+        let proof = try OpalHedge.Oracle.verifySettlementOracleProof(
+            messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
+            signatureHex: "\n\(OpalHedgeFixtureData.startingOracleSignatureHex.uppercased()) ",
+            publicKeyHex: OpalHedgeFixtureData.oraclePublicKeyHex
+        )
+
+        #expect(proof.signatureHex == OpalHedgeFixtureData.startingOracleSignatureHex)
+    }
+
     @Test("Rejects invalid settlement oracle signature")
     func rejectInvalidSettlementOracleSignature() {
-        let error = OpalHedgeTypedErrorCapture.captureSettlementOracleProofError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementOracleProofError {
             _ = try OpalHedge.Oracle.verifySettlementOracleProof(
                 messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
                 signatureHex: makeInvalidSignatureHex(),

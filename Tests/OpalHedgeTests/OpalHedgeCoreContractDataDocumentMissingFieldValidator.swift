@@ -6,7 +6,7 @@ import OpalHedge
 struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
     @Test("Rejects missing contract data document top-level fields")
     func rejectMissingContractDataDocumentTopLevelFields() throws {
-        let fieldPaths: [OpalHedgeContractDataDocumentFieldPath] = [
+        let fieldPaths: [OpalHedgeContractDataDocumentFieldPathData] = [
             .topLevel("parameters"),
             .topLevel("metadata"),
             .topLevel("fundings"),
@@ -14,15 +14,15 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         ]
 
         for fieldPath in fieldPaths {
-            let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: fieldPath,
                 from: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
             )
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
             }
 
-            OpalHedgeContractDataDocumentErrorExpectation.expectMissingField(
+            OpalHedgeContractDataDocumentErrorExpectationTool.expectMissingField(
                 error,
                 at: fieldPath
             )
@@ -31,7 +31,7 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
 
     @Test("Rejects missing contract data document parameter fields")
     func rejectMissingContractDataDocumentParameterFields() throws {
-        let fieldPaths: [OpalHedgeContractDataDocumentFieldPath] = [
+        let fieldPaths: [OpalHedgeContractDataDocumentFieldPathData] = [
             .parameter("oraclePublicKey"),
             .parameter("lowLiquidationPrice"),
             .parameter("highLiquidationPrice"),
@@ -48,15 +48,15 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         ]
 
         for fieldPath in fieldPaths {
-            let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: fieldPath,
                 from: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
             )
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
             }
 
-            OpalHedgeContractDataDocumentErrorExpectation.expectMissingField(
+            OpalHedgeContractDataDocumentErrorExpectationTool.expectMissingField(
                 error,
                 at: fieldPath
             )
@@ -65,7 +65,7 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
 
     @Test("Rejects missing contract data document metadata fields")
     func rejectMissingContractDataDocumentMetadataFields() throws {
-        let fieldPaths: [OpalHedgeContractDataDocumentFieldPath] = [
+        let fieldPaths: [OpalHedgeContractDataDocumentFieldPathData] = [
             .metadata("startingOracleMessage"),
             .metadata("startingOracleSignature"),
             .metadata("takerSide"),
@@ -85,15 +85,15 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         ]
 
         for fieldPath in fieldPaths {
-            let jsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: fieldPath,
                 from: OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
             )
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
             }
 
-            OpalHedgeContractDataDocumentErrorExpectation.expectMissingField(
+            OpalHedgeContractDataDocumentErrorExpectationTool.expectMissingField(
                 error,
                 at: fieldPath
             )
@@ -102,7 +102,7 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
 
     @Test("Rejects missing contract data document funding fields")
     func rejectMissingContractDataDocumentFundingFields() throws {
-        let fieldPaths: [OpalHedgeContractDataDocumentFieldPath] = [
+        let fieldPaths: [OpalHedgeContractDataDocumentFieldPathData] = [
             .firstFunding("fundingTransactionHash"),
             .firstFunding("fundingOutputIndex"),
             .firstFunding("fundingSatoshis")
@@ -110,15 +110,15 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         let jsonText = try settledContractDataDocumentJsonText()
 
         for fieldPath in fieldPaths {
-            let invalidJsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let invalidJsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: fieldPath,
                 from: jsonText
             )
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: invalidJsonText)
             }
 
-            OpalHedgeContractDataDocumentErrorExpectation.expectMissingField(
+            OpalHedgeContractDataDocumentErrorExpectationTool.expectMissingField(
                 error,
                 at: fieldPath
             )
@@ -127,7 +127,7 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
 
     @Test("Rejects missing contract data document fee fields")
     func rejectMissingContractDataDocumentFeeFields() throws {
-        let fieldPaths: [OpalHedgeContractDataDocumentFieldPath] = [
+        let fieldPaths: [OpalHedgeContractDataDocumentFieldPathData] = [
             .firstFee("name"),
             .firstFee("description"),
             .firstFee("address"),
@@ -136,15 +136,15 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         let jsonText = try settledContractDataDocumentJsonText()
 
         for fieldPath in fieldPaths {
-            let invalidJsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let invalidJsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: fieldPath,
                 from: jsonText
             )
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: invalidJsonText)
             }
 
-            OpalHedgeContractDataDocumentErrorExpectation.expectMissingField(
+            OpalHedgeContractDataDocumentErrorExpectationTool.expectMissingField(
                 error,
                 at: fieldPath
             )
@@ -153,7 +153,7 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
 
     @Test("Rejects missing contract data document settlement required fields")
     func rejectMissingContractDataDocumentSettlementRequiredFields() throws {
-        let fieldPaths: [OpalHedgeContractDataDocumentFieldPath] = [
+        let fieldPaths: [OpalHedgeContractDataDocumentFieldPathData] = [
             .firstFundingSettlement("settlementType"),
             .firstFundingSettlement("settlementTransactionHash"),
             .firstFundingSettlement("hedgePayoutInSatoshis"),
@@ -162,15 +162,15 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         let jsonText = try settledContractDataDocumentJsonText()
 
         for fieldPath in fieldPaths {
-            let invalidJsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let invalidJsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: fieldPath,
                 from: jsonText
             )
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: invalidJsonText)
             }
 
-            OpalHedgeContractDataDocumentErrorExpectation.expectMissingField(
+            OpalHedgeContractDataDocumentErrorExpectationTool.expectMissingField(
                 error,
                 at: fieldPath
             )
@@ -189,7 +189,7 @@ struct OpalHedgeCoreContractDataDocumentMissingFieldValidator {
         let jsonText = try settledContractDataDocumentJsonText()
 
         for fieldName in fields {
-            let decodedJsonText = try OpalHedgeContractDataDocumentJSONMutation.jsonText(
+            let decodedJsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 removingFieldAt: .firstFundingSettlement(fieldName),
                 from: jsonText
             )

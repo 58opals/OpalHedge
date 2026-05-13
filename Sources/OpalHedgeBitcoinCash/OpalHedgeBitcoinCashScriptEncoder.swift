@@ -40,7 +40,7 @@ public enum OpalHedgeBitcoinCashScriptEncoder {
             throw OpalHedgeBitcoinCashScriptEncodingError.dataPushTooLarge(data.count)
         }
 
-        if let smallIntegerPushOpcode = smallIntegerPushOpcode(for: data) {
+        if let smallIntegerPushOpcode = makeSmallIntegerPushOpcode(for: data) {
             return Data([smallIntegerPushOpcode])
         }
 
@@ -76,7 +76,7 @@ public enum OpalHedgeBitcoinCashScriptEncoder {
     private static let opPushData2: UInt8 = 0x4d
     private static let opPushData4: UInt8 = 0x4e
 
-    private static func smallIntegerPushOpcode(for data: Data) -> UInt8? {
+    private static func makeSmallIntegerPushOpcode(for data: Data) -> UInt8? {
         guard data.count <= 1 else {
             return nil
         }

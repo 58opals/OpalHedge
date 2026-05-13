@@ -14,7 +14,7 @@ struct OpalHedgeCoreContractDataDocumentRootValidator {
         ]
 
         for jsonText in jsonTexts {
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
             }
 
@@ -29,7 +29,7 @@ struct OpalHedgeCoreContractDataDocumentRootValidator {
                 of: #""nominalUnits":1000"#,
                 with: #""nominalUnits":1e999"#
             )
-        let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
             _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
         }
 
@@ -45,7 +45,7 @@ struct OpalHedgeCoreContractDataDocumentRootValidator {
         ]
 
         for utf8Data in utf8DataValues {
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(utf8Data: utf8Data)
             }
 
@@ -61,7 +61,7 @@ struct OpalHedgeCoreContractDataDocumentRootValidator {
         ]
 
         for jsonText in jsonTexts {
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
             }
 
@@ -77,7 +77,7 @@ struct OpalHedgeCoreContractDataDocumentRootValidator {
         ]
 
         for utf8Data in utf8DataValues {
-            let error = OpalHedgeTypedErrorCapture.captureContractDataDocumentError {
+            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(utf8Data: utf8Data)
             }
 

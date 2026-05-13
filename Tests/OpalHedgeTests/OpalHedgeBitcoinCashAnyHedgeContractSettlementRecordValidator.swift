@@ -81,6 +81,35 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         #expect(reconstructedRecord.lifecycleState == record.lifecycleState)
     }
 
+    @Test("Settles selected funding when duplicate funding records exist")
+    func settleSelectedFundingWhenDuplicateFundingRecordsExist() throws {
+        let fundingRecord = try makeFundingRecord()
+        let duplicateFundingDataDocument = try OpalHedge.Core.ContractDataDocument(
+            draftData: OpalHedge.Core.ContractDraftData(
+                parameters: fundingRecord.draftData.parameters,
+                metadata: fundingRecord.draftData.metadata,
+                fundings: [
+                    fundingRecord.funding,
+                    fundingRecord.funding
+                ],
+                fees: fundingRecord.draftData.fees
+            )
+        )
+        let firstFundingRecord = try OpalHedge.BitcoinCash
+            .AnyHedgeContractFundingRecord(
+                dataDocument: duplicateFundingDataDocument,
+                fundingIndex: 0
+            )
+        let record = try makeSettlementRequest(
+            fundingRecord: firstFundingRecord
+        ).createSettlementRecord(
+            settlementTransactionHash: String(repeating: "2", count: 64)
+        )
+
+        #expect(record.draftData.fundings[0].settlement == record.settlement)
+        #expect(record.draftData.fundings[1].settlement == nil)
+    }
+
     @Test("Rejects invalid AnyHedge contract settlement record")
     func rejectInvalidAnyHedgeContractSettlementRecord() throws {
         let error = captureSettlementRecordError {
@@ -128,8 +157,12 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
 
     private func makeSettlementRequest() throws
         -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest {
-        let fundingRecord = try makeFundingRecord()
+        try makeSettlementRequest(fundingRecord: makeFundingRecord())
+    }
 
+    private func makeSettlementRequest(
+        fundingRecord: OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord
+    ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest {
         return try fundingRecord.createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
                 .makeStartingSettlementOracleProof(),

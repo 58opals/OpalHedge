@@ -21,6 +21,10 @@ public enum OpalHedgeOracleSignatureVerifier {
         signature: Data,
         publicKey: Data
     ) throws -> Bool {
+        guard message.isCanonical else {
+            return false
+        }
+
         do {
             let digest = try OpalCrypto.Signature.Digest(
                 rawRepresentation: OpalCrypto.Hashing.sha256(message.rawData)

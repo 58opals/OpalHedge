@@ -1,6 +1,6 @@
-// OpalHedgeContractDataDocumentFieldPath.swift
+// OpalHedgeContractDataDocumentFieldPathData.swift
 
-enum OpalHedgeContractDataDocumentFieldPath: Hashable {
+enum OpalHedgeContractDataDocumentFieldPathData: Hashable {
     case topLevel(String)
     case parameter(String)
     case metadata(String)

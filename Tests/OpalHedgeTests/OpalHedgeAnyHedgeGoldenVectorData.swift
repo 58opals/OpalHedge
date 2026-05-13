@@ -2,7 +2,7 @@
 
 enum OpalHedgeAnyHedgeGoldenVectorData {
     static let sourceReferences = [
-        OpalHedgeFixtureSourceReference(
+        OpalHedgeFixtureSourceReferenceData(
             family: .anyHedgeContractMetadata,
             title: "AnyHedge ContractMetadataV1 interface",
             url: OpalHedgeFixtureReferenceData.anyHedgeContractMetadataV1Url,
@@ -10,7 +10,7 @@ enum OpalHedgeAnyHedgeGoldenVectorData {
                 upstreamHedgeTenWeekContractMetadataFixtureName
             ]
         ),
-        OpalHedgeFixtureSourceReference(
+        OpalHedgeFixtureSourceReferenceData(
             family: .anyHedgeContractFunding,
             title: "AnyHedge ContractFundingV1 interface",
             url: OpalHedgeFixtureReferenceData.anyHedgeContractFundingV1Url,
@@ -18,7 +18,7 @@ enum OpalHedgeAnyHedgeGoldenVectorData {
                 upstreamHedgeTenWeekContractFundingsFixtureName
             ]
         ),
-        OpalHedgeFixtureSourceReference(
+        OpalHedgeFixtureSourceReferenceData(
             family: .anyHedgeContractAutomatedPayout,
             title: "AnyHedge ContractAutomatedPayoutV1 interface",
             url: OpalHedgeFixtureReferenceData.anyHedgeContractAutomatedPayoutV1Url,
@@ -26,7 +26,7 @@ enum OpalHedgeAnyHedgeGoldenVectorData {
                 upstreamHedgeTenWeekContractSettlementFixtureName
             ]
         ),
-        OpalHedgeFixtureSourceReference(
+        OpalHedgeFixtureSourceReferenceData(
             family: .priceOracle,
             title: "PriceOracle library",
             url: OpalHedgeFixtureReferenceData.priceOracleLibraryUrl,

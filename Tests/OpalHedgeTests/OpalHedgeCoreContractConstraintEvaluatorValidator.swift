@@ -22,7 +22,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
     @Test("Rejects low liquidation multiplier at start price")
     func rejectLowLiquidationMultiplierAtStartPrice() {
         let context = OpalHedgeContractFixtureBuilder.makeCreationContext(lowLiquidationPriceMultiplier: 1)
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateCreationContext(context)
         }
 
@@ -32,7 +32,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
     @Test("Rejects high liquidation multiplier at start price")
     func rejectHighLiquidationMultiplierAtStartPrice() {
         let context = OpalHedgeContractFixtureBuilder.makeCreationContext(highLiquidationPriceMultiplier: 1)
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateCreationContext(context)
         }
 
@@ -42,7 +42,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
     @Test("Rejects non-binary hedge flag")
     func rejectNonbinaryHedgeFlag() {
         let context = OpalHedgeContractFixtureBuilder.makeCreationContext(isSimpleHedge: 2)
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateCreationContext(context)
         }
 
@@ -52,7 +52,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
     @Test("Rejects payout below dust")
     func rejectPayoutBelowDust() {
         let parameters = OpalHedgeContractFixtureBuilder.makeParameters(payoutSats: 1_331)
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateParameters(
                 parameters,
                 startPrice: 23_600
@@ -70,7 +70,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
             nominalUnitsXSatsPerBch: 1_000,
             payoutSats: 1_332
         )
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateParameters(
                 parameters,
                 startPrice: 2
@@ -89,7 +89,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
     @Test("Rejects unsafe long payout at low liquidation")
     func rejectUnsafeLongPayoutAtLowLiquidation() {
         let parameters = OpalHedgeContractFixtureBuilder.makeParameters(payoutSats: 1_332)
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateParameters(
                 parameters,
                 startPrice: 23_600
@@ -101,7 +101,7 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
 
     @Test("Rejects derived funding mismatch")
     func rejectDerivedFundingMismatch() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateDerivedFunding(
                 shortInputInSatoshis: 1,
                 longInputInSatoshis: 1,
@@ -114,6 +114,25 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
                 shortInput: 1,
                 longInput: 1,
                 payoutSats: 3
+            )
+        )
+    }
+
+    @Test("Rejects derived funding overflow")
+    func rejectDerivedFundingOverflow() {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            try OpalHedge.Core.ContractConstraintEvaluator.validateDerivedFunding(
+                shortInputInSatoshis: Int64.max,
+                longInputInSatoshis: 1,
+                payoutSats: Int64.max
+            )
+        }
+
+        #expect(
+            error == .invalidContractFunding(
+                shortInput: Int64.max,
+                longInput: 1,
+                payoutSats: Int64.max
             )
         )
     }

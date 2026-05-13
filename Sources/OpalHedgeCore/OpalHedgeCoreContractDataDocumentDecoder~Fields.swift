@@ -3,7 +3,7 @@
 import Foundation
 
 extension OpalHedgeCoreContractDataDocumentDecoder {
-    static func side(
+    static func decodeSide(
         _ name: String,
         in dictionary: [String: Any]
     ) throws -> OpalHedgeCoreContractSide {

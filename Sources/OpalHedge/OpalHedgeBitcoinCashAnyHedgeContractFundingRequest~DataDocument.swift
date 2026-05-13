@@ -11,6 +11,7 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
             .anyHedgeV0_12
     ) throws {
         try network.validatePayoutAddressNetworks(in: dataDocument.draftData)
+        try Self.validateNoExistingFundings(dataDocument.draftData.fundings)
 
         let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: dataDocument.draftData.parameters,
@@ -30,5 +31,14 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
             redeemScriptBytecode: bytecode.redeemScriptBytecode,
             contractScriptArtifact: bytecode.artifact
         )
+    }
+
+    package static func validateNoExistingFundings(
+        _ fundings: [OpalHedgeCoreContractFunding]
+    ) throws {
+        guard fundings.isEmpty else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractFundingRequestError
+                .contractAlreadyFunded(fundingCount: fundings.count)
+        }
     }
 }

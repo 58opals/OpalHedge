@@ -24,11 +24,4 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementPayoutAmounts: Senda
             longPayoutInSatoshis: settlementOutcome.longPayoutSatsSafe
         )
     }
-
-    var contractSettlementPayoutAmounts: OpalHedgeCoreContractSettlementPayoutAmounts {
-        OpalHedgeCoreContractSettlementPayoutAmounts(
-            shortPayoutInSatoshis: hedgePayoutInSatoshis,
-            longPayoutInSatoshis: longPayoutInSatoshis
-        )
-    }
 }

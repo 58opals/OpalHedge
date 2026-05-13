@@ -49,7 +49,10 @@ extension OpalHedgeClientContext {
         fundings: [OpalHedgeCoreContractFunding] = [],
         fees: [OpalHedgeCoreContractFeeData] = []
     ) throws -> OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
-        try createAnyHedgeContractBundle(
+        try OpalHedgeBitcoinCashAnyHedgeContractFundingRequest
+            .validateNoExistingFundings(fundings)
+
+        return try createAnyHedgeContractBundle(
             from: creationContext,
             network: network,
             scriptBytecode: scriptBytecode,
@@ -66,7 +69,10 @@ extension OpalHedgeClientContext {
         fundings: [OpalHedgeCoreContractFunding] = [],
         fees: [OpalHedgeCoreContractFeeData] = []
     ) throws -> OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
-        try createAnyHedgeContractBundle(
+        try OpalHedgeBitcoinCashAnyHedgeContractFundingRequest
+            .validateNoExistingFundings(fundings)
+
+        return try createAnyHedgeContractBundle(
             from: plan,
             network: network,
             scriptBytecode: scriptBytecode,

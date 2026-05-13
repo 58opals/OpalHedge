@@ -28,12 +28,22 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
         #expect(lockScript.publicKeyHashHex == mainnetAddress.publicKeyHashHex)
     }
 
+    @Test("Parses uppercase P2PKH payout address")
+    func parseUppercasePayToPublicKeyHashPayoutAddress() throws {
+        let address = try OpalHedge.Core.ContractPayoutAddress(
+            OpalHedgeFixtureData.shortPayoutAddress.uppercased()
+        )
+
+        #expect(address.cashAddrPrefix == "bitcoincash")
+        #expect(address.publicKeyHashHex == "285bb350881b21ac89724c6fb6dc914d096cd53b")
+    }
+
     @Test("Rejects unprefixed payout address")
     func rejectUnprefixedPayoutAddress() {
         let address = String(
             OpalHedgeFixtureData.shortPayoutAddress.dropFirst("bitcoincash:".count)
         )
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractPayoutAddress(address)
         }
 
@@ -48,7 +58,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
     @Test("Rejects invalid payout address character")
     func rejectInvalidPayoutAddressCharacter() {
         let address = "bitcoincash:bq59hv6s3qdjrtyfwfxxldkuj9xsjmx48vrz882knz"
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractPayoutAddress(address)
         }
 
@@ -58,7 +68,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
     @Test("Rejects payout address with invalid checksum")
     func rejectInvalidPayoutAddressChecksum() {
         let address = "bitcoincash:qq59hv6s3qdjrtyfwfxxldkuj9xsjmx48vrz882knp"
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractPayoutAddress(address)
         }
 
@@ -68,7 +78,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
     @Test("Rejects unsupported payout address prefix")
     func rejectUnsupportedPayoutAddressPrefix() {
         let address = "simpleledger:qq59hv6s3qdjrtyfwfxxldkuj9xsjmx48vrz882knz"
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractPayoutAddress(address)
         }
 
@@ -78,7 +88,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
     @Test("Rejects non-P2PKH payout address")
     func rejectNonPayToPublicKeyHashPayoutAddress() {
         let address = "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx"
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractPayoutAddress(address)
         }
 
@@ -87,7 +97,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
 
     @Test("Rejects invalid lock script hex")
     func rejectInvalidLockScriptHex() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractLockScript(hex: "zz")
         }
 
@@ -97,7 +107,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
     @Test("Rejects unsupported lock script template")
     func rejectUnsupportedLockScriptTemplate() {
         let lockScriptHex = "76a914285bb350881b21ac89724c6fb6dc914d096cd53b88ad"
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractLockScript(hex: lockScriptHex)
         }
 
@@ -114,7 +124,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
         let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
             shortPayoutAddress: OpalHedgeFixtureData.longPayoutAddress
         )
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateCreationContext(
                 creationContext
             )
@@ -131,7 +141,7 @@ struct OpalHedgeCoreContractBitcoinCashConstraintValidator {
 
     @Test("Rejects payout address network mismatch at funding boundary")
     func rejectPayoutAddressNetworkMismatchAtFundingBoundary() {
-        let error = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Client.Context().createAnyHedgeContractFundingRequest(
                 from: OpalHedgeFixtureData.contractCreationContext,
                 network: .regtest

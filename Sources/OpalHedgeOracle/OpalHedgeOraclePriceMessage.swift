@@ -63,6 +63,10 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
         OpalHedgeOracleHexadecimalCodec.encode(rawData)
     }
 
+    var isCanonical: Bool {
+        (try? Self.parse(data: rawData)) == self
+    }
+
     private static func readInt32LittleEndian(from data: Data, offset: Int) -> Int32 {
         let bytes = [UInt8](data)
         let value = UInt32(bytes[offset])
@@ -74,7 +78,7 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
     }
 
     private static func validatePositiveScriptInteger(_ value: Int64, name: String) throws {
-        guard value > 0, value < Int64(Int32.max) else {
+        guard value > 0, value <= Int64(Int32.max) else {
             throw OpalHedgeOracleMessageError.invalidScriptInteger(name: name, value: value)
         }
     }

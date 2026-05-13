@@ -23,13 +23,13 @@ struct OpalHedgeCoreContractSettlementOracleProofValidator {
 
     @Test("Rejects invalid contract settlement oracle proof")
     func rejectInvalidContractSettlementOracleProof() {
-        let messageError = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let messageError = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractSettlementOracleProof(
                 messageHex: "00",
                 signatureHex: OpalHedgeFixtureData.startingOracleSignatureHex
             )
         }
-        let signatureError = OpalHedgeTypedErrorCapture.captureConstraintError {
+        let signatureError = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractSettlementOracleProof(
                 messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
                 signatureHex: "00"

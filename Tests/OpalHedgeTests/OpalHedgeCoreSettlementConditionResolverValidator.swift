@@ -34,9 +34,7 @@ struct OpalHedgeCoreSettlementConditionResolverValidator {
 
     @Test("Rejects in-range price before maturity")
     func rejectInRangePriceBeforeMaturity() {
-        var didThrow = false
-
-        do {
+        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementConditionError {
             _ = try OpalHedge.Core.SettlementConditionResolver.resolve(
                 parameters: OpalHedgeFixtureData.contractParameters,
                 previousTimestamp: 615_642,
@@ -45,17 +43,14 @@ struct OpalHedgeCoreSettlementConditionResolverValidator {
                 settlementSequence: 2,
                 settlementPrice: 23_500
             )
-        } catch {
-            didThrow = true
         }
 
-        #expect(didThrow)
+        #expect(error == .priceInRangeBeforeMaturity(settlementPrice: 23_500))
     }
 
     @Test("Rejects settlement timestamp before previous timestamp")
     func rejectSettlementTimestampBeforePreviousTimestamp() {
-        var error: OpalHedge.Core.SettlementConditionError?
-        do {
+        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementConditionError {
             _ = try OpalHedge.Core.SettlementConditionResolver.resolve(
                 parameters: OpalHedgeFixtureData.contractParameters,
                 previousTimestamp: 615_644,
@@ -64,18 +59,33 @@ struct OpalHedgeCoreSettlementConditionResolverValidator {
                 settlementSequence: 2,
                 settlementPrice: 17_500
             )
-            error = nil
-        } catch let caughtError as OpalHedge.Core.SettlementConditionError {
-            error = caughtError
-        } catch let unexpectedError {
-            Issue.record("Unexpected error: \(unexpectedError)")
-            error = nil
         }
 
         #expect(
             error == .settlementMessageBeforePrevious(
                 previousTimestamp: 615_644,
                 settlementTimestamp: 615_643
+            )
+        )
+    }
+
+    @Test("Rejects max previous sequence without overflowing")
+    func rejectMaxPreviousSequenceWithoutOverflowing() {
+        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementConditionError {
+            _ = try OpalHedge.Core.SettlementConditionResolver.resolve(
+                parameters: OpalHedgeFixtureData.contractParameters,
+                previousTimestamp: 615_642,
+                previousSequence: Int64.max,
+                settlementTimestamp: 615_643,
+                settlementSequence: Int64.max,
+                settlementPrice: 17_500
+            )
+        }
+
+        #expect(
+            error == .sequenceGap(
+                previous: Int64.max,
+                settlement: Int64.max
             )
         )
     }

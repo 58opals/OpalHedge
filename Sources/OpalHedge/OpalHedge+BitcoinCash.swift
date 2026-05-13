@@ -7,6 +7,8 @@ extension OpalHedge {
         public typealias AnyHedgeContractFundingOutput = OpalHedgeBitcoinCashAnyHedgeContractFundingOutput
         public typealias AnyHedgeContractFundingOutputError = OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError
         public typealias AnyHedgeContractFundingRequest = OpalHedgeBitcoinCashAnyHedgeContractFundingRequest
+        public typealias AnyHedgeContractFundingRequestError =
+            OpalHedgeBitcoinCashAnyHedgeContractFundingRequestError
         public typealias AnyHedgeContractFundingRecord = OpalHedgeBitcoinCashAnyHedgeContractFundingRecord
         public typealias AnyHedgeContractFundingRecordError = OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
         public typealias AnyHedgeContractFundingState = OpalHedgeBitcoinCashAnyHedgeContractFundingState

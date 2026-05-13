@@ -34,8 +34,10 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
         let settlement = OpalHedgeCoreContractSettlement(
             kind: settlementRequest.settlementKind,
             settlementTransactionHash: settlementTransactionHash,
-            payoutAmounts: settlementRequest.settlementPayoutAmounts
-                .contractSettlementPayoutAmounts,
+            payoutAmounts: OpalHedgeCoreContractSettlementPayoutAmounts(
+                shortPayoutInSatoshis: settlementRequest.hedgePayoutInSatoshis,
+                longPayoutInSatoshis: settlementRequest.longPayoutInSatoshis
+            ),
             settlementMessageHex: settlementRequest.settlementOracleProof.messageHex,
             settlementSignatureHex: settlementRequest.settlementOracleProof.signatureHex,
             previousMessageHex: settlementRequest.previousOracleProof.messageHex,
@@ -50,7 +52,9 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
             settlement: settlement
         )
         var fundings = fundingRecord.draftData.fundings
-        guard let fundingIndex = fundings.lastIndex(of: fundingRecord.funding) else {
+        let fundingIndex = fundingRecord.fundingIndex
+        guard fundings.indices.contains(fundingIndex),
+              fundings[fundingIndex] == fundingRecord.funding else {
             throw OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError
                 .missingFundingRecord
         }
@@ -73,12 +77,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
     }
 
     private static func validateSettlementTransactionHash(_ value: String) throws {
-        guard value.utf8.count == 64,
-              value.utf8.allSatisfy({ byte in
-                  (48...57).contains(byte) ||
-                      (65...70).contains(byte) ||
-                      (97...102).contains(byte)
-              }) else {
+        guard OpalHedgeBitcoinCashTransactionHashValidator.isValid(value) else {
             throw OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError
                 .invalidSettlementTransactionHash(value)
         }
