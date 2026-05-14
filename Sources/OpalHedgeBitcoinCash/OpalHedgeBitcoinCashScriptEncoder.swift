@@ -17,10 +17,7 @@ public enum OpalHedgeBitcoinCashScriptEncoder {
             magnitude >>= 8
         }
 
-        guard let lastByte = encodedData.last else {
-            return encodedData
-        }
-
+        let lastByte = encodedData[encodedData.index(before: encodedData.endIndex)]
         if lastByte & 0x80 != 0 {
             encodedData.append(isNegative ? 0x80 : 0x00)
         } else if isNegative {

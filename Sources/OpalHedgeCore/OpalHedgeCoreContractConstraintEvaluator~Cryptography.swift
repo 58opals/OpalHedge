@@ -12,6 +12,16 @@ extension OpalHedgeCoreContractConstraintEvaluator {
         }
     }
 
+    static func validateTransactionHashHex(_ value: String, name: String) throws {
+        guard value.count == transactionHashHexCharacterCount,
+              value.allSatisfy({ cryptographyHexCharacters.contains($0) }) else {
+            throw OpalHedgeCoreContractConstraintError.invalidTransactionHashHex(
+                name: name,
+                value: value
+            )
+        }
+    }
+
     static func validateOracleMessageHex(_ value: String, name: String) throws {
         guard value.count == OpalHedgeCoreContractConstraintPolicy.oraclePriceMessageHexCharacterCount,
               value.allSatisfy({ lowercaseCryptographyHexCharacters.contains($0) }) else {
@@ -34,6 +44,12 @@ extension OpalHedgeCoreContractConstraintEvaluator {
 
     private static var compressedPublicKeyPrefixes: [String] {
         ["02", "03"]
+    }
+
+    private static let transactionHashHexCharacterCount = 64
+
+    private static var cryptographyHexCharacters: String {
+        "0123456789abcdefABCDEF"
     }
 
     private static var lowercaseCryptographyHexCharacters: String {

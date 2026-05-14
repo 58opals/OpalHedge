@@ -9,6 +9,7 @@ public enum OpalHedgeCoreContractConstraintError: Error, Sendable, Equatable {
     case invalidLiquidationMultiplier(name: String, value: Double)
     case invalidRoundedInteger(name: String, value: Double)
     case invalidPublicKeyHex(name: String, value: String)
+    case invalidTransactionHashHex(name: String, value: String)
     case invalidOracleMessageHex(name: String, value: String)
     case inconsistentOracleMessageComponent(name: String, expected: Int64, actual: Int64)
     case invalidOracleSignatureHex(name: String, value: String)

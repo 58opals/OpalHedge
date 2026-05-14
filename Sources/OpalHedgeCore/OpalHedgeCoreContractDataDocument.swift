@@ -163,6 +163,10 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
             metadata.longInputInOracleUnits,
             name: "longInputInOracleUnits"
         )
+        try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+            metadata.minerCostInSatoshis,
+            name: "minerCostInSatoshis"
+        )
     }
 
     private static func validateFiniteNumber(_ value: Double, name: String) throws {
@@ -203,6 +207,10 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
         _ fees: [OpalHedgeCoreContractFeeData]
     ) throws {
         for (index, fee) in fees.enumerated() {
+            _ = try OpalHedgeCoreContractConstraintEvaluator.validatePayoutAddress(
+                fee.address,
+                name: "fees[\(index)].address"
+            )
             try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
                 fee.satoshis,
                 name: "fees[\(index)].satoshis"
@@ -214,17 +222,86 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
         _ fundings: [OpalHedgeCoreContractFunding]
     ) throws {
         for (index, funding) in fundings.enumerated() {
+            let fundingName = "fundings[\(index)]"
+            try OpalHedgeCoreContractConstraintEvaluator.validateTransactionHashHex(
+                funding.fundingTransactionHash,
+                name: "\(fundingName).fundingTransactionHash"
+            )
+            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+                funding.fundingOutputIndex,
+                name: "\(fundingName).fundingOutputIndex"
+            )
+            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+                funding.fundingSatoshis,
+                name: "\(fundingName).fundingSatoshis"
+            )
+
             guard let settlement = funding.settlement else {
                 continue
             }
 
+            let settlementName = "\(fundingName).settlement"
+            try OpalHedgeCoreContractConstraintEvaluator.validateTransactionHashHex(
+                settlement.settlementTransactionHash,
+                name: "\(settlementName).settlementTransactionHash"
+            )
             try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
                 settlement.shortPayoutInSatoshis,
-                name: "fundings[\(index)].settlement.hedgePayoutInSatoshis"
+                name: "\(settlementName).hedgePayoutInSatoshis"
             )
             try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
                 settlement.longPayoutInSatoshis,
-                name: "fundings[\(index)].settlement.longPayoutInSatoshis"
+                name: "\(settlementName).longPayoutInSatoshis"
+            )
+            try validateSettlementPayoutTotal(settlement)
+            if let settlementPrice = settlement.settlementPrice {
+                try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
+                    settlementPrice,
+                    name: "\(settlementName).settlementPrice"
+                )
+            }
+            if let settlementMessageHex = settlement.settlementMessageHex {
+                try OpalHedgeCoreContractConstraintEvaluator.validateOracleMessageHex(
+                    settlementMessageHex,
+                    name: "\(settlementName).settlementMessage"
+                )
+            }
+            if let settlementSignatureHex = settlement.settlementSignatureHex {
+                try OpalHedgeCoreContractConstraintEvaluator.validateSchnorrSignatureHex(
+                    settlementSignatureHex,
+                    name: "\(settlementName).settlementSignature"
+                )
+            }
+            if let previousMessageHex = settlement.previousMessageHex {
+                try OpalHedgeCoreContractConstraintEvaluator.validateOracleMessageHex(
+                    previousMessageHex,
+                    name: "\(settlementName).previousMessage"
+                )
+            }
+            if let previousSignatureHex = settlement.previousSignatureHex {
+                try OpalHedgeCoreContractConstraintEvaluator.validateSchnorrSignatureHex(
+                    previousSignatureHex,
+                    name: "\(settlementName).previousSignature"
+                )
+            }
+        }
+    }
+
+    private static func validateSettlementPayoutTotal(
+        _ settlement: OpalHedgeCoreContractSettlement
+    ) throws {
+        let total = settlement.shortPayoutInSatoshis.addingReportingOverflow(
+            settlement.longPayoutInSatoshis
+        )
+        guard !total.overflow else {
+            throw OpalHedgeCoreContractConstraintError.contractSatoshisExceedMaximum(
+                Int64.max
+            )
+        }
+        guard total.partialValue <=
+              OpalHedgeCoreContractConstraintPolicy.maxContractSatoshis else {
+            throw OpalHedgeCoreContractConstraintError.contractSatoshisExceedMaximum(
+                total.partialValue
             )
         }
     }
@@ -262,6 +339,13 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
         _ metadata: OpalHedgeCoreContractMetadata,
         matches parameters: OpalHedgeCoreContractParameters
     ) throws {
+        guard metadata.makerSide != metadata.takerSide else {
+            throw OpalHedgeCoreContractConstraintError.makerSideMustOpposeTaker(
+                taker: metadata.takerSide,
+                maker: metadata.makerSide
+            )
+        }
+
         let expectedDuration = parameters.maturityTimestamp - parameters.startTimestamp
         guard metadata.durationInSeconds == expectedDuration else {
             throw OpalHedgeCoreContractConstraintError

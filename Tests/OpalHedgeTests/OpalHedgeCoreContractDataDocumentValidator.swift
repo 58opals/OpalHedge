@@ -177,6 +177,173 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         #expect(error == .invalidNonnegativeInteger(name: "fees[0].satoshis", value: -1))
     }
 
+    @Test("Rejects invalid fee address when creating contract data document")
+    func rejectInvalidFeeAddressWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData(
+            fees: [
+                OpalHedge.Core.ContractFeeData(
+                    name: "settlement",
+                    description: "Settlement service fee",
+                    address: "not-an-address",
+                    satoshis: 1_000
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidPayoutAddress(
+                name: "fees[0].address",
+                value: "not-an-address"
+            )
+        )
+    }
+
+    @Test("Rejects negative miner cost when creating contract data document")
+    func rejectNegativeMinerCostWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData()
+        let invalidDraftData = OpalHedge.Core.ContractDraftData(
+            parameters: draftData.parameters,
+            metadata: makeMetadata(
+                from: draftData.metadata,
+                minerCostInSatoshis: -1
+            ),
+            fundings: draftData.fundings,
+            fees: draftData.fees
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: invalidDraftData)
+        }
+
+        #expect(
+            error == .invalidNonnegativeInteger(
+                name: "minerCostInSatoshis",
+                value: -1
+            )
+        )
+    }
+
+    @Test("Rejects matching taker and maker sides when creating contract data document")
+    func rejectMatchingTakerAndMakerSidesWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData()
+        let invalidDraftData = OpalHedge.Core.ContractDraftData(
+            parameters: draftData.parameters,
+            metadata: makeMetadata(
+                from: draftData.metadata,
+                takerSide: .short,
+                makerSide: .short
+            ),
+            fundings: draftData.fundings,
+            fees: draftData.fees
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: invalidDraftData)
+        }
+
+        #expect(error == .makerSideMustOpposeTaker(taker: .short, maker: .short))
+    }
+
+    @Test("Rejects invalid funding transaction hash when creating contract data document")
+    func rejectInvalidFundingTransactionHashWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: "zz",
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_651_049
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidTransactionHashHex(
+                name: "fundings[0].fundingTransactionHash",
+                value: "zz"
+            )
+        )
+    }
+
+    @Test("Rejects negative funding satoshis when creating contract data document")
+    func rejectNegativeFundingSatoshisWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: -1
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidNonnegativeInteger(
+                name: "fundings[0].fundingSatoshis",
+                value: -1
+            )
+        )
+    }
+
+    @Test("Rejects negative funding output index when creating contract data document")
+    func rejectNegativeFundingOutputIndexWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: -1,
+                    fundingSatoshis: 5_651_049
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidNonnegativeInteger(
+                name: "fundings[0].fundingOutputIndex",
+                value: -1
+            )
+        )
+    }
+
+    @Test("Rejects invalid settlement transaction hash when creating contract data document")
+    func rejectInvalidSettlementTransactionHashWhenCreatingContractDataDocument() throws {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: "zz",
+            shortPayoutInSatoshis: 4_237_288,
+            longPayoutInSatoshis: 1_412_429
+        )
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_651_049,
+                    settlement: settlement
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidTransactionHashHex(
+                name: "fundings[0].settlement.settlementTransactionHash",
+                value: "zz"
+            )
+        )
+    }
+
     @Test("Rejects negative settlement payout satoshis when creating contract data document")
     func rejectNegativeSettlementPayoutSatoshisWhenCreatingContractDataDocument() throws {
         let settlement = OpalHedge.Core.ContractSettlement(
@@ -203,6 +370,98 @@ struct OpalHedgeCoreContractDataDocumentValidator {
             error == .invalidNonnegativeInteger(
                 name: "fundings[0].settlement.hedgePayoutInSatoshis",
                 value: -1
+            )
+        )
+    }
+
+    @Test("Rejects negative settlement price when creating contract data document")
+    func rejectNegativeSettlementPriceWhenCreatingContractDataDocument() throws {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            shortPayoutInSatoshis: 4_237_288,
+            longPayoutInSatoshis: 1_412_429,
+            settlementPrice: -1
+        )
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_651_049,
+                    settlement: settlement
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidPositiveInteger(
+                name: "fundings[0].settlement.settlementPrice",
+                value: -1
+            )
+        )
+    }
+
+    @Test("Rejects invalid settlement oracle message hex when creating contract data document")
+    func rejectInvalidSettlementOracleMessageHexWhenCreatingContractDataDocument() throws {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            shortPayoutInSatoshis: 4_237_288,
+            longPayoutInSatoshis: 1_412_429,
+            settlementMessageHex: "zz"
+        )
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_651_049,
+                    settlement: settlement
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidOracleMessageHex(
+                name: "fundings[0].settlement.settlementMessage",
+                value: "zz"
+            )
+        )
+    }
+
+    @Test("Rejects excessive settlement payout total when creating contract data document")
+    func rejectExcessiveSettlementPayoutTotalWhenCreatingContractDataDocument() throws {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            shortPayoutInSatoshis: OpalHedge.Core.ContractConstraintPolicy
+                .maxContractSatoshis,
+            longPayoutInSatoshis: 1
+        )
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_651_049,
+                    settlement: settlement
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .contractSatoshisExceedMaximum(
+                OpalHedge.Core.ContractConstraintPolicy.maxContractSatoshis + 1
             )
         )
     }
@@ -340,16 +599,19 @@ struct OpalHedgeCoreContractDataDocumentValidator {
 
     private func makeMetadata(
         from metadata: OpalHedge.Core.ContractMetadata,
+        takerSide: OpalHedge.Core.ContractSide? = nil,
+        makerSide: OpalHedge.Core.ContractSide? = nil,
         startPrice: Int64? = nil,
         nominalUnits: Double? = nil,
         lowLiquidationPriceMultiplier: Double? = nil,
         highLiquidationPriceMultiplier: Double? = nil,
         shortInputInOracleUnits: Double? = nil,
-        longInputInOracleUnits: Double? = nil
+        longInputInOracleUnits: Double? = nil,
+        minerCostInSatoshis: Int64? = nil
     ) -> OpalHedge.Core.ContractMetadata {
         OpalHedge.Core.ContractMetadata(
-            takerSide: metadata.takerSide,
-            makerSide: metadata.makerSide,
+            takerSide: takerSide ?? metadata.takerSide,
+            makerSide: makerSide ?? metadata.makerSide,
             shortPayoutAddress: metadata.shortPayoutAddress,
             longPayoutAddress: metadata.longPayoutAddress,
             startingOracleMessageHex: metadata.startingOracleMessageHex,
@@ -368,7 +630,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
                 ?? metadata.longInputInOracleUnits,
             shortInputInSatoshis: metadata.shortInputInSatoshis,
             longInputInSatoshis: metadata.longInputInSatoshis,
-            minerCostInSatoshis: metadata.minerCostInSatoshis
+            minerCostInSatoshis: minerCostInSatoshis ?? metadata.minerCostInSatoshis
         )
     }
 

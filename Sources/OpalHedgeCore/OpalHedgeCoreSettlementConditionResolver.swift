@@ -41,13 +41,9 @@ public enum OpalHedgeCoreSettlementConditionResolver {
             throw OpalHedgeCoreSettlementConditionError.invalidSettlementPrice(settlementPrice)
         }
 
-        let clampedPrice = max(
-            min(settlementPrice, parameters.highLiquidationPrice),
-            parameters.lowLiquidationPrice
-        )
         let onOrAfterMaturity = settlementTimestamp >= parameters.maturityTimestamp
-        let priceOutOfBounds = clampedPrice == parameters.lowLiquidationPrice
-            || clampedPrice >= parameters.highLiquidationPrice
+        let priceOutOfBounds = settlementPrice <= parameters.lowLiquidationPrice
+            || settlementPrice >= parameters.highLiquidationPrice
 
         if onOrAfterMaturity {
             return .maturation

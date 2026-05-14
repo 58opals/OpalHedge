@@ -46,10 +46,6 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
         try validatePositiveScriptInteger(priceSequence, name: "priceSequence")
         try validatePositiveScriptInteger(priceValue, name: "priceValue")
 
-        guard priceValue > 0 else {
-            throw OpalHedgeOracleMessageError.invalidPrice(priceValue)
-        }
-
         return Self(
             rawData: data,
             messageTimestamp: messageTimestamp,
