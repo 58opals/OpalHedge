@@ -15,10 +15,48 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable 
     public func deriveContractAddress(
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws -> OpalHedgeBitcoinCashContractAddress {
-        try OpalHedgeBitcoinCashContractAddress(
-            redeemScript: redeemScriptBytecode,
-            network: network
-        )
+        do {
+            let address = try OpalHedgeBitcoinCashContractAddress(
+                redeemScript: redeemScriptBytecode,
+                network: network
+            )
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractAddressEncoded,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("derive_contract_address"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.networkField(network),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                        redeemScriptBytecode.count
+                    ),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        "redeem_script"
+                    )
+                ]
+            )
+            return address
+        } catch {
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractAddressEncodingFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("derive_contract_address"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.networkField(network),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                        redeemScriptBytecode.count
+                    ),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        "redeem_script"
+                    )
+                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     public init(

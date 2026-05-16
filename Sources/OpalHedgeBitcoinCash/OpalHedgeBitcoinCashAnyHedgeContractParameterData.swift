@@ -32,57 +32,76 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
         startTimestamp: Int64,
         maturityTimestamp: Int64
     ) throws {
-        try Self.validateCompressedPublicKey(
-            shortMutualRedeemPublicKey,
-            name: "shortMutualRedeemPublicKey"
-        )
-        try Self.validateCompressedPublicKey(
-            longMutualRedeemPublicKey,
-            name: "longMutualRedeemPublicKey"
-        )
-        try Self.validateCompressedPublicKey(
-            oraclePublicKey,
-            name: "oraclePublicKey"
-        )
-        try Self.validatePayToPublicKeyHashLockScript(
-            shortLockScript,
-            name: "shortLockScript"
-        )
-        try Self.validatePayToPublicKeyHashLockScript(
-            longLockScript,
-            name: "longLockScript"
-        )
-        try Self.validateBooleanInteger(
-            enableMutualRedemption,
-            name: "enableMutualRedemption"
-        )
-        try Self.validatePositiveInteger(
-            nominalUnitsXSatsPerBch,
-            name: "nominalUnitsXSatsPerBch"
-        )
-        try Self.validateNonnegativeInteger(
-            satsForNominalUnitsAtHighLiquidation,
-            name: "satsForNominalUnitsAtHighLiquidation"
-        )
-        try Self.validatePositiveInteger(payoutSats, name: "payoutSats")
-        try Self.validatePositiveInteger(lowLiquidationPrice, name: "lowLiquidationPrice")
-        try Self.validatePositiveInteger(highLiquidationPrice, name: "highLiquidationPrice")
-        try Self.validatePositiveInteger(startTimestamp, name: "startTimestamp")
-        try Self.validatePositiveInteger(maturityTimestamp, name: "maturityTimestamp")
+        do {
+            try Self.validateCompressedPublicKey(
+                shortMutualRedeemPublicKey,
+                name: "shortMutualRedeemPublicKey"
+            )
+            try Self.validateCompressedPublicKey(
+                longMutualRedeemPublicKey,
+                name: "longMutualRedeemPublicKey"
+            )
+            try Self.validateCompressedPublicKey(
+                oraclePublicKey,
+                name: "oraclePublicKey"
+            )
+            try Self.validatePayToPublicKeyHashLockScript(
+                shortLockScript,
+                name: "shortLockScript"
+            )
+            try Self.validatePayToPublicKeyHashLockScript(
+                longLockScript,
+                name: "longLockScript"
+            )
+            try Self.validateBooleanInteger(
+                enableMutualRedemption,
+                name: "enableMutualRedemption"
+            )
+            try Self.validatePositiveInteger(
+                nominalUnitsXSatsPerBch,
+                name: "nominalUnitsXSatsPerBch"
+            )
+            try Self.validateNonnegativeInteger(
+                satsForNominalUnitsAtHighLiquidation,
+                name: "satsForNominalUnitsAtHighLiquidation"
+            )
+            try Self.validatePositiveInteger(payoutSats, name: "payoutSats")
+            try Self.validatePositiveInteger(lowLiquidationPrice, name: "lowLiquidationPrice")
+            try Self.validatePositiveInteger(highLiquidationPrice, name: "highLiquidationPrice")
+            try Self.validatePositiveInteger(startTimestamp, name: "startTimestamp")
+            try Self.validatePositiveInteger(maturityTimestamp, name: "maturityTimestamp")
 
-        self.shortMutualRedeemPublicKey = shortMutualRedeemPublicKey
-        self.longMutualRedeemPublicKey = longMutualRedeemPublicKey
-        self.enableMutualRedemption = enableMutualRedemption
-        self.shortLockScript = shortLockScript
-        self.longLockScript = longLockScript
-        self.oraclePublicKey = oraclePublicKey
-        self.nominalUnitsXSatsPerBch = nominalUnitsXSatsPerBch
-        self.satsForNominalUnitsAtHighLiquidation = satsForNominalUnitsAtHighLiquidation
-        self.payoutSats = payoutSats
-        self.lowLiquidationPrice = lowLiquidationPrice
-        self.highLiquidationPrice = highLiquidationPrice
-        self.startTimestamp = startTimestamp
-        self.maturityTimestamp = maturityTimestamp
+            self.shortMutualRedeemPublicKey = shortMutualRedeemPublicKey
+            self.longMutualRedeemPublicKey = longMutualRedeemPublicKey
+            self.enableMutualRedemption = enableMutualRedemption
+            self.shortLockScript = shortLockScript
+            self.longLockScript = longLockScript
+            self.oraclePublicKey = oraclePublicKey
+            self.nominalUnitsXSatsPerBch = nominalUnitsXSatsPerBch
+            self.satsForNominalUnitsAtHighLiquidation = satsForNominalUnitsAtHighLiquidation
+            self.payoutSats = payoutSats
+            self.lowLiquidationPrice = lowLiquidationPrice
+            self.highLiquidationPrice = highLiquidationPrice
+            self.startTimestamp = startTimestamp
+            self.maturityTimestamp = maturityTimestamp
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractParametersEncoded,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("create_contract_parameter_data"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash")
+                ]
+            )
+        } catch {
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractParameterEncodingFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("create_contract_parameter_data"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash")
+                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     public init(
@@ -125,10 +144,23 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
 
     private static func decodeHex(_ hex: String, name: String) throws -> Data {
         guard let data = OpalHedgeBitcoinCashHexadecimalCodec.decode(hex) else {
-            throw OpalHedgeBitcoinCashAnyHedgeContractParameterError.invalidHex(
+            let error = OpalHedgeBitcoinCashAnyHedgeContractParameterError.invalidHex(
                 name: name,
                 value: hex
             )
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractParameterEncodingFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("decode_contract_parameter_hex"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        name
+                    )
+                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
         }
 
         return data

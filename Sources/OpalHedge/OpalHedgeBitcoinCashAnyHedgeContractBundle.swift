@@ -42,45 +42,88 @@ package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
         fundings: [OpalHedgeCoreContractFunding] = [],
         fees: [OpalHedgeCoreContractFeeData] = []
     ) throws {
-        let draftData = OpalHedgeCoreContractDraftData(
-            plan: plan,
-            fundings: fundings,
-            fees: fees
-        )
-        try network.validatePayoutAddressNetworks(in: draftData)
+        do {
+            let draftData = OpalHedgeCoreContractDraftData(
+                plan: plan,
+                fundings: fundings,
+                fees: fees
+            )
+            try network.validatePayoutAddressNetworks(in: draftData)
 
-        let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
-            from: plan
-        )
-        let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
-            parameters: parameterData,
-            scriptBytecode: scriptBytecode
-        )
+            let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
+                from: plan
+            )
+            let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
+                parameters: parameterData,
+                scriptBytecode: scriptBytecode
+            )
 
-        let contractAddress = try bytecode.deriveContractAddress(network: network)
-        let fundingOutput = try OpalHedgeBitcoinCashAnyHedgeContractFundingOutput(
-            contractAddress: contractAddress,
-            payoutSatoshis: plan.parameters.payoutSats,
-            dustReserveSatoshis: OpalHedgeCoreContractConstraintPolicy
-                .dustLimitSatoshis
-        )
-        let dataDocument = try OpalHedgeCoreContractDataDocument(
-            draftData: draftData
-        )
-        let fundingRequest = OpalHedgeBitcoinCashAnyHedgeContractFundingRequest(
-            fundingOutput: fundingOutput,
-            contractDataDocument: dataDocument,
-            redeemScriptBytecode: bytecode.redeemScriptBytecode,
-            contractScriptArtifact: bytecode.artifact
-        )
+            let contractAddress = try bytecode.deriveContractAddress(network: network)
+            let fundingOutput = try OpalHedgeBitcoinCashAnyHedgeContractFundingOutput(
+                contractAddress: contractAddress,
+                payoutSatoshis: plan.parameters.payoutSats,
+                dustReserveSatoshis: OpalHedgeCoreContractConstraintPolicy
+                    .dustLimitSatoshis
+            )
+            let dataDocument = try OpalHedgeCoreContractDataDocument(
+                draftData: draftData
+            )
+            let fundingRequest = OpalHedgeBitcoinCashAnyHedgeContractFundingRequest(
+                fundingOutput: fundingOutput,
+                contractDataDocument: dataDocument,
+                redeemScriptBytecode: bytecode.redeemScriptBytecode,
+                contractScriptArtifact: bytecode.artifact
+            )
 
-        self.plan = plan
-        self.draftData = draftData
-        self.parameterData = parameterData
-        self.bytecode = bytecode
-        self.contractAddress = contractAddress
-        self.fundingOutput = fundingOutput
-        self.dataDocument = dataDocument
-        self.fundingRequest = fundingRequest
+            self.plan = plan
+            self.draftData = draftData
+            self.parameterData = parameterData
+            self.bytecode = bytecode
+            self.contractAddress = contractAddress
+            self.fundingOutput = fundingOutput
+            self.dataDocument = dataDocument
+            self.fundingRequest = fundingRequest
+            OpalHedgeDiagnostics.record(
+                OpalHedgeDiagnostics.Event.fundingRequestCreated,
+                category: OpalHedgeDiagnostics.Category.funding,
+                fields: [
+                    OpalHedgeDiagnostics.operationField("create_funding_request"),
+                    OpalHedgeDiagnostics.moduleField("opalhedge"),
+                    OpalHedgeDiagnostics.networkField(network),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.fundingCount,
+                        fundings.count
+                    ),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.feeCount,
+                        fees.count
+                    ),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.satoshiCount,
+                        fundingOutput.satoshis
+                    )
+                ]
+            )
+        } catch {
+            OpalHedgeDiagnostics.record(
+                OpalHedgeDiagnostics.Event.fundingRequestCreationFailed,
+                category: OpalHedgeDiagnostics.Category.funding,
+                level: .error,
+                fields: [
+                    OpalHedgeDiagnostics.operationField("create_funding_request"),
+                    OpalHedgeDiagnostics.moduleField("opalhedge"),
+                    OpalHedgeDiagnostics.networkField(network),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.fundingCount,
+                        fundings.count
+                    ),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.feeCount,
+                        fees.count
+                    )
+                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 }

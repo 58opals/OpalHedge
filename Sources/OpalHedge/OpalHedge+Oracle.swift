@@ -19,34 +19,67 @@ extension OpalHedge {
             signatureHex: String,
             publicKeyHex: String
         ) throws -> OpalHedge.Core.ContractStartingOracleProof {
-            let message = try OpalHedgeOraclePriceMessage.parse(hex: messageHex)
-            let isSignatureValid = try OpalHedgeOracleSignatureVerifier.verify(
-                message: message,
-                signatureHex: signatureHex,
-                publicKeyHex: publicKeyHex
-            )
-            guard isSignatureValid else {
-                throw OpalHedgeStartingPriceProofError.invalidSignature
-            }
-
-            let proof = OpalHedge.Core.ContractStartingOracleProof(
-                oraclePublicKey: try OpalHedge.Core.ContractPublicKey(
-                    hex: publicKeyHex
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                        .lowercased()
-                ),
-                message: try OpalHedge.Core.ContractOracleMessageData(
-                    hex: message.hex
-                ),
-                signature: try OpalHedge.Core.ContractOracleSignature(
-                    hex: signatureHex
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                        .lowercased()
+            do {
+                let message = try OpalHedgeOraclePriceMessage.parse(hex: messageHex)
+                let isSignatureValid = try OpalHedgeOracleSignatureVerifier.verify(
+                    message: message,
+                    signatureHex: signatureHex,
+                    publicKeyHex: publicKeyHex
                 )
-            )
-            try OpalHedgeCoreContractConstraintEvaluator.validateStartingOracleProof(proof)
+                guard isSignatureValid else {
+                    throw OpalHedgeStartingPriceProofError.invalidSignature
+                }
 
-            return proof
+                let proof = OpalHedge.Core.ContractStartingOracleProof(
+                    oraclePublicKey: try OpalHedge.Core.ContractPublicKey(
+                        hex: publicKeyHex
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .lowercased()
+                    ),
+                    message: try OpalHedge.Core.ContractOracleMessageData(
+                        hex: message.hex
+                    ),
+                    signature: try OpalHedge.Core.ContractOracleSignature(
+                        hex: signatureHex
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .lowercased()
+                    )
+                )
+                try OpalHedgeCoreContractConstraintEvaluator.validateStartingOracleProof(proof)
+
+                OpalHedgeDiagnostics.record(
+                    OpalHedgeDiagnostics.Event.startingOracleProofVerified,
+                    category: OpalHedgeDiagnostics.Category.oracle,
+                    fields: [
+                        OpalHedgeDiagnostics.operationField("verify_starting_oracle_proof"),
+                        OpalHedgeDiagnostics.moduleField("opalhedge"),
+                        OpalHedgeDiagnostics.publicField(
+                            OpalHedge.Diagnostics.Field.messageTimestamp,
+                            message.messageTimestamp
+                        ),
+                        OpalHedgeDiagnostics.publicField(
+                            OpalHedge.Diagnostics.Field.messageSequence,
+                            message.messageSequence
+                        ),
+                        OpalHedgeDiagnostics.publicField(
+                            OpalHedge.Diagnostics.Field.priceValue,
+                            message.priceValue
+                        )
+                    ]
+                )
+                return proof
+            } catch {
+                OpalHedgeDiagnostics.record(
+                    OpalHedgeDiagnostics.Event.startingOracleProofVerificationFailed,
+                    category: OpalHedgeDiagnostics.Category.oracle,
+                    level: .error,
+                    fields: [
+                        OpalHedgeDiagnostics.operationField("verify_starting_oracle_proof"),
+                        OpalHedgeDiagnostics.moduleField("opalhedge")
+                    ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                )
+                throw error
+            }
         }
 
         public static func verifySettlementOracleProof(
@@ -54,26 +87,60 @@ extension OpalHedge {
             signatureHex: String,
             publicKeyHex: String
         ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
-            let message = try OpalHedgeOraclePriceMessage.parse(hex: messageHex)
-            let isSignatureValid = try OpalHedgeOracleSignatureVerifier.verify(
-                message: message,
-                signatureHex: signatureHex,
-                publicKeyHex: publicKeyHex
-            )
-            guard isSignatureValid else {
-                throw OpalHedgeSettlementOracleProofError.invalidSignature
-            }
-
-            return OpalHedge.Core.ContractSettlementOracleProof(
-                message: try OpalHedge.Core.ContractOracleMessageData(
-                    hex: message.hex
-                ),
-                signature: try OpalHedge.Core.ContractOracleSignature(
-                    hex: signatureHex
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                        .lowercased()
+            do {
+                let message = try OpalHedgeOraclePriceMessage.parse(hex: messageHex)
+                let isSignatureValid = try OpalHedgeOracleSignatureVerifier.verify(
+                    message: message,
+                    signatureHex: signatureHex,
+                    publicKeyHex: publicKeyHex
                 )
-            )
+                guard isSignatureValid else {
+                    throw OpalHedgeSettlementOracleProofError.invalidSignature
+                }
+
+                let proof = OpalHedge.Core.ContractSettlementOracleProof(
+                    message: try OpalHedge.Core.ContractOracleMessageData(
+                        hex: message.hex
+                    ),
+                    signature: try OpalHedge.Core.ContractOracleSignature(
+                        hex: signatureHex
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                            .lowercased()
+                    )
+                )
+                OpalHedgeDiagnostics.record(
+                    OpalHedgeDiagnostics.Event.settlementOracleProofVerified,
+                    category: OpalHedgeDiagnostics.Category.oracle,
+                    fields: [
+                        OpalHedgeDiagnostics.operationField("verify_settlement_oracle_proof"),
+                        OpalHedgeDiagnostics.moduleField("opalhedge"),
+                        OpalHedgeDiagnostics.publicField(
+                            OpalHedge.Diagnostics.Field.messageTimestamp,
+                            message.messageTimestamp
+                        ),
+                        OpalHedgeDiagnostics.publicField(
+                            OpalHedge.Diagnostics.Field.messageSequence,
+                            message.messageSequence
+                        ),
+                        OpalHedgeDiagnostics.publicField(
+                            OpalHedge.Diagnostics.Field.priceValue,
+                            message.priceValue
+                        )
+                    ]
+                )
+                return proof
+            } catch {
+                OpalHedgeDiagnostics.record(
+                    OpalHedgeDiagnostics.Event.settlementOracleProofVerificationFailed,
+                    category: OpalHedgeDiagnostics.Category.oracle,
+                    level: .error,
+                    fields: [
+                        OpalHedgeDiagnostics.operationField("verify_settlement_oracle_proof"),
+                        OpalHedgeDiagnostics.moduleField("opalhedge")
+                    ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                )
+                throw error
+            }
         }
     }
 }

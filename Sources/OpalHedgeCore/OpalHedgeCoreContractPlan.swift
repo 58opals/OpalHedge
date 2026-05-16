@@ -13,21 +13,71 @@ public struct OpalHedgeCoreContractPlan: Sendable, Equatable {
     }
 
     public init(from context: OpalHedgeCoreContractCreationContext) throws {
-        try self.init(
-            from: OpalHedgeCoreContractPlanDerivationContext(
+        do {
+            let derivationContext = try OpalHedgeCoreContractPlanDerivationContext(
                 creationContext: context
             )
-        )
+            let parameters = try OpalHedgeCoreContractParameters(
+                from: derivationContext
+            )
+            let metadata = try OpalHedgeCoreContractMetadata(
+                from: derivationContext
+            )
+
+            self.parameters = parameters
+            self.metadata = metadata
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractPlanCreated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractPlanCreationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     public init(from context: OpalHedgeCoreContractPlanDerivationContext) throws {
-        let parameters = try OpalHedgeCoreContractParameters(
-            from: context
-        )
-        let metadata = try OpalHedgeCoreContractMetadata(
-            from: context
-        )
+        do {
+            let parameters = try OpalHedgeCoreContractParameters(
+                from: context
+            )
+            let metadata = try OpalHedgeCoreContractMetadata(
+                from: context
+            )
 
-        self.init(parameters: parameters, metadata: metadata)
+            self.parameters = parameters
+            self.metadata = metadata
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractPlanCreated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractPlanCreationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 }

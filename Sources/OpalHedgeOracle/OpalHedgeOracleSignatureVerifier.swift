@@ -9,10 +9,23 @@ public enum OpalHedgeOracleSignatureVerifier {
         signatureHex: String,
         publicKeyHex: String
     ) throws -> Bool {
-        try verify(
+        let signature: Data
+        let publicKey: Data
+        signature = try decodeVerificationHex(
+            signatureHex,
+            payloadType: "signature_hex",
+            message: message
+        )
+        publicKey = try decodeVerificationHex(
+            publicKeyHex,
+            payloadType: "public_key_hex",
+            message: message
+        )
+
+        return try verify(
             message: message,
-            signature: OpalHedgeOracleHexadecimalCodec.decode(signatureHex),
-            publicKey: OpalHedgeOracleHexadecimalCodec.decode(publicKeyHex)
+            signature: signature,
+            publicKey: publicKey
         )
     }
 
@@ -22,6 +35,22 @@ public enum OpalHedgeOracleSignatureVerifier {
         publicKey: Data
     ) throws -> Bool {
         guard message.isCanonical else {
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleSignatureVerificationFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("verify_oracle_signature"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.errorCode,
+                        OpalHedgeOracleDiagnostics.ErrorCode.oracleInvalidSignature
+                    ),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.errorCategory,
+                        "oracle_signature"
+                    )
+                ] + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+            )
             return false
         }
 
@@ -36,14 +65,54 @@ public enum OpalHedgeOracleSignatureVerifier {
                 rawRepresentation: publicKey
             )
 
-            return try schnorrSignature.verify(
+            let isVerified = try schnorrSignature.verify(
                 digest: digest,
                 verificationKey: verificationKey
             )
+            OpalHedgeOracleDiagnostics.record(
+                isVerified
+                    ? OpalHedgeOracleDiagnostics.Event.oracleSignatureVerified
+                    : OpalHedgeOracleDiagnostics.Event.oracleSignatureVerificationFailed,
+                level: isVerified ? .debug : .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("verify_oracle_signature"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle")
+                ] + (isVerified ? [] : [
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.errorCode,
+                        OpalHedgeOracleDiagnostics.ErrorCode.oracleInvalidSignature
+                    ),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.errorCategory,
+                        "oracle_signature"
+                    )
+                ]) + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+            )
+            return isVerified
         } catch let error as OpalCrypto.Signature.Error {
-            throw mapSignatureError(error)
+            let mappedError = mapSignatureError(error)
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleSignatureVerificationFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("verify_oracle_signature"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle")
+                ] + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+                    + OpalHedgeOracleDiagnostics.makeErrorFields(for: mappedError)
+            )
+            throw mappedError
         } catch {
-            throw OpalHedgeOracleSignatureVerificationError.cryptographyFailure
+            let mappedError = OpalHedgeOracleSignatureVerificationError.cryptographyFailure
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleSignatureVerificationFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("verify_oracle_signature"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle")
+                ] + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+                    + OpalHedgeOracleDiagnostics.makeErrorFields(for: mappedError)
+            )
+            throw mappedError
         }
     }
 
@@ -66,6 +135,34 @@ public enum OpalHedgeOracleSignatureVerifier {
              .invalidPrivateKey,
              .cryptographyFailure:
             return .cryptographyFailure
+        }
+    }
+
+    private static func decodeVerificationHex(
+        _ text: String,
+        payloadType: String,
+        message: OpalHedgeOraclePriceMessage
+    ) throws -> Data {
+        do {
+            return try OpalHedgeOracleHexadecimalCodec.decode(text)
+        } catch {
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleSignatureVerificationFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("verify_oracle_signature"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                        payloadType
+                    )
+                ] + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+                    + OpalHedgeOracleDiagnostics.makeErrorFields(
+                        for: error,
+                        errorCategory: "oracle_signature"
+                    )
+            )
+            throw error
         }
     }
 }

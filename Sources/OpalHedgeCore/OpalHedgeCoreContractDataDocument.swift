@@ -1,6 +1,7 @@
 // OpalHedgeCoreContractDataDocument.swift
 
 import Foundation
+import OpalDiagnostics
 
 public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
     public let draftData: OpalHedgeCoreContractDraftData
@@ -11,15 +12,81 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
     }
 
     public init(draftData: OpalHedgeCoreContractDraftData) throws {
-        try Self.validateDraftData(draftData)
-
-        let data = try JSONSerialization.data(
-            withJSONObject: Self.dictionary(for: draftData),
-            options: [.sortedKeys]
+        try self.init(
+            draftData: draftData,
+            diagnosticsOperation: "encode_data_document",
+            successEvent: OpalHedgeCoreDiagnostics.Event.dataDocumentEncoded,
+            failureEvent: OpalHedgeCoreDiagnostics.Event.dataDocumentEncodeFailed
         )
+    }
 
-        self.draftData = draftData
-        self.jsonText = String(decoding: data, as: UTF8.self)
+    package init(
+        draftData: OpalHedgeCoreContractDraftData,
+        diagnosticsOperation: String,
+        successEvent: OpalDiagnostics.Event,
+        failureEvent: OpalDiagnostics.Event,
+        diagnosticsByteCount: Int? = nil,
+        extraFields: [OpalDiagnostics.Field] = []
+    ) throws {
+        do {
+            try Self.validateDraftData(draftData)
+
+            let data = try JSONSerialization.data(
+                withJSONObject: Self.dictionary(for: draftData),
+                options: [.sortedKeys]
+            )
+
+            self.draftData = draftData
+            self.jsonText = String(decoding: data, as: UTF8.self)
+            OpalHedgeCoreDiagnostics.record(
+                successEvent,
+                category: OpalHedgeCoreDiagnostics.Category.dataDocument,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField(diagnosticsOperation),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.fundingCount,
+                        draftData.fundings.count
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.feeCount,
+                        draftData.fees.count
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.byteCount,
+                        diagnosticsByteCount ?? data.count
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.payloadType,
+                        "json"
+                    )
+                ] + extraFields
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                failureEvent,
+                category: OpalHedgeCoreDiagnostics.Category.dataDocument,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField(diagnosticsOperation),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.fundingCount,
+                        draftData.fundings.count
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.feeCount,
+                        draftData.fees.count
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.payloadType,
+                        "json"
+                    )
+                ] + extraFields + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     private static func dictionary(

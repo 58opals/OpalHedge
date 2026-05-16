@@ -24,10 +24,77 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
     }
 
     public static func parse(hex text: String) throws -> Self {
-        try parse(data: OpalHedgeOracleHexadecimalCodec.decode(text))
+        let data: Data
+        do {
+            data = try OpalHedgeOracleHexadecimalCodec.decode(text)
+        } catch {
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleMessageParseFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("parse_oracle_message"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                        "hex"
+                    ),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.byteCount,
+                        text.utf8.count
+                    )
+                ] + OpalHedgeOracleDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+
+        return try parse(data: data)
     }
 
     public static func parse(data: Data) throws -> Self {
+        do {
+            let message = try parseValidatedData(data)
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleMessageParsed,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("parse_oracle_message"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                        "bytes"
+                    )
+                ] + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+            )
+            return message
+        } catch {
+            OpalHedgeOracleDiagnostics.record(
+                OpalHedgeOracleDiagnostics.Event.oracleMessageParseFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeOracleDiagnostics.operationField("parse_oracle_message"),
+                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                        "bytes"
+                    ),
+                    OpalHedgeOracleDiagnostics.publicField(
+                        OpalHedgeOracleDiagnostics.Field.byteCount,
+                        data.count
+                    )
+                ] + OpalHedgeOracleDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    public var hex: String {
+        OpalHedgeOracleHexadecimalCodec.encode(rawData)
+    }
+
+    var isCanonical: Bool {
+        (try? Self.parseValidatedData(rawData)) == self
+    }
+
+    private static func parseValidatedData(_ data: Data) throws -> Self {
         let expectedLength = 16
         guard data.count == expectedLength else {
             throw OpalHedgeOracleMessageError.invalidMessageLength(
@@ -53,14 +120,6 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
             priceSequence: priceSequence,
             priceValue: priceValue
         )
-    }
-
-    public var hex: String {
-        OpalHedgeOracleHexadecimalCodec.encode(rawData)
-    }
-
-    var isCanonical: Bool {
-        (try? Self.parse(data: rawData)) == self
     }
 
     private static func readInt32LittleEndian(from data: Data, offset: Int) -> Int32 {

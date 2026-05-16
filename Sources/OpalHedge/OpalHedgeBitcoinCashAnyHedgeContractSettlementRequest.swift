@@ -49,31 +49,73 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, E
         previousOracleProof: OpalHedgeCoreContractSettlementOracleProof,
         settlementOracleProof: OpalHedgeCoreContractSettlementOracleProof
     ) throws {
-        let parameters = fundingRecord.draftData.parameters
-        let settlementCondition = try OpalHedgeCoreSettlementConditionResolver.resolve(
-            parameters: parameters,
-            previousTimestamp: previousOracleProof.messageTimestamp,
-            previousSequence: previousOracleProof.messageSequence,
-            settlementTimestamp: settlementOracleProof.messageTimestamp,
-            settlementSequence: settlementOracleProof.messageSequence,
-            settlementPrice: settlementOracleProof.priceValue
-        )
-        let settlementOutcome = try OpalHedgeCoreSettlementCalculator.calculateOutcome(
-            parameters: parameters,
-            fundingSatoshis: fundingRecord.funding.fundingSatoshis,
-            redeemPrice: settlementOracleProof.priceValue
-        )
-
-        self.fundingRecord = fundingRecord
-        self.previousOracleProof = previousOracleProof
-        self.settlementOracleProof = settlementOracleProof
-        self.settlementCondition = settlementCondition
-        self.settlementKind = Self.settlementKind(for: settlementCondition)
-        self.settlementOutcome = settlementOutcome
-        self.settlementPayoutAmounts =
-            OpalHedgeBitcoinCashAnyHedgeContractSettlementPayoutAmounts(
-                settlementOutcome: settlementOutcome
+        do {
+            let parameters = fundingRecord.draftData.parameters
+            let settlementCondition = try OpalHedgeCoreSettlementConditionResolver.resolve(
+                parameters: parameters,
+                previousTimestamp: previousOracleProof.messageTimestamp,
+                previousSequence: previousOracleProof.messageSequence,
+                settlementTimestamp: settlementOracleProof.messageTimestamp,
+                settlementSequence: settlementOracleProof.messageSequence,
+                settlementPrice: settlementOracleProof.priceValue
             )
+            let settlementOutcome = try OpalHedgeCoreSettlementCalculator.calculateOutcome(
+                parameters: parameters,
+                fundingSatoshis: fundingRecord.funding.fundingSatoshis,
+                redeemPrice: settlementOracleProof.priceValue
+            )
+
+            self.fundingRecord = fundingRecord
+            self.previousOracleProof = previousOracleProof
+            self.settlementOracleProof = settlementOracleProof
+            self.settlementCondition = settlementCondition
+            self.settlementKind = Self.settlementKind(for: settlementCondition)
+            self.settlementOutcome = settlementOutcome
+            self.settlementPayoutAmounts =
+                OpalHedgeBitcoinCashAnyHedgeContractSettlementPayoutAmounts(
+                    settlementOutcome: settlementOutcome
+                )
+            OpalHedgeDiagnostics.record(
+                OpalHedgeDiagnostics.Event.settlementRequestCreated,
+                category: OpalHedgeDiagnostics.Category.settlement,
+                fields: [
+                    OpalHedgeDiagnostics.operationField("create_settlement_request"),
+                    OpalHedgeDiagnostics.moduleField("opalhedge"),
+                    OpalHedgeDiagnostics.settlementKindField(self.settlementKind),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.fundingIndex,
+                        fundingRecord.fundingIndex
+                    ),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.settlementPrice,
+                        settlementOracleProof.priceValue
+                    ),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.satoshiCount,
+                        settlementOutcome.totalPayoutSatsSafe
+                    )
+                ]
+            )
+        } catch {
+            OpalHedgeDiagnostics.record(
+                OpalHedgeDiagnostics.Event.settlementRequestCreationFailed,
+                category: OpalHedgeDiagnostics.Category.settlement,
+                level: .error,
+                fields: [
+                    OpalHedgeDiagnostics.operationField("create_settlement_request"),
+                    OpalHedgeDiagnostics.moduleField("opalhedge"),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.fundingIndex,
+                        fundingRecord.fundingIndex
+                    ),
+                    OpalHedgeDiagnostics.publicField(
+                        OpalHedge.Diagnostics.Field.settlementPrice,
+                        settlementOracleProof.priceValue
+                    )
+                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     private static func settlementKind(

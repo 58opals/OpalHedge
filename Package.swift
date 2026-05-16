@@ -18,7 +18,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/58opals/OpalCrypto.git", branch: "develop")
+        .package(url: "https://github.com/58opals/OpalCrypto.git", branch: "develop"),
+        .package(url: "https://github.com/58opals/OpalDiagnostics.git", branch: "develop")
     ],
     targets: [
         .target(
@@ -27,20 +28,28 @@ let package = Package(
                 "OpalHedgeCore",
                 "OpalHedgeOracle",
                 "OpalHedgeBitcoinCash",
-                "OpalHedgeClient"
+                "OpalHedgeClient",
+                .product(name: "OpalDiagnostics", package: "OpalDiagnostics")
             ]
         ),
-        .target(name: "OpalHedgeCore"),
+        .target(
+            name: "OpalHedgeCore",
+            dependencies: [
+                .product(name: "OpalDiagnostics", package: "OpalDiagnostics")
+            ]
+        ),
         .target(
             name: "OpalHedgeOracle",
             dependencies: [
-                .product(name: "OpalCrypto", package: "OpalCrypto")
+                .product(name: "OpalCrypto", package: "OpalCrypto"),
+                .product(name: "OpalDiagnostics", package: "OpalDiagnostics")
             ]
         ),
         .target(
             name: "OpalHedgeBitcoinCash",
             dependencies: [
-                .product(name: "OpalCrypto", package: "OpalCrypto")
+                .product(name: "OpalCrypto", package: "OpalCrypto"),
+                .product(name: "OpalDiagnostics", package: "OpalDiagnostics")
             ]
         ),
         .target(name: "OpalHedgeClient"),
@@ -51,7 +60,8 @@ let package = Package(
                 "OpalHedgeCore",
                 "OpalHedgeOracle",
                 "OpalHedgeBitcoinCash",
-                "OpalHedgeClient"
+                "OpalHedgeClient",
+                .product(name: "OpalDiagnostics", package: "OpalDiagnostics")
             ]
         )
     ]

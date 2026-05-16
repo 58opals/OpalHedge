@@ -58,5 +58,26 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary: Sendable, E
             .messageTimestamp
         self.settlementOracleMessageSequence = settlementRequest.settlementOracleProof
             .messageSequence
+        OpalHedgeDiagnostics.record(
+            OpalHedgeDiagnostics.Event.settlementSummaryCreated,
+            category: OpalHedgeDiagnostics.Category.settlement,
+            fields: [
+                OpalHedgeDiagnostics.operationField("create_settlement_summary"),
+                OpalHedgeDiagnostics.moduleField("opalhedge"),
+                OpalHedgeDiagnostics.settlementKindField(settlementRecord.settlement.kind),
+                OpalHedgeDiagnostics.publicField(
+                    OpalHedge.Diagnostics.Field.fundingIndex,
+                    settlementRecord.fundingRecord.fundingIndex
+                ),
+                OpalHedgeDiagnostics.publicField(
+                    OpalHedge.Diagnostics.Field.settlementPrice,
+                    settlementRequest.settlementPrice
+                ),
+                OpalHedgeDiagnostics.publicField(
+                    OpalHedge.Diagnostics.Field.satoshiCount,
+                    settlementPayoutAmounts.totalPayoutInSatoshis
+                )
+            ]
+        )
     }
 }

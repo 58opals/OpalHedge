@@ -4,6 +4,34 @@ extension OpalHedgeCoreContractConstraintEvaluator {
     public static func validatePlanDerivationContext(
         _ context: OpalHedgeCoreContractPlanDerivationContext
     ) throws {
+        do {
+            try performValidatePlanDerivationContext(context)
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_plan_derivation_context"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_plan_derivation_context"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    private static func performValidatePlanDerivationContext(
+        _ context: OpalHedgeCoreContractPlanDerivationContext
+    ) throws {
         let expectedFundingAmounts = try OpalHedgeCoreContractFundingAmounts(
             from: context.creationContext
         )
@@ -16,6 +44,38 @@ extension OpalHedgeCoreContractConstraintEvaluator {
     }
 
     public static func validateFundingAmounts(
+        _ amounts: OpalHedgeCoreContractFundingAmounts
+    ) throws {
+        do {
+            try performValidateFundingAmounts(amounts)
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_funding_amounts"),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.satoshiCount,
+                        amounts.payoutSats
+                    )
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_funding_amounts"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    private static func performValidateFundingAmounts(
         _ amounts: OpalHedgeCoreContractFundingAmounts
     ) throws {
         try validatePriceOracleUnits(amounts.lowLiquidationPrice, name: "lowLiquidationPrice")

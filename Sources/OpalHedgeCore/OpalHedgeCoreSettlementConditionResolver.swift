@@ -9,6 +9,58 @@ public enum OpalHedgeCoreSettlementConditionResolver {
         settlementSequence: Int64,
         settlementPrice: Int64
     ) throws -> OpalHedgeCoreSettlementCondition {
+        do {
+            let condition = try performResolve(
+                parameters: parameters,
+                previousTimestamp: previousTimestamp,
+                previousSequence: previousSequence,
+                settlementTimestamp: settlementTimestamp,
+                settlementSequence: settlementSequence,
+                settlementPrice: settlementPrice
+            )
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.settlementConditionResolved,
+                category: OpalHedgeCoreDiagnostics.Category.settlement,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("resolve_settlement_condition"),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.settlementKind,
+                        settlementKind(for: condition)
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                        settlementPrice
+                    )
+                ]
+            )
+            return condition
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.settlementConditionResolutionFailed,
+                category: OpalHedgeCoreDiagnostics.Category.settlement,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("resolve_settlement_condition"),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                        settlementPrice
+                    )
+                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    private static func performResolve(
+        parameters: OpalHedgeCoreContractParameters,
+        previousTimestamp: Int64,
+        previousSequence: Int64,
+        settlementTimestamp: Int64,
+        settlementSequence: Int64,
+        settlementPrice: Int64
+    ) throws -> OpalHedgeCoreSettlementCondition {
         guard previousSequence > 0 else {
             throw OpalHedgeCoreSettlementConditionError.metadataSequence(previousSequence)
         }
@@ -55,5 +107,16 @@ public enum OpalHedgeCoreSettlementConditionResolver {
         throw OpalHedgeCoreSettlementConditionError.priceInRangeBeforeMaturity(
             settlementPrice: settlementPrice
         )
+    }
+
+    private static func settlementKind(
+        for condition: OpalHedgeCoreSettlementCondition
+    ) -> String {
+        switch condition {
+        case .maturation:
+            "maturation"
+        case .liquidation:
+            "liquidation"
+        }
     }
 }

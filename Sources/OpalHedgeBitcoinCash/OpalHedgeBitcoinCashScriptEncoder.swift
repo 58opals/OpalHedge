@@ -33,37 +33,57 @@ public enum OpalHedgeBitcoinCashScriptEncoder {
     }
 
     public static func encodeDataPush(_ data: Data) throws -> Data {
-        guard data.count <= UInt32.max else {
-            throw OpalHedgeBitcoinCashScriptEncodingError.dataPushTooLarge(data.count)
+        do {
+            guard data.count <= UInt32.max else {
+                throw OpalHedgeBitcoinCashScriptEncodingError.dataPushTooLarge(data.count)
+            }
+
+            if let smallIntegerPushOpcode = makeSmallIntegerPushOpcode(for: data) {
+                return Data([smallIntegerPushOpcode])
+            }
+
+            var encodedData = Data()
+            encodedData.reserveCapacity(data.count + 5)
+
+            switch data.count {
+            case 0...75:
+                encodedData.append(UInt8(data.count))
+            case 76...Int(UInt8.max):
+                encodedData.append(opPushData1)
+                encodedData.append(UInt8(data.count))
+            case (Int(UInt8.max) + 1)...Int(UInt16.max):
+                encodedData.append(opPushData2)
+                encodedData.append(UInt8(data.count & 0xff))
+                encodedData.append(UInt8((data.count >> 8) & 0xff))
+            default:
+                encodedData.append(opPushData4)
+                encodedData.append(UInt8(data.count & 0xff))
+                encodedData.append(UInt8((data.count >> 8) & 0xff))
+                encodedData.append(UInt8((data.count >> 16) & 0xff))
+                encodedData.append(UInt8((data.count >> 24) & 0xff))
+            }
+
+            encodedData.append(data)
+            return encodedData
+        } catch {
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractScriptEncodingFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_data_push"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        "script_data"
+                    ),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                        data.count
+                    )
+                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
         }
-
-        if let smallIntegerPushOpcode = makeSmallIntegerPushOpcode(for: data) {
-            return Data([smallIntegerPushOpcode])
-        }
-
-        var encodedData = Data()
-        encodedData.reserveCapacity(data.count + 5)
-
-        switch data.count {
-        case 0...75:
-            encodedData.append(UInt8(data.count))
-        case 76...Int(UInt8.max):
-            encodedData.append(opPushData1)
-            encodedData.append(UInt8(data.count))
-        case (Int(UInt8.max) + 1)...Int(UInt16.max):
-            encodedData.append(opPushData2)
-            encodedData.append(UInt8(data.count & 0xff))
-            encodedData.append(UInt8((data.count >> 8) & 0xff))
-        default:
-            encodedData.append(opPushData4)
-            encodedData.append(UInt8(data.count & 0xff))
-            encodedData.append(UInt8((data.count >> 8) & 0xff))
-            encodedData.append(UInt8((data.count >> 16) & 0xff))
-            encodedData.append(UInt8((data.count >> 24) & 0xff))
-        }
-
-        encodedData.append(data)
-        return encodedData
     }
 
     private static let op0: UInt8 = 0x00

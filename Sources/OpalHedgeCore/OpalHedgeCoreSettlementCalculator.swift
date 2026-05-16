@@ -6,6 +6,52 @@ public enum OpalHedgeCoreSettlementCalculator {
         fundingSatoshis: Int64,
         redeemPrice: Int64
     ) throws -> OpalHedgeCoreSettlementOutcome {
+        do {
+            let outcome = try performCalculateOutcome(
+                parameters: parameters,
+                fundingSatoshis: fundingSatoshis,
+                redeemPrice: redeemPrice
+            )
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.settlementPayoutCalculated,
+                category: OpalHedgeCoreDiagnostics.Category.settlement,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("calculate_settlement_payout"),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                        redeemPrice
+                    ),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.satoshiCount,
+                        outcome.totalPayoutSatsSafe
+                    )
+                ]
+            )
+            return outcome
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.settlementPayoutCalculationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.settlement,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("calculate_settlement_payout"),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                        redeemPrice
+                    )
+                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    private static func performCalculateOutcome(
+        parameters: OpalHedgeCoreContractParameters,
+        fundingSatoshis: Int64,
+        redeemPrice: Int64
+    ) throws -> OpalHedgeCoreSettlementOutcome {
         guard redeemPrice > 0 else {
             throw OpalHedgeCoreSettlementCalculationError.invalidRedeemPrice(redeemPrice)
         }

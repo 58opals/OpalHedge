@@ -4,6 +4,34 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
     public static func validateCreationContext(
         _ context: OpalHedgeCoreContractCreationContext
     ) throws {
+        do {
+            try performValidateCreationContext(context)
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_creation_context"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_creation_context"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    private static func performValidateCreationContext(
+        _ context: OpalHedgeCoreContractCreationContext
+    ) throws {
         guard context.makerSide != context.takerSide else {
             throw OpalHedgeCoreContractConstraintError.makerSideMustOpposeTaker(
                 taker: context.takerSide,
@@ -80,9 +108,31 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
     public static func validateStartingOracleProof(
         _ proof: OpalHedgeCoreContractStartingOracleProof
     ) throws {
-        try validateCompressedPublicKeyHex(proof.oraclePublicKeyHex, name: "oraclePublicKeyHex")
-        try validateOracleMessageData(proof.message)
-        try validateSchnorrSignatureHex(proof.signatureHex, name: "signatureHex")
+        do {
+            try validateCompressedPublicKeyHex(proof.oraclePublicKeyHex, name: "oraclePublicKeyHex")
+            try validateOracleMessageData(proof.message)
+            try validateSchnorrSignatureHex(proof.signatureHex, name: "signatureHex")
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_starting_oracle_proof"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_starting_oracle_proof"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     package static func validateMetadataContext(
@@ -97,14 +147,65 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
     public static func validateOracleMessageData(
         _ message: OpalHedgeCoreContractOracleMessageData
     ) throws {
-        try validateOracleMessageHex(message.hex, name: "messageHex")
-        try validateFourBytePositiveScriptInteger(message.messageTimestamp, name: "messageTimestamp")
-        try validateFourBytePositiveScriptInteger(message.messageSequence, name: "messageSequence")
-        try validateFourBytePositiveScriptInteger(message.priceSequence, name: "priceSequence")
-        try validateFourBytePositiveScriptInteger(message.priceValue, name: "priceValue")
+        do {
+            try validateOracleMessageHex(message.hex, name: "messageHex")
+            try validateFourBytePositiveScriptInteger(message.messageTimestamp, name: "messageTimestamp")
+            try validateFourBytePositiveScriptInteger(message.messageSequence, name: "messageSequence")
+            try validateFourBytePositiveScriptInteger(message.priceSequence, name: "priceSequence")
+            try validateFourBytePositiveScriptInteger(message.priceValue, name: "priceValue")
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_oracle_message_data"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_oracle_message_data"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     public static func validateParameters(
+        _ parameters: OpalHedgeCoreContractParameters,
+        startPrice: Int64
+    ) throws {
+        do {
+            try performValidateParameters(parameters, startPrice: startPrice)
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_parameters"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_parameters"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
+    }
+
+    private static func performValidateParameters(
         _ parameters: OpalHedgeCoreContractParameters,
         startPrice: Int64
     ) throws {
@@ -151,19 +252,45 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
         longInputInSatoshis: Int64,
         payoutSats: Int64
     ) throws {
-        let totalInput = shortInputInSatoshis.addingReportingOverflow(
-            longInputInSatoshis
-        )
-        guard shortInputInSatoshis > 0,
-              longInputInSatoshis > 0,
-              payoutSats > 0,
-              !totalInput.overflow,
-              totalInput.partialValue == payoutSats else {
-            throw OpalHedgeCoreContractConstraintError.invalidContractFunding(
-                shortInput: shortInputInSatoshis,
-                longInput: longInputInSatoshis,
-                payoutSats: payoutSats
+        do {
+            let totalInput = shortInputInSatoshis.addingReportingOverflow(
+                longInputInSatoshis
             )
+            guard shortInputInSatoshis > 0,
+                  longInputInSatoshis > 0,
+                  payoutSats > 0,
+                  !totalInput.overflow,
+                  totalInput.partialValue == payoutSats else {
+                throw OpalHedgeCoreContractConstraintError.invalidContractFunding(
+                    shortInput: shortInputInSatoshis,
+                    longInput: longInputInSatoshis,
+                    payoutSats: payoutSats
+                )
+            }
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_derived_funding"),
+                    OpalHedgeCoreDiagnostics.moduleField("core"),
+                    OpalHedgeCoreDiagnostics.publicField(
+                        OpalHedgeCoreDiagnostics.Field.satoshiCount,
+                        payoutSats
+                    )
+                ]
+            )
+        } catch {
+            OpalHedgeCoreDiagnostics.record(
+                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
+                category: OpalHedgeCoreDiagnostics.Category.contract,
+                level: .error,
+                fields: [
+                    OpalHedgeCoreDiagnostics.operationField("validate_derived_funding"),
+                    OpalHedgeCoreDiagnostics.moduleField("core")
+                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
+                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
         }
     }
 

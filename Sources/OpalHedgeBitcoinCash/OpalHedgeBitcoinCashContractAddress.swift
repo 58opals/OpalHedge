@@ -12,17 +12,54 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         scriptHash: Data,
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws {
-        guard scriptHash.count == Self.scriptHashByteCount else {
-            throw OpalHedgeBitcoinCashContractAddressError
-                .invalidScriptHashByteCount(scriptHash.count)
-        }
+        do {
+            guard scriptHash.count == Self.scriptHashByteCount else {
+                throw OpalHedgeBitcoinCashContractAddressError
+                    .invalidScriptHashByteCount(scriptHash.count)
+            }
 
-        self.rawValue = try Self.cashAddr(
-            scriptHash: scriptHash,
-            network: network
-        )
-        self.scriptHash = scriptHash
-        self.network = network
+            self.rawValue = try Self.cashAddr(
+                scriptHash: scriptHash,
+                network: network
+            )
+            self.scriptHash = scriptHash
+            self.network = network
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractAddressEncoded,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_contract_address"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.networkField(network),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                        scriptHash.count
+                    ),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        "script_hash"
+                    )
+                ]
+            )
+        } catch {
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractAddressEncodingFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_contract_address"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.networkField(network),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                        scriptHash.count
+                    ),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        "script_hash"
+                    )
+                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
+        }
     }
 
     public init(
@@ -40,9 +77,23 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws {
         guard let redeemScript = OpalHedgeBitcoinCashHexadecimalCodec.decode(redeemScriptHex) else {
-            throw OpalHedgeBitcoinCashContractAddressError.invalidRedeemScriptHex(
+            let error = OpalHedgeBitcoinCashContractAddressError.invalidRedeemScriptHex(
                 redeemScriptHex
             )
+            OpalHedgeBitcoinCashDiagnostics.record(
+                OpalHedgeBitcoinCashDiagnostics.Event.contractAddressEncodingFailed,
+                level: .error,
+                fields: [
+                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_contract_address"),
+                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
+                    OpalHedgeBitcoinCashDiagnostics.networkField(network),
+                    OpalHedgeBitcoinCashDiagnostics.publicField(
+                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                        "redeem_script_hex"
+                    )
+                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+            )
+            throw error
         }
 
         try self.init(
