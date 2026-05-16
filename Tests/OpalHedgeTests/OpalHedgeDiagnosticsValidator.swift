@@ -31,6 +31,121 @@ struct OpalHedgeDiagnosticsValidator {
         #expect(OpalHedge.Diagnostics.Event.contractPlanCreated.rawValue == "opalhedge.contract.plan.created")
         #expect(OpalHedge.Diagnostics.Field.errorCode == "error_code")
         #expect(OpalHedge.Diagnostics.ErrorCode.transactionHashInvalid == "bitcoin_cash.transaction_hash.invalid")
+        #expect(OpalHedge.Diagnostics.TraceID(rawValue: "wallet-action").rawValue == "wallet-action")
+        #expect(OpalHedge.Diagnostics.currentTraceID == nil)
+    }
+
+    @Test("Wallet action diagnostics share trace ID")
+    func verifyWalletActionDiagnosticsShareTraceID() throws {
+        try withDiagnosticsCapture {
+            let traceID = OpalHedge.Diagnostics.TraceID(rawValue: "wallet-action-123")
+            let clientContext = OpalHedge.Client.Context()
+            let fundingTransactionHash = String(repeating: "1", count: 64)
+            let settlementTransactionHash = String(repeating: "2", count: 64)
+
+            try OpalHedge.Diagnostics.withTraceID(traceID) {
+                #expect(OpalHedge.Diagnostics.currentTraceID == traceID)
+
+                let plan = try OpalHedge.Core.ContractPlan(
+                    from: OpalHedgeFixtureData.contractCreationContext
+                )
+                _ = try clientContext.createAnyHedgeContractFundingRequest(
+                    from: plan
+                )
+                _ = try clientContext.createAnyHedgeContractSettlementSummary(
+                    from: plan,
+                    fundingTransactionHash: fundingTransactionHash,
+                    fundingOutputIndex: 0,
+                    previousOracleProof: OpalHedgeContractFixtureBuilder
+                        .makeStartingSettlementOracleProof(),
+                    settlementOracleProof: OpalHedgeContractFixtureBuilder
+                        .makeSettlementOracleProof(),
+                    settlementTransactionHash: settlementTransactionHash
+                )
+            }
+
+            #expect(OpalHedge.Diagnostics.currentTraceID == nil)
+            let traceRecords = OpalHedge.Diagnostics.recentRecords(traceID: traceID)
+            let traceEvents = Set(traceRecords.map(\.event))
+            #expect(traceRecords.isEmpty == false)
+            #expect(traceEvents.contains(OpalHedge.Diagnostics.Event.contractPlanCreated))
+            #expect(traceEvents.contains(OpalHedge.Diagnostics.Event.fundingRequestCreated))
+            #expect(traceEvents.contains(OpalHedge.Diagnostics.Event.fundingRecordCreated))
+            #expect(traceEvents.contains(OpalHedge.Diagnostics.Event.settlementRequestCreated))
+            #expect(traceEvents.contains(OpalHedge.Diagnostics.Event.settlementRecordCreated))
+            #expect(traceEvents.contains(OpalHedge.Diagnostics.Event.settlementSummaryCreated))
+            #expect(OpalDiagnostics.recentRecords.allSatisfy { $0.traceID == traceID })
+        }
+    }
+
+    @Test("Nested default trace scopes inherit current trace ID")
+    func verifyNestedDefaultTraceScopesInheritCurrentTraceID() throws {
+        try withDiagnosticsCapture {
+            let traceID = OpalHedge.Diagnostics.TraceID(rawValue: "wallet-action-nested")
+
+            try OpalHedge.Diagnostics.withTraceID(traceID) {
+                try OpalHedge.Diagnostics.withTraceID {
+                    _ = try OpalHedge.Core.ContractPlan(
+                        from: OpalHedgeFixtureData.contractCreationContext
+                    )
+                }
+            }
+
+            let record = try #require(
+                findDiagnosticRecord(named: OpalHedge.Diagnostics.Event.contractPlanCreated)
+            )
+            #expect(record.traceID == traceID)
+        }
+    }
+
+    @Test("Generated root trace ID is visible inside scope")
+    func verifyGeneratedRootTraceIDIsVisibleInsideScope() throws {
+        try withDiagnosticsCapture {
+            let traceID = try OpalHedge.Diagnostics.withNewTraceID { traceID in
+                #expect(OpalHedge.Diagnostics.currentTraceID == traceID)
+                _ = try OpalHedge.Core.ContractPlan(
+                    from: OpalHedgeFixtureData.contractCreationContext
+                )
+                return traceID
+            }
+
+            let record = try #require(
+                findDiagnosticRecord(named: OpalHedge.Diagnostics.Event.contractPlanCreated)
+            )
+            #expect(traceID.rawValue.isEmpty == false)
+            #expect(record.traceID == traceID)
+        }
+    }
+
+    @Test("Trace record helper filters to OpalHedge categories")
+    func verifyTraceRecordHelperFiltersToOpalHedgeCategories() throws {
+        try OpalDiagnostics.withConfiguration(
+            .init(minimumLevel: .debug, bufferPolicy: .enabled(capacity: 10_000))
+        ) {
+            OpalDiagnostics.clearRecentRecords()
+            let traceID = OpalHedge.Diagnostics.TraceID(rawValue: "wallet-action-mixed")
+
+            try OpalHedge.Diagnostics.withTraceID(traceID) {
+                _ = try OpalHedge.Core.ContractPlan(
+                    from: OpalHedgeFixtureData.contractCreationContext
+                )
+                OpalDiagnostics.logger(category: .fulcrum).record(
+                    event: "fulcrum.connected",
+                    level: .debug
+                )
+            }
+
+            #expect(
+                OpalDiagnostics.recentRecords(matching: .init(traceID: traceID))
+                    .contains { $0.category == .fulcrum }
+            )
+            let hedgeRecords = OpalHedge.Diagnostics.recentRecords(traceID: traceID)
+            #expect(hedgeRecords.isEmpty == false)
+            #expect(hedgeRecords.allSatisfy { $0.category.isOpalHedgeCategory })
+            #expect(hedgeRecords.map(\.event).contains(
+                OpalHedge.Diagnostics.Event.contractPlanCreated
+            ))
+        }
     }
 
     @Test("Category filters support exact and hierarchical OpalHedge matching")
@@ -343,5 +458,12 @@ struct OpalHedgeDiagnosticsValidator {
 
     private func findField(_ name: String, in record: OpalDiagnostics.Record) -> OpalDiagnostics.Field? {
         record.fields.first { $0.name == name }
+    }
+}
+
+private extension OpalDiagnostics.Category {
+    var isOpalHedgeCategory: Bool {
+        self == OpalHedge.Diagnostics.Category.hedge
+            || rawValue.hasPrefix("hedge.")
     }
 }

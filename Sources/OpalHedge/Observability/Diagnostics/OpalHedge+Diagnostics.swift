@@ -4,6 +4,73 @@ public import OpalDiagnostics
 
 extension OpalHedge {
     public enum Diagnostics {
+        /// Public-safe correlation identifier for following one Wallet action across records.
+        public typealias TraceID = OpalDiagnostics.TraceID
+
+        /// Trace ID currently scoped to this task, if one has been installed.
+        public static var currentTraceID: TraceID? {
+            OpalDiagnostics.currentTraceID
+        }
+
+        /// Returns recent OpalHedge records associated with a trace ID.
+        public static func recentRecords(
+            traceID: TraceID
+        ) -> [OpalDiagnostics.Record] {
+            OpalDiagnostics.recentRecords.filter { record in
+                record.traceID == traceID && isHedgeCategory(record.category)
+            }
+        }
+
+        /// Runs an operation with a trace ID scoped to the current task and inherited child tasks.
+        public static func withTraceID<Success>(
+            _ traceID: TraceID,
+            operation: () throws -> Success
+        ) rethrows -> Success {
+            try OpalDiagnostics.withTraceID(traceID, operation: operation)
+        }
+
+        /// Runs an operation with the current trace ID, or starts a new root trace when none exists.
+        public static func withTraceID<Success>(
+            operation: () throws -> Success
+        ) rethrows -> Success {
+            try withTraceID(resolveTraceID(), operation: operation)
+        }
+
+        /// Runs an operation with a new root trace ID and passes the ID to the operation.
+        public static func withNewTraceID<Success>(
+            operation: (TraceID) throws -> Success
+        ) rethrows -> Success {
+            let traceID = TraceID()
+            return try withTraceID(traceID) {
+                try operation(traceID)
+            }
+        }
+
+        /// Runs an async operation with a trace ID scoped to the current task and inherited child tasks.
+        public static func withTraceID<Success>(
+            _ traceID: TraceID,
+            operation: () async throws -> Success
+        ) async rethrows -> Success {
+            try await OpalDiagnostics.withTraceID(traceID, operation: operation)
+        }
+
+        /// Runs an async operation with the current trace ID, or starts a new root trace when none exists.
+        public static func withTraceID<Success>(
+            operation: () async throws -> Success
+        ) async rethrows -> Success {
+            try await withTraceID(resolveTraceID(), operation: operation)
+        }
+
+        /// Runs an async operation with a new root trace ID and passes the ID to the operation.
+        public static func withNewTraceID<Success>(
+            operation: (TraceID) async throws -> Success
+        ) async rethrows -> Success {
+            let traceID = TraceID()
+            return try await withTraceID(traceID) {
+                try await operation(traceID)
+            }
+        }
+
         /// Stable diagnostics categories that callers may use with OpalDiagnostics filters.
         public enum Category {
             public static let hedge: OpalDiagnostics.Category = .hedge
@@ -121,6 +188,15 @@ extension OpalHedge {
             public static let settlementConditionInvalid = "settlement.condition_invalid"
             public static let settlementPayoutInvalid = "settlement.payout_invalid"
             public static let settlementRecordInvalid = "settlement.record_invalid"
+        }
+
+        private static func isHedgeCategory(_ category: OpalDiagnostics.Category) -> Bool {
+            category == Category.hedge
+                || category.rawValue.hasPrefix("\(Category.hedge.rawValue).")
+        }
+
+        private static func resolveTraceID() -> TraceID {
+            currentTraceID ?? TraceID()
         }
     }
 }
