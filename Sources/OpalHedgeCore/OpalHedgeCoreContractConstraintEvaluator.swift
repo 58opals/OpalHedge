@@ -1,29 +1,30 @@
 // OpalHedgeCoreContractConstraintEvaluator.swift
 
+import OpalDiagnostics
+
 public enum OpalHedgeCoreContractConstraintEvaluator {
     public static func validateCreationContext(
         _ context: OpalHedgeCoreContractCreationContext
     ) throws {
         do {
             try performValidateCreationContext(context)
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_creation_context"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("validate_creation_context"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_creation_context"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_creation_context"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -112,24 +113,23 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
             try validateCompressedPublicKeyHex(proof.oraclePublicKeyHex, name: "oraclePublicKeyHex")
             try validateOracleMessageData(proof.message)
             try validateSchnorrSignatureHex(proof.signatureHex, name: "signatureHex")
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_starting_oracle_proof"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("validate_starting_oracle_proof"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_starting_oracle_proof"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_starting_oracle_proof"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -153,24 +153,23 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
             try validateFourBytePositiveScriptInteger(message.messageSequence, name: "messageSequence")
             try validateFourBytePositiveScriptInteger(message.priceSequence, name: "priceSequence")
             try validateFourBytePositiveScriptInteger(message.priceValue, name: "priceValue")
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_oracle_message_data"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("validate_oracle_message_data"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_oracle_message_data"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_oracle_message_data"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -182,24 +181,23 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
     ) throws {
         do {
             try performValidateParameters(parameters, startPrice: startPrice)
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_parameters"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("validate_parameters"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_parameters"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_parameters"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -267,28 +265,27 @@ public enum OpalHedgeCoreContractConstraintEvaluator {
                     payoutSats: payoutSats
                 )
             }
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_derived_funding"),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.satoshiCount,
+                    OpalDiagnostics.Field.operationField("validate_derived_funding"),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.satoshiCount,
                         payoutSats
                     )
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_derived_funding"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_derived_funding"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

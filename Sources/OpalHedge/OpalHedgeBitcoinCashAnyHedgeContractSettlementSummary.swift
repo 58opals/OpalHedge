@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary.swift
 
 import OpalHedgeCore
+import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary: Sendable, Equatable {
     public let settlementKind: OpalHedgeCoreSettlementKind
@@ -58,23 +59,23 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary: Sendable, E
             .messageTimestamp
         self.settlementOracleMessageSequence = settlementRequest.settlementOracleProof
             .messageSequence
-        OpalHedgeDiagnostics.record(
-            OpalHedgeDiagnostics.Event.settlementSummaryCreated,
-            category: OpalHedgeDiagnostics.Category.settlement,
+        OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+            event: OpalDiagnostics.Event.settlementSummaryCreated,
+            level: .debug,
             fields: [
-                OpalHedgeDiagnostics.operationField("create_settlement_summary"),
-                OpalHedgeDiagnostics.moduleField("opalhedge"),
-                OpalHedgeDiagnostics.settlementKindField(settlementRecord.settlement.kind),
-                OpalHedgeDiagnostics.publicField(
-                    OpalHedge.Diagnostics.Field.fundingIndex,
+                OpalDiagnostics.Field.operationField("create_settlement_summary"),
+                OpalDiagnostics.Field.moduleField("opalhedge"),
+                OpalDiagnostics.Field.settlementKindField(settlementRecord.settlement.kind),
+                OpalDiagnostics.Field.publicField(
+                    OpalDiagnostics.Field.fundingIndex,
                     settlementRecord.fundingRecord.fundingIndex
                 ),
-                OpalHedgeDiagnostics.publicField(
-                    OpalHedge.Diagnostics.Field.settlementPrice,
+                OpalDiagnostics.Field.publicField(
+                    OpalDiagnostics.Field.settlementPrice,
                     settlementRequest.settlementPrice
                 ),
-                OpalHedgeDiagnostics.publicField(
-                    OpalHedge.Diagnostics.Field.satoshiCount,
+                OpalDiagnostics.Field.publicField(
+                    OpalDiagnostics.Field.satoshiCount,
                     settlementPayoutAmounts.totalPayoutInSatoshis
                 )
             ]

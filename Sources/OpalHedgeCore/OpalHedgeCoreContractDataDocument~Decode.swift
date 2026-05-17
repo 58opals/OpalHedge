@@ -1,6 +1,7 @@
 // OpalHedgeCoreContractDataDocument~Decode.swift
 
 import Foundation
+import OpalDiagnostics
 
 extension OpalHedgeCoreContractDataDocument {
     public init(jsonText: String) throws {
@@ -36,8 +37,8 @@ extension OpalHedgeCoreContractDataDocument {
         try self.init(
             draftData: draftData,
             diagnosticsOperation: "decode_data_document",
-            successEvent: OpalHedgeCoreDiagnostics.Event.dataDocumentDecoded,
-            failureEvent: OpalHedgeCoreDiagnostics.Event.dataDocumentDecodeFailed,
+            successEvent: OpalDiagnostics.Event.dataDocumentDecoded,
+            failureEvent: OpalDiagnostics.Event.dataDocumentDecodeFailed,
             diagnosticsByteCount: utf8Data.count
         )
     }
@@ -46,23 +47,22 @@ extension OpalHedgeCoreContractDataDocument {
         _ error: Swift.Error,
         byteCount: Int
     ) {
-        OpalHedgeCoreDiagnostics.record(
-            OpalHedgeCoreDiagnostics.Event.dataDocumentDecodeFailed,
-            category: OpalHedgeCoreDiagnostics.Category.dataDocument,
+        OpalDiagnostics.logger(category: OpalDiagnostics.Category.dataDocument).record(
+            event: OpalDiagnostics.Event.dataDocumentDecodeFailed,
             level: .error,
             fields: [
-                OpalHedgeCoreDiagnostics.operationField("decode_data_document"),
-                OpalHedgeCoreDiagnostics.moduleField("core"),
-                OpalHedgeCoreDiagnostics.publicField(
-                    OpalHedgeCoreDiagnostics.Field.byteCount,
+                OpalDiagnostics.Field.operationField("decode_data_document"),
+                OpalDiagnostics.Field.moduleField("core"),
+                OpalDiagnostics.Field.publicField(
+                    OpalDiagnostics.Field.byteCount,
                     byteCount
                 ),
-                OpalHedgeCoreDiagnostics.publicField(
-                    OpalHedgeCoreDiagnostics.Field.payloadType,
+                OpalDiagnostics.Field.publicField(
+                    OpalDiagnostics.Field.payloadType,
                     "json"
                 )
-            ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+            ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                + OpalDiagnostics.Field.makeErrorFields(for: error)
         )
     }
 }

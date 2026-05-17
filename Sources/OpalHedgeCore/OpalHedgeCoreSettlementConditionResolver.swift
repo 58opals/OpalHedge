@@ -1,5 +1,7 @@
 // OpalHedgeCoreSettlementConditionResolver.swift
 
+import OpalDiagnostics
+
 public enum OpalHedgeCoreSettlementConditionResolver {
     public static func resolve(
         parameters: OpalHedgeCoreContractParameters,
@@ -18,36 +20,35 @@ public enum OpalHedgeCoreSettlementConditionResolver {
                 settlementSequence: settlementSequence,
                 settlementPrice: settlementPrice
             )
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.settlementConditionResolved,
-                category: OpalHedgeCoreDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementConditionResolved,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("resolve_settlement_condition"),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.settlementKind,
+                    OpalDiagnostics.Field.operationField("resolve_settlement_condition"),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementKind,
                         settlementKind(for: condition)
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         settlementPrice
                     )
                 ]
             )
             return condition
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.settlementConditionResolutionFailed,
-                category: OpalHedgeCoreDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementConditionResolutionFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("resolve_settlement_condition"),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.operationField("resolve_settlement_condition"),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         settlementPrice
                     )
-                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

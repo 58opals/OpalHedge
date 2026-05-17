@@ -1,6 +1,7 @@
 // OpalHedgeOraclePriceMessage.swift
 
 import Foundation
+import OpalDiagnostics
 
 public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
     public let rawData: Data
@@ -28,21 +29,21 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
         do {
             data = try OpalHedgeOracleHexadecimalCodec.decode(text)
         } catch {
-            OpalHedgeOracleDiagnostics.record(
-                OpalHedgeOracleDiagnostics.Event.oracleMessageParseFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                event: OpalDiagnostics.Event.oracleMessageParseFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeOracleDiagnostics.operationField("parse_oracle_message"),
-                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
-                    OpalHedgeOracleDiagnostics.publicField(
-                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.operationField("parse_oracle_message"),
+                    OpalDiagnostics.Field.moduleField("oracle"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         "hex"
                     ),
-                    OpalHedgeOracleDiagnostics.publicField(
-                        OpalHedgeOracleDiagnostics.Field.byteCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.byteCount,
                         text.utf8.count
                     )
-                ] + OpalHedgeOracleDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -53,34 +54,35 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
     public static func parse(data: Data) throws -> Self {
         do {
             let message = try parseValidatedData(data)
-            OpalHedgeOracleDiagnostics.record(
-                OpalHedgeOracleDiagnostics.Event.oracleMessageParsed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                event: OpalDiagnostics.Event.oracleMessageParsed,
+                level: .debug,
                 fields: [
-                    OpalHedgeOracleDiagnostics.operationField("parse_oracle_message"),
-                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
-                    OpalHedgeOracleDiagnostics.publicField(
-                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.operationField("parse_oracle_message"),
+                    OpalDiagnostics.Field.moduleField("oracle"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         "bytes"
                     )
-                ] + OpalHedgeOracleDiagnostics.makeMessageFields(for: message)
+                ] + OpalDiagnostics.Field.makeMessageFields(for: message)
             )
             return message
         } catch {
-            OpalHedgeOracleDiagnostics.record(
-                OpalHedgeOracleDiagnostics.Event.oracleMessageParseFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                event: OpalDiagnostics.Event.oracleMessageParseFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeOracleDiagnostics.operationField("parse_oracle_message"),
-                    OpalHedgeOracleDiagnostics.moduleField("oracle"),
-                    OpalHedgeOracleDiagnostics.publicField(
-                        OpalHedgeOracleDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.operationField("parse_oracle_message"),
+                    OpalDiagnostics.Field.moduleField("oracle"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         "bytes"
                     ),
-                    OpalHedgeOracleDiagnostics.publicField(
-                        OpalHedgeOracleDiagnostics.Field.byteCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.byteCount,
                         data.count
                     )
-                ] + OpalHedgeOracleDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

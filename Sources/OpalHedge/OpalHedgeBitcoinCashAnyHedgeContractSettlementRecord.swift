@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord.swift
 
 import OpalHedgeCore
+import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Equatable {
     public let settlementRequest: OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest
@@ -75,41 +76,40 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
             self.dataDocument = try OpalHedgeCoreContractDataDocument(
                 draftData: draftData
             )
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.settlementRecordCreated,
-                category: OpalHedgeDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementRecordCreated,
+                level: .debug,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("create_settlement_record"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.settlementKindField(settlementRequest.settlementKind),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingIndex,
+                    OpalDiagnostics.Field.operationField("create_settlement_record"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.settlementKindField(settlementRequest.settlementKind),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingIndex,
                         fundingIndex
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         settlementRequest.settlementPrice
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.satoshiCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.satoshiCount,
                         settlement.totalPayoutInSatoshis
                     )
                 ]
             )
         } catch {
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.settlementRecordCreationFailed,
-                category: OpalHedgeDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementRecordCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("create_settlement_record"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.settlementKindField(settlementRequest.settlementKind),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingIndex,
+                    OpalDiagnostics.Field.operationField("create_settlement_record"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.settlementKindField(settlementRequest.settlementKind),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingIndex,
                         settlementRequest.fundingRecord.fundingIndex
                     )
-                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -119,14 +119,13 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
         guard OpalHedgeBitcoinCashTransactionHashValidator.isValid(value) else {
             let error = OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError
                 .invalidSettlementTransactionHash(value)
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.transactionHashValidationFailed,
-                category: OpalHedgeDiagnostics.Category.bitcoinCash,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.transactionHashValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("validate_settlement_transaction_hash"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge")
-                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_settlement_transaction_hash"),
+                    OpalDiagnostics.Field.moduleField("opalhedge")
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

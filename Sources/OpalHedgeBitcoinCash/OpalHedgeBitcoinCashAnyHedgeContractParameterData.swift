@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashAnyHedgeContractParameterData.swift
 
 import Foundation
+import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equatable {
     public let shortMutualRedeemPublicKey: Data
@@ -84,21 +85,22 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
             self.highLiquidationPrice = highLiquidationPrice
             self.startTimestamp = startTimestamp
             self.maturityTimestamp = maturityTimestamp
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParametersEncoded,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParametersEncoded,
+                level: .debug,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("create_contract_parameter_data"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash")
+                    OpalDiagnostics.Field.operationField("create_contract_parameter_data"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash")
                 ]
             )
         } catch {
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParameterEncodingFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParameterEncodingFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("create_contract_parameter_data"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash")
-                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("create_contract_parameter_data"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash")
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -148,17 +150,17 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
                 name: name,
                 value: hex
             )
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParameterEncodingFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParameterEncodingFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("decode_contract_parameter_hex"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
-                    OpalHedgeBitcoinCashDiagnostics.publicField(
-                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.operationField("decode_contract_parameter_hex"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         name
                     )
-                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

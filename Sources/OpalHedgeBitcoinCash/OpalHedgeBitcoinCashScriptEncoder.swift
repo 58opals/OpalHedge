@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashScriptEncoder.swift
 
 import Foundation
+import OpalDiagnostics
 
 public enum OpalHedgeBitcoinCashScriptEncoder {
     public static func encodeScriptNumber(_ value: Int64) -> Data {
@@ -66,21 +67,21 @@ public enum OpalHedgeBitcoinCashScriptEncoder {
             encodedData.append(data)
             return encodedData
         } catch {
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractScriptEncodingFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractScriptEncodingFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_data_push"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
-                    OpalHedgeBitcoinCashDiagnostics.publicField(
-                        OpalHedgeBitcoinCashDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.operationField("encode_data_push"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         "script_data"
                     ),
-                    OpalHedgeBitcoinCashDiagnostics.publicField(
-                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.byteCount,
                         data.count
                     )
-                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

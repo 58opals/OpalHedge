@@ -1,29 +1,30 @@
 // OpalHedgeCoreContractConstraintEvaluator~Funding.swift
 
+import OpalDiagnostics
+
 extension OpalHedgeCoreContractConstraintEvaluator {
     public static func validatePlanDerivationContext(
         _ context: OpalHedgeCoreContractPlanDerivationContext
     ) throws {
         do {
             try performValidatePlanDerivationContext(context)
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_plan_derivation_context"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("validate_plan_derivation_context"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_plan_derivation_context"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_plan_derivation_context"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -48,28 +49,27 @@ extension OpalHedgeCoreContractConstraintEvaluator {
     ) throws {
         do {
             try performValidateFundingAmounts(amounts)
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintsValidated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintsValidated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_funding_amounts"),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.satoshiCount,
+                    OpalDiagnostics.Field.operationField("validate_funding_amounts"),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.satoshiCount,
                         amounts.payoutSats
                     )
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractConstraintValidationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractConstraintValidationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("validate_funding_amounts"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("validate_funding_amounts"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

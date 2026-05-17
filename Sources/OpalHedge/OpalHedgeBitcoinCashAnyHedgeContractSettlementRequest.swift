@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest.swift
 
 import OpalHedgeCore
+import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, Equatable {
     public let fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord
@@ -75,44 +76,43 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, E
                 OpalHedgeBitcoinCashAnyHedgeContractSettlementPayoutAmounts(
                     settlementOutcome: settlementOutcome
                 )
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.settlementRequestCreated,
-                category: OpalHedgeDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementRequestCreated,
+                level: .debug,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("create_settlement_request"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.settlementKindField(self.settlementKind),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingIndex,
+                    OpalDiagnostics.Field.operationField("create_settlement_request"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.settlementKindField(self.settlementKind),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingIndex,
                         fundingRecord.fundingIndex
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         settlementOracleProof.priceValue
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.satoshiCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.satoshiCount,
                         settlementOutcome.totalPayoutSatsSafe
                     )
                 ]
             )
         } catch {
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.settlementRequestCreationFailed,
-                category: OpalHedgeDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementRequestCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("create_settlement_request"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingIndex,
+                    OpalDiagnostics.Field.operationField("create_settlement_request"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingIndex,
                         fundingRecord.fundingIndex
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         settlementOracleProof.priceValue
                     )
-                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

@@ -15,8 +15,8 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
         try self.init(
             draftData: draftData,
             diagnosticsOperation: "encode_data_document",
-            successEvent: OpalHedgeCoreDiagnostics.Event.dataDocumentEncoded,
-            failureEvent: OpalHedgeCoreDiagnostics.Event.dataDocumentEncodeFailed
+            successEvent: OpalDiagnostics.Event.dataDocumentEncoded,
+            failureEvent: OpalDiagnostics.Event.dataDocumentEncodeFailed
         )
     }
 
@@ -38,52 +38,60 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
 
             self.draftData = draftData
             self.jsonText = String(decoding: data, as: UTF8.self)
-            OpalHedgeCoreDiagnostics.record(
-                successEvent,
-                category: OpalHedgeCoreDiagnostics.Category.dataDocument,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.dataDocument).record(
+                event: successEvent,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField(diagnosticsOperation),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField(diagnosticsOperation),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         draftData.fundings.count
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.feeCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.feeCount,
                         draftData.fees.count
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.byteCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.byteCount,
                         diagnosticsByteCount ?? data.count
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         "json"
                     )
                 ] + extraFields
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                failureEvent,
-                category: OpalHedgeCoreDiagnostics.Category.dataDocument,
+            let byteCountFields = diagnosticsByteCount.map {
+                [
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.byteCount,
+                        $0
+                    )
+                ]
+            } ?? []
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.dataDocument).record(
+                event: failureEvent,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField(diagnosticsOperation),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField(diagnosticsOperation),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         draftData.fundings.count
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.feeCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.feeCount,
                         draftData.fees.count
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.payloadType,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.payloadType,
                         "json"
                     )
-                ] + extraFields + OpalHedgeCoreDiagnostics.makeConstraintFields(for: error)
-                    + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                ] + byteCountFields + extraFields
+                    + OpalDiagnostics.Field.makeConstraintFields(for: error)
+                    + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

@@ -1,5 +1,7 @@
 // OpalHedgeCoreContractPlan.swift
 
+import OpalDiagnostics
+
 public struct OpalHedgeCoreContractPlan: Sendable, Equatable {
     public let parameters: OpalHedgeCoreContractParameters
     public let metadata: OpalHedgeCoreContractMetadata
@@ -26,23 +28,22 @@ public struct OpalHedgeCoreContractPlan: Sendable, Equatable {
 
             self.parameters = parameters
             self.metadata = metadata
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractPlanCreated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractPlanCreated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("create_contract_plan"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractPlanCreationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractPlanCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("create_contract_plan"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -59,23 +60,22 @@ public struct OpalHedgeCoreContractPlan: Sendable, Equatable {
 
             self.parameters = parameters
             self.metadata = metadata
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractPlanCreated,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractPlanCreated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
+                    OpalDiagnostics.Field.operationField("create_contract_plan"),
+                    OpalDiagnostics.Field.moduleField("core")
                 ]
             )
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.contractPlanCreationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.contract,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.contract).record(
+                event: OpalDiagnostics.Event.contractPlanCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("create_contract_plan"),
-                    OpalHedgeCoreDiagnostics.moduleField("core")
-                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("create_contract_plan"),
+                    OpalDiagnostics.Field.moduleField("core")
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

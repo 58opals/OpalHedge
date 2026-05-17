@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder.swift
 
 import Foundation
+import OpalDiagnostics
 
 public enum OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder {
     public static func encodeConstructorStackPushes(
@@ -32,26 +33,27 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder {
                 try OpalHedgeBitcoinCashScriptEncoder
                     .encodeDataPush(parameters.shortMutualRedeemPublicKey)
             ]
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParametersEncoded,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParametersEncoded,
+                level: .debug,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_constructor_stack_pushes"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
-                    OpalHedgeBitcoinCashDiagnostics.publicField(
-                        OpalHedgeBitcoinCashDiagnostics.Field.pushCount,
+                    OpalDiagnostics.Field.operationField("encode_constructor_stack_pushes"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.pushCount,
                         pushes.count
                     )
                 ]
             )
             return pushes
         } catch {
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParameterEncodingFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParameterEncodingFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_constructor_stack_pushes"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash")
-                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("encode_constructor_stack_pushes"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash")
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -69,30 +71,31 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder {
                 bytecode.append(push)
             }
 
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParametersEncoded,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParametersEncoded,
+                level: .debug,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_constructor_stack_bytecode"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash"),
-                    OpalHedgeBitcoinCashDiagnostics.publicField(
-                        OpalHedgeBitcoinCashDiagnostics.Field.byteCount,
+                    OpalDiagnostics.Field.operationField("encode_constructor_stack_bytecode"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.byteCount,
                         bytecode.count
                     ),
-                    OpalHedgeBitcoinCashDiagnostics.publicField(
-                        OpalHedgeBitcoinCashDiagnostics.Field.pushCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.pushCount,
                         pushes.count
                     )
                 ]
             )
             return bytecode
         } catch {
-            OpalHedgeBitcoinCashDiagnostics.record(
-                OpalHedgeBitcoinCashDiagnostics.Event.contractParameterEncodingFailed,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
+                event: OpalDiagnostics.Event.contractParameterEncodingFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeBitcoinCashDiagnostics.operationField("encode_constructor_stack_bytecode"),
-                    OpalHedgeBitcoinCashDiagnostics.moduleField("bitcoin_cash")
-                ] + OpalHedgeBitcoinCashDiagnostics.makeErrorFields(for: error)
+                    OpalDiagnostics.Field.operationField("encode_constructor_stack_bytecode"),
+                    OpalDiagnostics.Field.moduleField("bitcoin_cash")
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

@@ -1,5 +1,7 @@
 // OpalHedgeCoreSettlementCalculator.swift
 
+import OpalDiagnostics
+
 public enum OpalHedgeCoreSettlementCalculator {
     public static func calculateOutcome(
         parameters: OpalHedgeCoreContractParameters,
@@ -12,36 +14,35 @@ public enum OpalHedgeCoreSettlementCalculator {
                 fundingSatoshis: fundingSatoshis,
                 redeemPrice: redeemPrice
             )
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.settlementPayoutCalculated,
-                category: OpalHedgeCoreDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementPayoutCalculated,
+                level: .debug,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("calculate_settlement_payout"),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.operationField("calculate_settlement_payout"),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         redeemPrice
                     ),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.satoshiCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.satoshiCount,
                         outcome.totalPayoutSatsSafe
                     )
                 ]
             )
             return outcome
         } catch {
-            OpalHedgeCoreDiagnostics.record(
-                OpalHedgeCoreDiagnostics.Event.settlementPayoutCalculationFailed,
-                category: OpalHedgeCoreDiagnostics.Category.settlement,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.settlement).record(
+                event: OpalDiagnostics.Event.settlementPayoutCalculationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeCoreDiagnostics.operationField("calculate_settlement_payout"),
-                    OpalHedgeCoreDiagnostics.moduleField("core"),
-                    OpalHedgeCoreDiagnostics.publicField(
-                        OpalHedgeCoreDiagnostics.Field.settlementPrice,
+                    OpalDiagnostics.Field.operationField("calculate_settlement_payout"),
+                    OpalDiagnostics.Field.moduleField("core"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.settlementPrice,
                         redeemPrice
                     )
-                ] + OpalHedgeCoreDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

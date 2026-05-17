@@ -3,6 +3,7 @@
 import Foundation
 import OpalHedgeCore
 import OpalHedgeOracle
+import OpalDiagnostics
 
 extension OpalHedge {
     public enum Oracle {
@@ -47,36 +48,35 @@ extension OpalHedge {
                 )
                 try OpalHedgeCoreContractConstraintEvaluator.validateStartingOracleProof(proof)
 
-                OpalHedgeDiagnostics.record(
-                    OpalHedgeDiagnostics.Event.startingOracleProofVerified,
-                    category: OpalHedgeDiagnostics.Category.oracle,
+                OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                    event: OpalDiagnostics.Event.startingOracleProofVerified,
+                    level: .debug,
                     fields: [
-                        OpalHedgeDiagnostics.operationField("verify_starting_oracle_proof"),
-                        OpalHedgeDiagnostics.moduleField("opalhedge"),
-                        OpalHedgeDiagnostics.publicField(
-                            OpalHedge.Diagnostics.Field.messageTimestamp,
+                        OpalDiagnostics.Field.operationField("verify_starting_oracle_proof"),
+                        OpalDiagnostics.Field.moduleField("opalhedge"),
+                        OpalDiagnostics.Field.publicField(
+                            OpalDiagnostics.Field.messageTimestamp,
                             message.messageTimestamp
                         ),
-                        OpalHedgeDiagnostics.publicField(
-                            OpalHedge.Diagnostics.Field.messageSequence,
+                        OpalDiagnostics.Field.publicField(
+                            OpalDiagnostics.Field.messageSequence,
                             message.messageSequence
                         ),
-                        OpalHedgeDiagnostics.publicField(
-                            OpalHedge.Diagnostics.Field.priceValue,
+                        OpalDiagnostics.Field.publicField(
+                            OpalDiagnostics.Field.priceValue,
                             message.priceValue
                         )
                     ]
                 )
                 return proof
             } catch {
-                OpalHedgeDiagnostics.record(
-                    OpalHedgeDiagnostics.Event.startingOracleProofVerificationFailed,
-                    category: OpalHedgeDiagnostics.Category.oracle,
+                OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                    event: OpalDiagnostics.Event.startingOracleProofVerificationFailed,
                     level: .error,
                     fields: [
-                        OpalHedgeDiagnostics.operationField("verify_starting_oracle_proof"),
-                        OpalHedgeDiagnostics.moduleField("opalhedge")
-                    ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                        OpalDiagnostics.Field.operationField("verify_starting_oracle_proof"),
+                        OpalDiagnostics.Field.moduleField("opalhedge")
+                    ] + OpalDiagnostics.Field.makeErrorFields(for: error)
                 )
                 throw error
             }
@@ -108,36 +108,35 @@ extension OpalHedge {
                             .lowercased()
                     )
                 )
-                OpalHedgeDiagnostics.record(
-                    OpalHedgeDiagnostics.Event.settlementOracleProofVerified,
-                    category: OpalHedgeDiagnostics.Category.oracle,
+                OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                    event: OpalDiagnostics.Event.settlementOracleProofVerified,
+                    level: .debug,
                     fields: [
-                        OpalHedgeDiagnostics.operationField("verify_settlement_oracle_proof"),
-                        OpalHedgeDiagnostics.moduleField("opalhedge"),
-                        OpalHedgeDiagnostics.publicField(
-                            OpalHedge.Diagnostics.Field.messageTimestamp,
+                        OpalDiagnostics.Field.operationField("verify_settlement_oracle_proof"),
+                        OpalDiagnostics.Field.moduleField("opalhedge"),
+                        OpalDiagnostics.Field.publicField(
+                            OpalDiagnostics.Field.messageTimestamp,
                             message.messageTimestamp
                         ),
-                        OpalHedgeDiagnostics.publicField(
-                            OpalHedge.Diagnostics.Field.messageSequence,
+                        OpalDiagnostics.Field.publicField(
+                            OpalDiagnostics.Field.messageSequence,
                             message.messageSequence
                         ),
-                        OpalHedgeDiagnostics.publicField(
-                            OpalHedge.Diagnostics.Field.priceValue,
+                        OpalDiagnostics.Field.publicField(
+                            OpalDiagnostics.Field.priceValue,
                             message.priceValue
                         )
                     ]
                 )
                 return proof
             } catch {
-                OpalHedgeDiagnostics.record(
-                    OpalHedgeDiagnostics.Event.settlementOracleProofVerificationFailed,
-                    category: OpalHedgeDiagnostics.Category.oracle,
+                OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
+                    event: OpalDiagnostics.Event.settlementOracleProofVerificationFailed,
                     level: .error,
                     fields: [
-                        OpalHedgeDiagnostics.operationField("verify_settlement_oracle_proof"),
-                        OpalHedgeDiagnostics.moduleField("opalhedge")
-                    ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                        OpalDiagnostics.Field.operationField("verify_settlement_oracle_proof"),
+                        OpalDiagnostics.Field.moduleField("opalhedge")
+                    ] + OpalDiagnostics.Field.makeErrorFields(for: error)
                 )
                 throw error
             }

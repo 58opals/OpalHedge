@@ -2,6 +2,7 @@
 
 import OpalHedgeBitcoinCash
 import OpalHedgeCore
+import OpalDiagnostics
 
 extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
     public init(
@@ -38,41 +39,40 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
                 redeemScriptBytecode: bytecode.redeemScriptBytecode,
                 contractScriptArtifact: bytecode.artifact
             )
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.fundingRequestCreated,
-                category: OpalHedgeDiagnostics.Category.funding,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.funding).record(
+                event: OpalDiagnostics.Event.fundingRequestCreated,
+                level: .debug,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("reconstruct_funding_request"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.networkField(network),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField("reconstruct_funding_request"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.networkField(network),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         draftData.fundings.count
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.feeCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.feeCount,
                         draftData.fees.count
                     )
                 ]
             )
         } catch {
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.fundingRequestCreationFailed,
-                category: OpalHedgeDiagnostics.Category.funding,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.funding).record(
+                event: OpalDiagnostics.Event.fundingRequestCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("reconstruct_funding_request"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.networkField(network),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField("reconstruct_funding_request"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.networkField(network),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         draftData.fundings.count
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.feeCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.feeCount,
                         draftData.fees.count
                     )
-                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
@@ -84,18 +84,17 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
         guard fundings.isEmpty else {
             let error = OpalHedgeBitcoinCashAnyHedgeContractFundingRequestError
                 .contractAlreadyFunded(fundingCount: fundings.count)
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.fundingRequestCreationFailed,
-                category: OpalHedgeDiagnostics.Category.funding,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.funding).record(
+                event: OpalDiagnostics.Event.fundingRequestCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("validate_no_existing_fundings"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField("validate_no_existing_fundings"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         fundings.count
                     )
-                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }

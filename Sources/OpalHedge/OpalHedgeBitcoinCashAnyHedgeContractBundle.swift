@@ -2,6 +2,7 @@
 
 import OpalHedgeBitcoinCash
 import OpalHedgeCore
+import OpalDiagnostics
 
 package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
     package let plan: OpalHedgeCoreContractPlan
@@ -83,45 +84,44 @@ package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
             self.fundingOutput = fundingOutput
             self.dataDocument = dataDocument
             self.fundingRequest = fundingRequest
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.fundingRequestCreated,
-                category: OpalHedgeDiagnostics.Category.funding,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.funding).record(
+                event: OpalDiagnostics.Event.fundingRequestCreated,
+                level: .debug,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("create_funding_request"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.networkField(network),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField("create_funding_request"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.networkField(network),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         fundings.count
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.feeCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.feeCount,
                         fees.count
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.satoshiCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.satoshiCount,
                         fundingOutput.satoshis
                     )
                 ]
             )
         } catch {
-            OpalHedgeDiagnostics.record(
-                OpalHedgeDiagnostics.Event.fundingRequestCreationFailed,
-                category: OpalHedgeDiagnostics.Category.funding,
+            OpalDiagnostics.logger(category: OpalDiagnostics.Category.funding).record(
+                event: OpalDiagnostics.Event.fundingRequestCreationFailed,
                 level: .error,
                 fields: [
-                    OpalHedgeDiagnostics.operationField("create_funding_request"),
-                    OpalHedgeDiagnostics.moduleField("opalhedge"),
-                    OpalHedgeDiagnostics.networkField(network),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.fundingCount,
+                    OpalDiagnostics.Field.operationField("create_funding_request"),
+                    OpalDiagnostics.Field.moduleField("opalhedge"),
+                    OpalDiagnostics.Field.networkField(network),
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.fundingCount,
                         fundings.count
                     ),
-                    OpalHedgeDiagnostics.publicField(
-                        OpalHedge.Diagnostics.Field.feeCount,
+                    OpalDiagnostics.Field.publicField(
+                        OpalDiagnostics.Field.feeCount,
                         fees.count
                     )
-                ] + OpalHedgeDiagnostics.makeErrorFields(for: error)
+                ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
