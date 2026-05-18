@@ -4,7 +4,7 @@ import OpalDiagnostics
 import OpalHedgeCore
 
 extension OpalDiagnostics.Field {
-    static func coreConstraintErrorCode(for error: OpalHedgeCoreContractConstraintError) -> String {
+    static func coreConstraintErrorCode(for error: OpalHedgeCoreContractConstraintError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .makerSideMustOpposeTaker,
              .invalidPositiveInteger,
@@ -32,24 +32,24 @@ extension OpalDiagnostics.Field {
              .unsafeLongPayoutAtLowLiquidation,
              .inconsistentContractFundingAmount,
              .invalidContractFunding:
-            return OpalHedgeDiagnosticErrorCode.contractConstraintValidationFailed
+            return OpalDiagnostics.ErrorCode(rawValue: "contract.constraint_validation_failed")
         }
     }
 
-    static func coreDataDocumentErrorCode(for error: OpalHedgeCoreContractDataDocumentError) -> String {
+    static func coreDataDocumentErrorCode(for error: OpalHedgeCoreContractDataDocumentError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidJson:
-            return OpalHedgeDiagnosticErrorCode.dataDocumentInvalidJson
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_json")
         case .invalidRootObject:
-            return OpalHedgeDiagnosticErrorCode.dataDocumentInvalidRootObject
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_root_object")
         case .missingField:
-            return OpalHedgeDiagnosticErrorCode.dataDocumentMissingField
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.missing_field")
         case .invalidFieldType:
-            return OpalHedgeDiagnosticErrorCode.dataDocumentInvalidFieldType
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_field_type")
         case .invalidContractSide:
-            return OpalHedgeDiagnosticErrorCode.dataDocumentInvalidContractSide
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_contract_side")
         case .invalidSettlementType:
-            return OpalHedgeDiagnosticErrorCode.dataDocumentInvalidSettlementType
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_settlement_type")
         }
     }
 }

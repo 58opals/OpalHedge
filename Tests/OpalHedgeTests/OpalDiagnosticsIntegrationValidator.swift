@@ -24,7 +24,7 @@ struct OpalDiagnosticsIntegrationValidator {
             #expect(findField(OpalDiagnostics.Field.errorCode, in: record)?.value == "data_document.invalid_json")
             #expect(findField(OpalDiagnostics.Field.errorMessage, in: record)?.value == "<redacted>")
             #expect(findField(OpalDiagnostics.Field.errorMessage, in: record)?.privacy == .private)
-            #expect(record.fields.contains { $0.name == "error_type" } == false)
+            #expect(findField("error_type", in: record)?.value.contains("OpalHedgeCoreContractDataDocumentError") == true)
             #expect(record.fields.contains { $0.name == "raw_message" } == false)
             #expect(record.fields.contains { $0.name == "serialized_payload" } == false)
         }
@@ -155,6 +155,31 @@ struct OpalDiagnosticsIntegrationValidator {
             #expect(isVerified)
             #expect(findDiagnosticRecord(named: OpalDiagnostics.Event.oracleSignatureVerified) != nil)
             #expect(findDiagnosticRecord(named: OpalDiagnostics.Event.oracleMessageParsed) == nil)
+        }
+    }
+
+    @Test("Oracle signature invalid result emits shared error fields")
+    func verifyOracleSignatureInvalidResultEmitsSharedErrorFields() throws {
+        try withDiagnosticsCapture {
+            let message = try OpalHedge.Oracle.PriceMessage.parse(
+                hex: OpalHedgeFixtureData.startingOracleMessageHex
+            )
+            OpalDiagnostics.clearRecentRecords()
+
+            let isVerified = try OpalHedge.Oracle.SignatureVerifier.verify(
+                message: message,
+                signatureHex: String(repeating: "0", count: 128),
+                publicKeyHex: OpalHedgeFixtureData.oraclePublicKeyHex
+            )
+
+            let record = try #require(
+                findDiagnosticRecord(named: OpalDiagnostics.Event.oracleSignatureVerificationFailed)
+            )
+            #expect(!isVerified)
+            #expect(findField(OpalDiagnostics.Field.errorCode, in: record)?.value == "oracle.invalid_signature")
+            #expect(findField(OpalDiagnostics.Field.errorCategory, in: record)?.value == "oracle_signature")
+            #expect(findField("error_type", in: record)?.value.contains("OpalHedgeOracleSignatureVerificationError") == true)
+            #expect(findField(OpalDiagnostics.Field.errorMessage, in: record)?.value == "<redacted>")
         }
     }
 
@@ -344,6 +369,7 @@ struct OpalDiagnosticsIntegrationValidator {
             )
             #expect(hashRecord.category == OpalDiagnostics.Category.bitcoinCash)
             #expect(findField(OpalDiagnostics.Field.errorCode, in: hashRecord)?.value == "bitcoin_cash.transaction_hash.invalid")
+            #expect(findField(OpalDiagnostics.Field.errorCategory, in: hashRecord)?.value == "bitcoin_cash")
             #expect(hashRecord.fields.contains { $0.name == "transaction_hash" } == false)
             #expect(findField(OpalDiagnostics.Field.errorMessage, in: hashRecord)?.value == "<redacted>")
         }

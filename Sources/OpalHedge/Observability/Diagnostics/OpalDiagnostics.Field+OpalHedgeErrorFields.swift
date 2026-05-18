@@ -41,17 +41,18 @@ extension OpalDiagnostics.Field {
 
     static func makeErrorFields(for error: Swift.Error) -> [OpalDiagnostics.Field] {
         [
-            publicField(Self.errorCode, errorCode(for: error)),
+            OpalDiagnostics.Field.errorCode(errorCode(for: error)),
+            OpalDiagnostics.Field.errorType(error),
             publicField(Self.errorCategory, errorCategory(for: error)),
-            privateField(Self.errorMessage, (error as NSError).localizedDescription)
+            OpalDiagnostics.Field.errorMessage((error as NSError).localizedDescription)
         ]
     }
 
-    static func errorCode(for error: Swift.Error) -> String {
+    static func errorCode(for error: Swift.Error) -> OpalDiagnostics.ErrorCode {
         switch error {
         case OpalHedgeStartingPriceProofError.invalidSignature,
              OpalHedgeSettlementOracleProofError.invalidSignature:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidSignature
+            return OpalDiagnostics.ErrorCode.oracleInvalidSignature
         case let error as OpalHedgeOracleMessageError:
             return oracleErrorCode(for: error)
         case let error as OpalHedgeOracleSignatureVerificationError:
@@ -67,7 +68,7 @@ extension OpalDiagnostics.Field {
         case let error as OpalHedgeBitcoinCashAnyHedgeContractParameterError:
             return bitcoinCashParameterErrorCode(for: error)
         case is OpalHedgeBitcoinCashAnyHedgeContractFundingRequestError:
-            return OpalHedgeDiagnosticErrorCode.fundingAlreadyExists
+            return OpalDiagnostics.ErrorCode.fundingAlreadyExists
         case let error as OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError:
             return fundingOutputErrorCode(for: error)
         case let error as OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError:
@@ -75,11 +76,11 @@ extension OpalDiagnostics.Field {
         case let error as OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError:
             return settlementRecordErrorCode(for: error)
         case is OpalHedgeCoreSettlementConditionError:
-            return OpalHedgeDiagnosticErrorCode.settlementConditionInvalid
+            return OpalDiagnostics.ErrorCode.settlementConditionInvalid
         case is OpalHedgeCoreSettlementCalculationError:
-            return OpalHedgeDiagnosticErrorCode.settlementPayoutInvalid
+            return OpalDiagnostics.ErrorCode.settlementPayoutInvalid
         default:
-            return OpalHedgeDiagnosticErrorCode.unknown
+            return OpalDiagnostics.ErrorCode.unknown
         }
     }
 
@@ -97,6 +98,9 @@ extension OpalDiagnostics.Field {
         case is OpalHedgeBitcoinCashContractAddressError,
              is OpalHedgeBitcoinCashScriptEncodingError,
              is OpalHedgeBitcoinCashAnyHedgeContractParameterError:
+            return "bitcoin_cash"
+        case OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError.invalidFundingTransactionHash,
+             OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError.invalidSettlementTransactionHash:
             return "bitcoin_cash"
         case is OpalHedgeBitcoinCashAnyHedgeContractFundingRequestError,
              is OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError,

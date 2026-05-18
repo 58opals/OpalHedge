@@ -44,9 +44,10 @@ extension OpalDiagnostics.Field {
 
     static func makeErrorFields(for error: Swift.Error) -> [OpalDiagnostics.Field] {
         [
-            publicField(Self.errorCode, errorCode(for: error)),
+            OpalDiagnostics.Field.errorCode(errorCode(for: error)),
+            OpalDiagnostics.Field.errorType(error),
             publicField(Self.errorCategory, errorCategory(for: error)),
-            privateField(Self.errorMessage, (error as NSError).localizedDescription)
+            OpalDiagnostics.Field.errorMessage((error as NSError).localizedDescription)
         ]
     }
 
@@ -60,22 +61,22 @@ extension OpalDiagnostics.Field {
         ]
     }
 
-    static func errorCode(for error: Swift.Error) -> String {
+    static func errorCode(for error: Swift.Error) -> OpalDiagnostics.ErrorCode {
         switch error {
         case let error as OpalHedgeCoreContractConstraintError:
             return errorCode(for: error)
         case let error as OpalHedgeCoreContractDataDocumentError:
             return errorCode(for: error)
         case is OpalHedgeCoreSettlementConditionError:
-            return OpalHedgeCoreDiagnosticErrorCode.settlementConditionInvalid
+            return OpalDiagnostics.ErrorCode(rawValue: "settlement.condition_invalid")
         case is OpalHedgeCoreSettlementCalculationError:
-            return OpalHedgeCoreDiagnosticErrorCode.settlementPayoutInvalid
+            return OpalDiagnostics.ErrorCode(rawValue: "settlement.payout_invalid")
         default:
-            return OpalHedgeCoreDiagnosticErrorCode.unknown
+            return OpalDiagnostics.ErrorCode(rawValue: "unknown")
         }
     }
 
-    static func errorCode(for error: OpalHedgeCoreContractConstraintError) -> String {
+    static func errorCode(for error: OpalHedgeCoreContractConstraintError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .makerSideMustOpposeTaker,
              .invalidPositiveInteger,
@@ -103,24 +104,24 @@ extension OpalDiagnostics.Field {
              .unsafeLongPayoutAtLowLiquidation,
              .inconsistentContractFundingAmount,
              .invalidContractFunding:
-            return OpalHedgeCoreDiagnosticErrorCode.contractConstraintValidationFailed
+            return OpalDiagnostics.ErrorCode(rawValue: "contract.constraint_validation_failed")
         }
     }
 
-    static func errorCode(for error: OpalHedgeCoreContractDataDocumentError) -> String {
+    static func errorCode(for error: OpalHedgeCoreContractDataDocumentError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidJson:
-            return OpalHedgeCoreDiagnosticErrorCode.dataDocumentInvalidJson
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_json")
         case .invalidRootObject:
-            return OpalHedgeCoreDiagnosticErrorCode.dataDocumentInvalidRootObject
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_root_object")
         case .missingField:
-            return OpalHedgeCoreDiagnosticErrorCode.dataDocumentMissingField
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.missing_field")
         case .invalidFieldType:
-            return OpalHedgeCoreDiagnosticErrorCode.dataDocumentInvalidFieldType
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_field_type")
         case .invalidContractSide:
-            return OpalHedgeCoreDiagnosticErrorCode.dataDocumentInvalidContractSide
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_contract_side")
         case .invalidSettlementType:
-            return OpalHedgeCoreDiagnosticErrorCode.dataDocumentInvalidSettlementType
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_settlement_type")
         }
     }
 

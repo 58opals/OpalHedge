@@ -41,18 +41,11 @@ public enum OpalHedgeOracleSignatureVerifier {
                 level: .error,
                 fields: [
                     OpalDiagnostics.Field.operationField("verify_oracle_signature"),
-                    OpalDiagnostics.Field.moduleField("oracle"),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.errorCode,
-                        OpalDiagnostics.Field.errorCode(
-                            for: OpalHedgeOracleSignatureVerificationError.invalidSignature
-                        )
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.errorCategory,
-                        "oracle_signature"
-                    )
-                ] + OpalDiagnostics.Field.makeMessageFields(for: message)
+                    OpalDiagnostics.Field.moduleField("oracle")
+                ] + OpalDiagnostics.Field.makeErrorFields(
+                    for: OpalHedgeOracleSignatureVerificationError.invalidSignature,
+                    errorCategory: "oracle_signature"
+                ) + OpalDiagnostics.Field.makeMessageFields(for: message)
             )
             return false
         }
@@ -80,18 +73,10 @@ public enum OpalHedgeOracleSignatureVerifier {
                 fields: [
                     OpalDiagnostics.Field.operationField("verify_oracle_signature"),
                     OpalDiagnostics.Field.moduleField("oracle")
-                ] + (isVerified ? [] : [
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.errorCode,
-                        OpalDiagnostics.Field.errorCode(
-                            for: OpalHedgeOracleSignatureVerificationError.invalidSignature
-                        )
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.errorCategory,
-                        "oracle_signature"
-                    )
-                ]) + OpalDiagnostics.Field.makeMessageFields(for: message)
+                ] + (isVerified ? [] : OpalDiagnostics.Field.makeErrorFields(
+                    for: OpalHedgeOracleSignatureVerificationError.invalidSignature,
+                    errorCategory: "oracle_signature"
+                )) + OpalDiagnostics.Field.makeMessageFields(for: message)
             )
             return isVerified
         } catch let error as OpalCrypto.Signature.Error {

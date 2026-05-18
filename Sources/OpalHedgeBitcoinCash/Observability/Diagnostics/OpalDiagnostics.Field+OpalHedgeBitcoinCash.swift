@@ -40,13 +40,14 @@ extension OpalDiagnostics.Field {
 
     static func makeErrorFields(for error: Swift.Error) -> [OpalDiagnostics.Field] {
         [
-            publicField(Self.errorCode, errorCode(for: error)),
+            OpalDiagnostics.Field.errorCode(errorCode(for: error)),
+            OpalDiagnostics.Field.errorType(error),
             publicField(Self.errorCategory, errorCategory(for: error)),
-            privateField(Self.errorMessage, (error as NSError).localizedDescription)
+            OpalDiagnostics.Field.errorMessage((error as NSError).localizedDescription)
         ]
     }
 
-    static func errorCode(for error: Swift.Error) -> String {
+    static func errorCode(for error: Swift.Error) -> OpalDiagnostics.ErrorCode {
         switch error {
         case let error as OpalHedgeBitcoinCashContractAddressError:
             return errorCode(for: error)
@@ -55,40 +56,40 @@ extension OpalDiagnostics.Field {
         case let error as OpalHedgeBitcoinCashAnyHedgeContractParameterError:
             return errorCode(for: error)
         default:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.unknown
+            return OpalDiagnostics.ErrorCode(rawValue: "unknown")
         }
     }
 
-    static func errorCode(for error: OpalHedgeBitcoinCashContractAddressError) -> String {
+    static func errorCode(for error: OpalHedgeBitcoinCashContractAddressError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidRedeemScriptHex:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidRedeemScriptHex
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.invalid_redeem_script_hex")
         case .invalidScriptHashByteCount:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidScriptHashByteCount
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.invalid_script_hash_byte_count")
         }
     }
 
-    static func errorCode(for error: OpalHedgeBitcoinCashScriptEncodingError) -> String {
+    static func errorCode(for error: OpalHedgeBitcoinCashScriptEncodingError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .dataPushTooLarge:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.dataPushTooLarge
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.script.data_push_too_large")
         }
     }
 
-    static func errorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractParameterError) -> String {
+    static func errorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractParameterError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidHex:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidHex
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.parameter.invalid_hex")
         case .invalidCompressedPublicKey:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidCompressedPublicKey
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.parameter.invalid_compressed_public_key")
         case .invalidLockScript:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidLockScript
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.parameter.invalid_lock_script")
         case .invalidPositiveInteger:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidPositiveInteger
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.parameter.invalid_positive_integer")
         case .invalidNonnegativeInteger:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidNonnegativeInteger
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.parameter.invalid_nonnegative_integer")
         case .invalidBooleanInteger:
-            return OpalHedgeBitcoinCashDiagnosticErrorCode.invalidBooleanInteger
+            return OpalDiagnostics.ErrorCode(rawValue: "bitcoin_cash.parameter.invalid_boolean_integer")
         }
     }
 

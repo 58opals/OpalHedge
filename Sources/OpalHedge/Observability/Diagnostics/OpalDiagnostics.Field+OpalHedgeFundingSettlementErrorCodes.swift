@@ -3,39 +3,39 @@
 import OpalDiagnostics
 
 extension OpalDiagnostics.Field {
-    static func fundingOutputErrorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError) -> String {
+    static func fundingOutputErrorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidPayoutSatoshis:
-            return OpalHedgeDiagnosticErrorCode.fundingOutputInvalidPayoutSatoshis
+            return OpalDiagnostics.ErrorCode.fundingOutputInvalidPayoutSatoshis
         case .invalidDustReserveSatoshis:
-            return OpalHedgeDiagnosticErrorCode.fundingOutputInvalidDustReserveSatoshis
+            return OpalDiagnostics.ErrorCode.fundingOutputInvalidDustReserveSatoshis
         case .fundingSatoshisOverflow:
-            return OpalHedgeDiagnosticErrorCode.fundingOutputSatoshisOverflow
+            return OpalDiagnostics.ErrorCode.fundingOutputSatoshisOverflow
         }
     }
 
-    static func fundingRecordErrorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError) -> String {
+    static func fundingRecordErrorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidFundingTransactionHash:
-            return OpalHedgeDiagnosticErrorCode.transactionHashInvalid
+            return OpalDiagnostics.ErrorCode.transactionHashInvalid
         case .missingFundingRecord,
              .fundingAlreadySettled,
              .invalidFundingOutputIndex,
              .inconsistentFundingSatoshis:
-            return OpalHedgeDiagnosticErrorCode.fundingRecordInvalid
+            return OpalDiagnostics.ErrorCode.fundingRecordInvalid
         }
     }
 
-    static func settlementRecordErrorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError) -> String {
+    static func settlementRecordErrorCode(for error: OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidSettlementTransactionHash:
-            return OpalHedgeDiagnosticErrorCode.transactionHashInvalid
+            return OpalDiagnostics.ErrorCode.transactionHashInvalid
         case .missingFundingRecord,
              .missingDataDocumentFunding,
              .missingSettlement,
              .missingSettlementField,
              .inconsistentSettlement:
-            return OpalHedgeDiagnosticErrorCode.settlementRecordInvalid
+            return OpalDiagnostics.ErrorCode.settlementRecordInvalid
         }
     }
 }

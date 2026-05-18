@@ -52,48 +52,49 @@ extension OpalDiagnostics.Field {
 
     static func makeErrorFields(for error: Swift.Error, errorCategory explicitErrorCategory: String? = nil) -> [OpalDiagnostics.Field] {
         [
-            publicField(Self.errorCode, errorCode(for: error)),
+            OpalDiagnostics.Field.errorCode(errorCode(for: error)),
+            OpalDiagnostics.Field.errorType(error),
             publicField(Self.errorCategory, explicitErrorCategory ?? errorCategory(for: error)),
-            privateField(Self.errorMessage, (error as NSError).localizedDescription)
+            OpalDiagnostics.Field.errorMessage((error as NSError).localizedDescription)
         ]
     }
 
-    static func errorCode(for error: Swift.Error) -> String {
+    static func errorCode(for error: Swift.Error) -> OpalDiagnostics.ErrorCode {
         switch error {
         case let error as OpalHedgeOracleMessageError:
             return errorCode(for: error)
         case let error as OpalHedgeOracleSignatureVerificationError:
             return errorCode(for: error)
         default:
-            return OpalHedgeOracleDiagnosticErrorCode.unknown
+            return OpalDiagnostics.ErrorCode(rawValue: "unknown")
         }
     }
 
-    static func errorCode(for error: OpalHedgeOracleMessageError) -> String {
+    static func errorCode(for error: OpalHedgeOracleMessageError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidHexLength:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidHexLength
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_hex_length")
         case .invalidHexCharacter:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidHexCharacter
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_hex_character")
         case .invalidMessageLength:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidMessageLength
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_message_length")
         case .invalidScriptInteger:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidScriptInteger
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_script_integer")
         case .invalidPrice:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidPrice
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_price")
         }
     }
 
-    static func errorCode(for error: OpalHedgeOracleSignatureVerificationError) -> String {
+    static func errorCode(for error: OpalHedgeOracleSignatureVerificationError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidPublicKey:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidPublicKey
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_public_key")
         case .invalidSignature:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidSignature
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_signature")
         case .invalidDigest:
-            return OpalHedgeOracleDiagnosticErrorCode.invalidDigest
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_digest")
         case .cryptographyFailure:
-            return OpalHedgeOracleDiagnosticErrorCode.cryptographyFailure
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.cryptography_failure")
         }
     }
 

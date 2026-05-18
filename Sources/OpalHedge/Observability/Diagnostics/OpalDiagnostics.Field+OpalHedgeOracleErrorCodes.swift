@@ -4,31 +4,31 @@ import OpalDiagnostics
 import OpalHedgeOracle
 
 extension OpalDiagnostics.Field {
-    static func oracleErrorCode(for error: OpalHedgeOracleMessageError) -> String {
+    static func oracleErrorCode(for error: OpalHedgeOracleMessageError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidHexLength:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidHexLength
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_hex_length")
         case .invalidHexCharacter:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidHexCharacter
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_hex_character")
         case .invalidMessageLength:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidMessageLength
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_message_length")
         case .invalidScriptInteger:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidScriptInteger
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_script_integer")
         case .invalidPrice:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidPrice
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_price")
         }
     }
 
-    static func oracleSignatureErrorCode(for error: OpalHedgeOracleSignatureVerificationError) -> String {
+    static func oracleSignatureErrorCode(for error: OpalHedgeOracleSignatureVerificationError) -> OpalDiagnostics.ErrorCode {
         switch error {
         case .invalidPublicKey:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidPublicKey
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_public_key")
         case .invalidSignature:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidSignature
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_signature")
         case .invalidDigest:
-            return OpalHedgeDiagnosticErrorCode.oracleInvalidDigest
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.invalid_digest")
         case .cryptographyFailure:
-            return OpalHedgeDiagnosticErrorCode.oracleCryptographyFailure
+            return OpalDiagnostics.ErrorCode(rawValue: "oracle.cryptography_failure")
         }
     }
 }
