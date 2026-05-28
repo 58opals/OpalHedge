@@ -531,7 +531,7 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
                 expectedFieldType: "object"
             )
         ]
-        let settledJsonText = try settledContractDataDocumentJsonText()
+        let settledJsonText = try makeSettledContractDataDocumentJsonText()
 
         for fieldCase in cases {
             let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
@@ -575,7 +575,7 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
                 expectedFieldType: "integer"
             )
         ]
-        let settledJsonText = try settledContractDataDocumentJsonText()
+        let settledJsonText = try makeSettledContractDataDocumentJsonText()
 
         for fieldCase in cases {
             let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
@@ -644,7 +644,7 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
                 expectedFieldType: "integer"
             )
         ]
-        let settledJsonText = try settledContractDataDocumentJsonText()
+        let settledJsonText = try makeSettledContractDataDocumentJsonText()
 
         for fieldCase in cases {
             let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
@@ -693,7 +693,7 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
                 expectedFieldType: "integer"
             )
         ]
-        let settledJsonText = try settledContractDataDocumentJsonText()
+        let settledJsonText = try makeSettledContractDataDocumentJsonText()
 
         for fieldCase in cases {
             let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
@@ -758,7 +758,7 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
             let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 replacingFieldAt: fieldPath,
                 with: fieldValue,
-                in: try sourceJsonText(for: fieldPath)
+                in: try makeSourceJsonText(for: fieldPath)
             )
             let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
@@ -779,7 +779,7 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
             let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
                 replacingFieldAt: fieldPath,
                 withRawJSONValue: rawJSONValue,
-                in: try sourceJsonText(for: fieldPath)
+                in: try makeSourceJsonText(for: fieldPath)
             )
             let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
                 _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
@@ -827,20 +827,20 @@ struct OpalHedgeCoreContractDataDocumentDecodeValidator {
         ]
     }
 
-    private func sourceJsonText(
+    private func makeSourceJsonText(
         for fieldPath: OpalHedgeContractDataDocumentFieldPathData
     ) throws -> String {
         switch fieldPath {
         case .firstFunding,
             .firstFee,
             .firstFundingSettlement:
-            return try settledContractDataDocumentJsonText()
+            return try makeSettledContractDataDocumentJsonText()
         default:
             return OpalHedgeFixtureData.upstreamHedgeTenWeekContractDataDocumentJsonText
         }
     }
 
-    private func settledContractDataDocumentJsonText() throws -> String {
+    private func makeSettledContractDataDocumentJsonText() throws -> String {
         let document = try OpalHedge.Core.ContractDataDocument(
             draftData: makeSettledDraftData()
         )

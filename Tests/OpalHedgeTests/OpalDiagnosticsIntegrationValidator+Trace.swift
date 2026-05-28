@@ -6,7 +6,7 @@ import Testing
 
 extension OpalDiagnosticsIntegrationValidator {
     @Test("Diagnostics extensions expose stable filter values")
-    func diagnosticsExtensionsExposeStableFilterValues() {
+    func verifyDiagnosticsExtensionsExposeStableFilterValues() {
         let categories: [OpalDiagnostics.Category] = [
             OpalDiagnostics.Category.hedge,
             OpalDiagnostics.Category.contract,
@@ -149,7 +149,7 @@ extension OpalDiagnosticsIntegrationValidator {
     }
 
     @Test("Category filters support exact and hierarchical OpalHedge matching")
-    func categoryFiltersSupportExactAndHierarchicalOpalHedgeMatching() {
+    func verifyCategoryFiltersSupportExactAndHierarchicalOpalHedgeMatching() {
         OpalDiagnostics.withConfiguration(
             .init(
                 minimumLevel: .debug,

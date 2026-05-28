@@ -46,7 +46,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
 
     @Test("Ignores unknown contract data document funding and fee fields")
     func ignoreUnknownContractDataDocumentFundingAndFeeFields() throws {
-        let referenceDocument = try settledContractDataDocument()
+        let referenceDocument = try makeSettledContractDataDocument()
         let cases = [
             (arrayName: "fundings", fieldName: "futureFunding"),
             (arrayName: "fees", fieldName: "futureFee")
@@ -68,7 +68,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
 
     @Test("Ignores unknown contract data document settlement fields")
     func ignoreUnknownContractDataDocumentSettlementFields() throws {
-        let referenceDocument = try settledContractDataDocument()
+        let referenceDocument = try makeSettledContractDataDocument()
         let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
             replacingSettlementField: "futureSettlement",
             with: "ignored",
@@ -80,7 +80,7 @@ struct OpalHedgeCoreContractDataDocumentUnknownFieldValidator {
         #expect(document.jsonText == referenceDocument.jsonText)
     }
 
-    private func settledContractDataDocument() throws -> OpalHedge.Core.ContractDataDocument {
+    private func makeSettledContractDataDocument() throws -> OpalHedge.Core.ContractDataDocument {
         try OpalHedge.Core.ContractDataDocument(
             draftData: makeSettledDraftData()
         )

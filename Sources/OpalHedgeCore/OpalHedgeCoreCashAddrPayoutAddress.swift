@@ -29,7 +29,8 @@ struct OpalHedgeCoreCashAddrPayoutAddress: Sendable, Equatable {
         let prefix = String(parts[0])
         let payloadText = parts[1]
         guard supportedPrefixes.contains(prefix),
-              payloadText.count == encodedPayloadCharacterCount else {
+              payloadText.count == OpalHedgeCoreContractConstraintPolicy
+                .cashAddressPayToPublicKeyHashPayloadLength else {
             throw OpalHedgeCoreContractConstraintError.invalidPayoutAddress(
                 name: name,
                 value: value
@@ -74,7 +75,6 @@ struct OpalHedgeCoreCashAddrPayoutAddress: Sendable, Equatable {
         "bchtest",
         "bchreg"
     ]
-    private static let encodedPayloadCharacterCount = 42
     private static let checksumValueCount = 8
     private static let expectedPayloadByteCount = 21
     private static let payToPublicKeyHashVersionByte: UInt8 = 0

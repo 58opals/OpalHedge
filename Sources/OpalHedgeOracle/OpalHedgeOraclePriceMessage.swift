@@ -105,10 +105,11 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
             )
         }
 
-        let messageTimestamp = Int64(readInt32LittleEndian(from: data, offset: 0))
-        let messageSequence = Int64(readInt32LittleEndian(from: data, offset: 4))
-        let priceSequence = Int64(readInt32LittleEndian(from: data, offset: 8))
-        let priceValue = Int64(readInt32LittleEndian(from: data, offset: 12))
+        let bytes = [UInt8](data)
+        let messageTimestamp = Int64(readInt32LittleEndian(from: bytes, offset: 0))
+        let messageSequence = Int64(readInt32LittleEndian(from: bytes, offset: 4))
+        let priceSequence = Int64(readInt32LittleEndian(from: bytes, offset: 8))
+        let priceValue = Int64(readInt32LittleEndian(from: bytes, offset: 12))
 
         try validatePositiveScriptInteger(messageTimestamp, name: "messageTimestamp")
         try validatePositiveScriptInteger(messageSequence, name: "messageSequence")
@@ -124,8 +125,7 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
         )
     }
 
-    private static func readInt32LittleEndian(from data: Data, offset: Int) -> Int32 {
-        let bytes = [UInt8](data)
+    private static func readInt32LittleEndian(from bytes: [UInt8], offset: Int) -> Int32 {
         let value = UInt32(bytes[offset])
             | UInt32(bytes[offset + 1]) << 8
             | UInt32(bytes[offset + 2]) << 16

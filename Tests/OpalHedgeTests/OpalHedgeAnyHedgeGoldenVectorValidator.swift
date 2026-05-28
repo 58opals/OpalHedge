@@ -21,7 +21,7 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
         )
         let constructorStackPushHexTexts = try OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder
             .encodeConstructorStackPushes(from: parameterData)
-            .map(hexText)
+            .map(makeHexText)
         let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             parameters: parameterData
         )
@@ -34,7 +34,7 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
         #expect(plan.parameters == OpalHedgeFixtureData.contractParameters)
         #expect(constructorStackPushHexTexts == OpalHedgeAnyHedgeGoldenVectorData
             .constructorStackPushHexTexts)
-        #expect(hexText(bytecode.constructorStackBytecode) == OpalHedgeAnyHedgeGoldenVectorData
+        #expect(makeHexText(bytecode.constructorStackBytecode) == OpalHedgeAnyHedgeGoldenVectorData
             .constructorStackBytecodeHex)
         #expect(bytecode.constructorStackPushes.count == OpalHedgeAnyHedgeGoldenVectorData
             .constructorStackPushCount)
@@ -42,10 +42,10 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
             .constructorStackBytecodeByteCount)
         #expect(bytecode.redeemScriptBytecode.count == OpalHedgeAnyHedgeGoldenVectorData
             .redeemScriptBytecodeByteCount)
-        #expect(hexText(bytecode.redeemScriptBytecode).hasSuffix(
+        #expect(makeHexText(bytecode.redeemScriptBytecode).hasSuffix(
             OpalHedgeAnyHedgeGoldenVectorData.contractScriptBytecodeSuffixHex
         ))
-        #expect(hexText(address.scriptHash) == OpalHedgeAnyHedgeGoldenVectorData
+        #expect(makeHexText(address.scriptHash) == OpalHedgeAnyHedgeGoldenVectorData
             .mainnetContractScriptHashHex)
         #expect(address.rawValue == OpalHedgeAnyHedgeGoldenVectorData.mainnetContractAddress)
         #expect(bundle.contractAddress == address)
@@ -133,7 +133,7 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
         ])
     }
 
-    private func hexText(_ data: Data) -> String {
+    private func makeHexText(_ data: Data) -> String {
         data.map { String(format: "%02x", $0) }.joined()
     }
 }

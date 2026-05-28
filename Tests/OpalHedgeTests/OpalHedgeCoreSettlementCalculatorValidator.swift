@@ -37,14 +37,14 @@ struct OpalHedgeCoreSettlementCalculatorValidator {
     }
 
     @Test("Rejects underfunded settlement outcome")
-    func rejectUnderfundedSettlementOutcome() {
-        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
+    func rejectUnderfundedSettlementOutcome() throws {
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
             _ = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
                 parameters: OpalHedgeFixtureData.contractParameters,
                 fundingSatoshis: 5_649_716,
                 redeemPrice: 23_500
             )
-        }
+        })
 
         #expect(
             error == .insufficientFundingSatoshis(
@@ -55,57 +55,29 @@ struct OpalHedgeCoreSettlementCalculatorValidator {
     }
 
     @Test("Rejects settlement payout overflow without trapping")
-    func rejectSettlementPayoutOverflowWithoutTrapping() {
-        let parameters = OpalHedge.Core.ContractParameters(
-            oraclePublicKey: OpalHedgeFixtureData.contractParameters.oraclePublicKey,
+    func rejectSettlementPayoutOverflowWithoutTrapping() throws {
+        let parameters = makeContractParameters(
             lowLiquidationPrice: 1,
             highLiquidationPrice: 2,
-            startTimestamp: OpalHedgeFixtureData.contractParameters.startTimestamp,
-            maturityTimestamp: OpalHedgeFixtureData.contractParameters.maturityTimestamp,
             nominalUnitsXSatsPerBch: Int64.max,
             satsForNominalUnitsAtHighLiquidation: 0,
-            payoutSats: 0,
-            shortLockScript: OpalHedgeFixtureData.contractParameters.shortLockScript,
-            longLockScript: OpalHedgeFixtureData.contractParameters.longLockScript,
-            enableMutualRedemption: OpalHedgeFixtureData.contractParameters
-                .enableMutualRedemption,
-            shortMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
-                .shortMutualRedeemPublicKey,
-            longMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
-                .longMutualRedeemPublicKey
+            payoutSats: 1_332
         )
-        let error = OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
             _ = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
                 parameters: parameters,
                 fundingSatoshis: Int64.max,
                 redeemPrice: 1
             )
-        }
+        })
 
         #expect(error == .payoutSatoshisOverflow)
     }
 
     @Test("Rejects empty liquidation range")
     func rejectEmptyLiquidationRange() {
-        let parameters = OpalHedge.Core.ContractParameters(
-            oraclePublicKey: OpalHedgeFixtureData.contractParameters.oraclePublicKey,
-            lowLiquidationPrice: OpalHedgeFixtureData.contractParameters.lowLiquidationPrice,
-            highLiquidationPrice: OpalHedgeFixtureData.contractParameters.lowLiquidationPrice,
-            startTimestamp: OpalHedgeFixtureData.contractParameters.startTimestamp,
-            maturityTimestamp: OpalHedgeFixtureData.contractParameters.maturityTimestamp,
-            nominalUnitsXSatsPerBch: OpalHedgeFixtureData.contractParameters
-                .nominalUnitsXSatsPerBch,
-            satsForNominalUnitsAtHighLiquidation: OpalHedgeFixtureData.contractParameters
-                .satsForNominalUnitsAtHighLiquidation,
-            payoutSats: OpalHedgeFixtureData.contractParameters.payoutSats,
-            shortLockScript: OpalHedgeFixtureData.contractParameters.shortLockScript,
-            longLockScript: OpalHedgeFixtureData.contractParameters.longLockScript,
-            enableMutualRedemption: OpalHedgeFixtureData.contractParameters
-                .enableMutualRedemption,
-            shortMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
-                .shortMutualRedeemPublicKey,
-            longMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
-                .longMutualRedeemPublicKey
+        let parameters = makeContractParameters(
+            highLiquidationPrice: OpalHedgeFixtureData.contractParameters.lowLiquidationPrice
         )
         let error = OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
             _ = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
@@ -120,6 +92,63 @@ struct OpalHedgeCoreSettlementCalculatorValidator {
                 low: 17_700,
                 high: 17_700
             )
+        )
+    }
+
+    @Test("Rejects sub-dust payout sats")
+    func rejectSubDustPayoutSats() throws {
+        let parameters = makeContractParameters(payoutSats: 1)
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
+            _ = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
+                parameters: parameters,
+                fundingSatoshis: 5_651_049,
+                redeemPrice: 23_500
+            )
+        })
+
+        #expect(error == .invalidPayoutSatoshis(1))
+    }
+
+    @Test("Rejects nonpositive nominal units")
+    func rejectNonpositiveNominalUnits() throws {
+        let parameters = makeContractParameters(nominalUnitsXSatsPerBch: 0)
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureSettlementCalculationError {
+            _ = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
+                parameters: parameters,
+                fundingSatoshis: 5_651_049,
+                redeemPrice: 23_500
+            )
+        })
+
+        #expect(error == .invalidNominalUnitsXSatsPerBch(0))
+    }
+
+    private func makeContractParameters(
+        lowLiquidationPrice: Int64 = OpalHedgeFixtureData.contractParameters.lowLiquidationPrice,
+        highLiquidationPrice: Int64 = OpalHedgeFixtureData.contractParameters.highLiquidationPrice,
+        nominalUnitsXSatsPerBch: Int64 = OpalHedgeFixtureData.contractParameters
+            .nominalUnitsXSatsPerBch,
+        satsForNominalUnitsAtHighLiquidation: Int64 = OpalHedgeFixtureData.contractParameters
+            .satsForNominalUnitsAtHighLiquidation,
+        payoutSats: Int64 = OpalHedgeFixtureData.contractParameters.payoutSats
+    ) -> OpalHedge.Core.ContractParameters {
+        OpalHedge.Core.ContractParameters(
+            oraclePublicKey: OpalHedgeFixtureData.contractParameters.oraclePublicKey,
+            lowLiquidationPrice: lowLiquidationPrice,
+            highLiquidationPrice: highLiquidationPrice,
+            startTimestamp: OpalHedgeFixtureData.contractParameters.startTimestamp,
+            maturityTimestamp: OpalHedgeFixtureData.contractParameters.maturityTimestamp,
+            nominalUnitsXSatsPerBch: nominalUnitsXSatsPerBch,
+            satsForNominalUnitsAtHighLiquidation: satsForNominalUnitsAtHighLiquidation,
+            payoutSats: payoutSats,
+            shortLockScript: OpalHedgeFixtureData.contractParameters.shortLockScript,
+            longLockScript: OpalHedgeFixtureData.contractParameters.longLockScript,
+            enableMutualRedemption: OpalHedgeFixtureData.contractParameters
+                .enableMutualRedemption,
+            shortMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
+                .shortMutualRedeemPublicKey,
+            longMutualRedeemPublicKey: OpalHedgeFixtureData.contractParameters
+                .longMutualRedeemPublicKey
         )
     }
 }

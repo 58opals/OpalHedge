@@ -7,10 +7,7 @@ import OpalHedgeBitcoinCash
 struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
     @Test("Creates AnyHedge contract funding output")
     func createAnyHedgeContractFundingOutput() throws {
-        let contractAddress = try OpalHedgeBitcoinCashContractAddress(
-            redeemScriptHex: "51",
-            network: .mainnet
-        )
+        let contractAddress = try makeContractAddress()
         let fundingOutput = try OpalHedge.BitcoinCash
             .AnyHedgeContractFundingOutput(
                 contractAddress: contractAddress,
@@ -26,19 +23,32 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
 
     @Test("Rejects invalid AnyHedge contract funding output satoshis")
     func rejectInvalidAnyHedgeContractFundingOutputSatoshis() throws {
-        let contractAddress = try OpalHedgeBitcoinCashContractAddress(
-            redeemScriptHex: "51",
-            network: .mainnet
-        )
-        let error = captureFundingOutputError {
+        let contractAddress = try makeContractAddress()
+        let error = try #require(captureFundingOutputError {
             _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingOutput(
                 contractAddress: contractAddress,
-                payoutSatoshis: 0,
+                payoutSatoshis: 1,
                 dustReserveSatoshis: 1_332
             )
-        }
+        })
 
-        #expect(error == .invalidPayoutSatoshis(0))
+        #expect(error == .invalidPayoutSatoshis(1))
+    }
+
+    @Test("Rejects oversized AnyHedge contract funding output satoshis")
+    func rejectOversizedAnyHedgeContractFundingOutputSatoshis() throws {
+        let contractAddress = try makeContractAddress()
+        let maximumContractSatoshis = OpalHedge.Core.ContractConstraintPolicy
+            .maxContractSatoshis
+        let error = try #require(captureFundingOutputError {
+            _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingOutput(
+                contractAddress: contractAddress,
+                payoutSatoshis: maximumContractSatoshis,
+                dustReserveSatoshis: 1
+            )
+        })
+
+        #expect(error == .invalidPayoutSatoshis(maximumContractSatoshis))
     }
 
     @Test("Includes AnyHedge contract funding output in bundle")
@@ -71,5 +81,12 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
         }
 
         return nil
+    }
+
+    private func makeContractAddress() throws -> OpalHedgeBitcoinCashContractAddress {
+        try OpalHedgeBitcoinCashContractAddress(
+            redeemScriptHex: "51",
+            network: .mainnet
+        )
     }
 }

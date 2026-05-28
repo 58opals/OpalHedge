@@ -18,7 +18,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         #expect(bytecode.artifact == .anyHedgeV0_12)
         #expect(bytecode.constructorStackPushes.count == 13)
         #expect(bytecode.constructorStackBytecode.count == 181)
-        #expect(hexText(bytecode.constructorStackBytecode).hasPrefix("03dbad6503db6409"))
+        #expect(makeHexText(bytecode.constructorStackBytecode).hasPrefix("03dbad6503db6409"))
     }
 
     @Test("Composes AnyHedge redeem script bytecode")
@@ -32,12 +32,13 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         let scriptSuffix = bytecode.redeemScriptBytecode.suffix(
             bytecode.scriptBytecode.rawData.count
         )
+        let redeemScriptHexText = makeHexText(bytecode.redeemScriptBytecode)
 
         #expect(bytecode.redeemScriptBytecode.count == 343)
         #expect(Data(constructorPrefix) == bytecode.constructorStackBytecode)
         #expect(Data(scriptSuffix) == bytecode.scriptBytecode.rawData)
-        #expect(hexText(bytecode.redeemScriptBytecode).hasPrefix("03dbad6503db6409"))
-        #expect(hexText(bytecode.redeemScriptBytecode).hasSuffix("cd547a8777777768"))
+        #expect(redeemScriptHexText.hasPrefix("03dbad6503db6409"))
+        #expect(redeemScriptHexText.hasSuffix("cd547a8777777768"))
     }
 
     @Test("Derives AnyHedge contract address from redeem script bytecode")
@@ -51,7 +52,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
             network: .mainnet
         )
 
-        #expect(hexText(address.scriptHash) == "6cf774143b35046148a90f3f9024b2fd96541e5c")
+        #expect(makeHexText(address.scriptHash) == "6cf774143b35046148a90f3f9024b2fd96541e5c")
         #expect(address.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
         #expect(address == directAddress)
     }
@@ -101,7 +102,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         #expect(bytecode.constructorStackBytecode.count == 181)
     }
 
-    private func hexText(_ data: Data) -> String {
+    private func makeHexText(_ data: Data) -> String {
         data.map { String(format: "%02x", $0) }.joined()
     }
 }

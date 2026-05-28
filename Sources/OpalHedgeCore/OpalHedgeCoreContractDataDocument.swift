@@ -286,7 +286,7 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
                 fee.address,
                 name: "fees[\(index)].address"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
                 fee.satoshis,
                 name: "fees[\(index)].satoshis"
             )
@@ -306,7 +306,7 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
                 funding.fundingOutputIndex,
                 name: "\(fundingName).fundingOutputIndex"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
                 funding.fundingSatoshis,
                 name: "\(fundingName).fundingSatoshis"
             )
@@ -320,11 +320,11 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
                 settlement.settlementTransactionHash,
                 name: "\(settlementName).settlementTransactionHash"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
                 settlement.shortPayoutInSatoshis,
                 name: "\(settlementName).hedgePayoutInSatoshis"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
                 settlement.longPayoutInSatoshis,
                 name: "\(settlementName).longPayoutInSatoshis"
             )

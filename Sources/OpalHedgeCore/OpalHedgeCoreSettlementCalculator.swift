@@ -56,13 +56,7 @@ public enum OpalHedgeCoreSettlementCalculator {
         guard redeemPrice > 0 else {
             throw OpalHedgeCoreSettlementCalculationError.invalidRedeemPrice(redeemPrice)
         }
-        guard parameters.lowLiquidationPrice > 0,
-              parameters.highLiquidationPrice > parameters.lowLiquidationPrice else {
-            throw OpalHedgeCoreSettlementCalculationError.invalidLiquidationRange(
-                low: parameters.lowLiquidationPrice,
-                high: parameters.highLiquidationPrice
-            )
-        }
+        try validateParameters(parameters)
 
         let clampedPrice = max(
             min(redeemPrice, parameters.highLiquidationPrice),
@@ -106,6 +100,28 @@ public enum OpalHedgeCoreSettlementCalculator {
             satsForNominalUnits: satsForNominalUnits,
             minerFeeSats: minerFeeSats
         )
+    }
+
+    private static func validateParameters(
+        _ parameters: OpalHedgeCoreContractParameters
+    ) throws {
+        guard parameters.lowLiquidationPrice > 0,
+              parameters.highLiquidationPrice > parameters.lowLiquidationPrice else {
+            throw OpalHedgeCoreSettlementCalculationError.invalidLiquidationRange(
+                low: parameters.lowLiquidationPrice,
+                high: parameters.highLiquidationPrice
+            )
+        }
+        guard parameters.payoutSats >= OpalHedgeCoreContractConstraintPolicy.dustLimitSatoshis,
+              parameters.payoutSats <= OpalHedgeCoreContractConstraintPolicy.maxContractSatoshis else {
+            throw OpalHedgeCoreSettlementCalculationError.invalidPayoutSatoshis(
+                parameters.payoutSats
+            )
+        }
+        guard parameters.nominalUnitsXSatsPerBch > 0 else {
+            throw OpalHedgeCoreSettlementCalculationError
+                .invalidNominalUnitsXSatsPerBch(parameters.nominalUnitsXSatsPerBch)
+        }
     }
 
     private static func subtractingSatoshis(

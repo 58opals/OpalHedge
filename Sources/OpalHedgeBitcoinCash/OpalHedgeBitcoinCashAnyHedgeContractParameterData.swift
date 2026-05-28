@@ -66,11 +66,30 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
                 satsForNominalUnitsAtHighLiquidation,
                 name: "satsForNominalUnitsAtHighLiquidation"
             )
-            try Self.validatePositiveInteger(payoutSats, name: "payoutSats")
-            try Self.validatePositiveInteger(lowLiquidationPrice, name: "lowLiquidationPrice")
-            try Self.validatePositiveInteger(highLiquidationPrice, name: "highLiquidationPrice")
-            try Self.validatePositiveInteger(startTimestamp, name: "startTimestamp")
-            try Self.validatePositiveInteger(maturityTimestamp, name: "maturityTimestamp")
+            try Self.validatePayoutSatoshis(payoutSats)
+            try Self.validateFourBytePositiveScriptInteger(
+                lowLiquidationPrice,
+                name: "lowLiquidationPrice"
+            )
+            try Self.validateFourBytePositiveScriptInteger(
+                highLiquidationPrice,
+                name: "highLiquidationPrice"
+            )
+            try Self.validateIncreasingIntegerRange(
+                lower: lowLiquidationPrice,
+                upper: highLiquidationPrice,
+                upperName: "highLiquidationPrice"
+            )
+            try Self.validateFourBytePositiveScriptInteger(startTimestamp, name: "startTimestamp")
+            try Self.validateFourBytePositiveScriptInteger(
+                maturityTimestamp,
+                name: "maturityTimestamp"
+            )
+            try Self.validateIncreasingIntegerRange(
+                lower: startTimestamp,
+                upper: maturityTimestamp,
+                upperName: "maturityTimestamp"
+            )
 
             self.shortMutualRedeemPublicKey = shortMutualRedeemPublicKey
             self.longMutualRedeemPublicKey = longMutualRedeemPublicKey
@@ -170,7 +189,8 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
 
     private static func validateCompressedPublicKey(_ value: Data, name: String) throws {
         guard value.count == compressedPublicKeyByteCount,
-              compressedPublicKeyPrefixes.contains(value.first ?? 0) else {
+              let firstByte = value.first,
+              compressedPublicKeyPrefixes.contains(firstByte) else {
             throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
                 .invalidCompressedPublicKey(name: name, byteCount: value.count)
         }
@@ -196,6 +216,28 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
         }
     }
 
+    private static func validateFourBytePositiveScriptInteger(
+        _ value: Int64,
+        name: String
+    ) throws {
+        try validatePositiveInteger(value, name: name)
+        guard value <= maxFourByteScriptInteger else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
+                .invalidPositiveInteger(name: name, value: value)
+        }
+    }
+
+    private static func validateIncreasingIntegerRange(
+        lower: Int64,
+        upper: Int64,
+        upperName: String
+    ) throws {
+        guard upper > lower else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
+                .invalidPositiveInteger(name: upperName, value: upper)
+        }
+    }
+
     private static func validateNonnegativeInteger(_ value: Int64, name: String) throws {
         guard value >= 0 else {
             throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
@@ -210,18 +252,21 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
         }
     }
 
+    private static func validatePayoutSatoshis(_ value: Int64) throws {
+        guard value >= dustLimitSatoshis,
+              value <= maxContractSatoshis else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
+                .invalidPositiveInteger(name: "payoutSats", value: value)
+        }
+    }
+
     private static let compressedPublicKeyByteCount = 33
     private static let payToPublicKeyHashLockScriptByteCount = 25
+    private static let maxFourByteScriptInteger = Int64(Int32.max)
+    private static let dustLimitSatoshis: Int64 = 1_332
+    private static let maxContractSatoshis: Int64 = 10_000_000_000_000
 
-    private static var payToPublicKeyHashLockScriptPrefix: Data {
-        Data([0x76, 0xa9, 0x14])
-    }
-
-    private static var payToPublicKeyHashLockScriptSuffix: Data {
-        Data([0x88, 0xac])
-    }
-
-    private static var compressedPublicKeyPrefixes: Set<UInt8> {
-        [0x02, 0x03]
-    }
+    private static let payToPublicKeyHashLockScriptPrefix = Data([0x76, 0xa9, 0x14])
+    private static let payToPublicKeyHashLockScriptSuffix = Data([0x88, 0xac])
+    private static let compressedPublicKeyPrefixes: Set<UInt8> = [0x02, 0x03]
 }

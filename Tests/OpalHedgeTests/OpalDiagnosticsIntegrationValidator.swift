@@ -318,7 +318,7 @@ struct OpalDiagnosticsIntegrationValidator {
 
             do {
                 _ = try OpalHedgeBitcoinCashAnyHedgeContractBundle(plan: invalidPlan)
-                Issue.record("Expected funding output overflow to throw.")
+                Issue.record("Expected invalid funding output parameters to throw.")
             } catch {
             }
 
@@ -326,8 +326,8 @@ struct OpalDiagnosticsIntegrationValidator {
                 findDiagnosticRecord(named: OpalDiagnostics.Event.fundingRequestCreationFailed)
             )
             #expect(record.category == OpalDiagnostics.Category.funding)
-            #expect(findField(OpalDiagnostics.Field.errorCode, in: record)?.value == "funding.output.satoshis_overflow")
-            #expect(findField(OpalDiagnostics.Field.errorCategory, in: record)?.value == "funding")
+            #expect(findField(OpalDiagnostics.Field.errorCode, in: record)?.value == "bitcoin_cash.parameter.invalid_positive_integer")
+            #expect(findField(OpalDiagnostics.Field.errorCategory, in: record)?.value == "bitcoin_cash")
             #expect(findField(OpalDiagnostics.Field.errorMessage, in: record)?.value == "<redacted>")
         }
     }

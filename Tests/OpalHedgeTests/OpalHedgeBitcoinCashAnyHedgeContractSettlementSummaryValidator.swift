@@ -95,11 +95,11 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementSummaryValidator {
     @Test("Rejects AnyHedge contract settlement summary without settlement data")
     func rejectAnyHedgeContractSettlementSummaryWithoutSettlementData() throws {
         let fundingRecord = try makeFundingRecord()
-        let error = captureSettlementRecordError {
+        let error = try #require(captureSettlementRecordError {
             _ = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementSummary(
                 dataDocument: fundingRecord.dataDocument
             )
-        }
+        })
 
         #expect(error == .missingSettlement(index: 0))
     }

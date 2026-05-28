@@ -1,6 +1,7 @@
 // OpalHedgeCoreSettlementConditionError.swift
 
 public enum OpalHedgeCoreSettlementConditionError: Error, Sendable, Equatable {
+    case invalidPreviousTimestamp(Int64)
     case metadataSequence(Int64)
     case sequenceGap(previous: Int64, settlement: Int64)
     case previousMessageNotBeforeMaturity(previousTimestamp: Int64, maturityTimestamp: Int64)

@@ -16,7 +16,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractScriptBytecodeValidator {
         #expect(scriptBytecode.rawHex.count == 324)
         #expect(scriptBytecode.rawHex.hasPrefix("5d79009c637b695d"))
         #expect(scriptBytecode.rawHex.hasSuffix("77777768"))
-        #expect(hexText(scriptBytecode.rawData) == scriptBytecode.rawHex)
+        #expect(makeHexText(scriptBytecode.rawData) == scriptBytecode.rawHex)
     }
 
     @Test("Includes AnyHedge v0.12 script bytecode in contract bytecode")
@@ -30,7 +30,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractScriptBytecodeValidator {
         #expect(bytecode.constructorStackBytecode.count == 181)
     }
 
-    private func hexText(_ data: Data) -> String {
+    private func makeHexText(_ data: Data) -> String {
         data.map { String(format: "%02x", $0) }.joined()
     }
 }

@@ -49,7 +49,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         let document = try OpalHedge.Core.ContractDataDocument(
             draftData: makeDraftData()
         )
-        let dictionary = try documentDictionary(for: document)
+        let dictionary = try makeDocumentDictionary(for: document)
         let metadata = try #require(dictionary["metadata"] as? [String: Any])
 
         #expect(Set(metadata.keys) == OpalHedgeFixtureReferenceData
@@ -70,7 +70,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         let document = try OpalHedge.Core.ContractDataDocument(
             draftData: draftData
         )
-        let dictionary = try documentDictionary(for: document)
+        let dictionary = try makeDocumentDictionary(for: document)
         let fundings = try #require(dictionary["fundings"] as? [[String: Any]])
         let funding = try #require(fundings.first)
 
@@ -81,12 +81,12 @@ struct OpalHedgeCoreContractDataDocumentValidator {
     @Test("Matches official AnyHedge automated payout fields")
     func matchOfficialAnyHedgeAutomatedPayoutFields() throws {
         let draftData = try makeDraftData(
-            fundings: [fundingWithAutomatedPayout()]
+            fundings: [makeFundingWithAutomatedPayout()]
         )
         let document = try OpalHedge.Core.ContractDataDocument(
             draftData: draftData
         )
-        let dictionary = try documentDictionary(for: document)
+        let dictionary = try makeDocumentDictionary(for: document)
         let fundings = try #require(dictionary["fundings"] as? [[String: Any]])
         let funding = try #require(fundings.first)
         let settlement = try #require(funding["settlement"] as? [String: Any])
@@ -100,12 +100,12 @@ struct OpalHedgeCoreContractDataDocumentValidator {
     @Test("Omits absent AnyHedge automated payout optional fields")
     func omitAbsentAnyHedgeAutomatedPayoutOptionalFields() throws {
         let draftData = try makeDraftData(
-            fundings: [fundingWithRequiredPayout()]
+            fundings: [makeFundingWithRequiredPayout()]
         )
         let document = try OpalHedge.Core.ContractDataDocument(
             draftData: draftData
         )
-        let dictionary = try documentDictionary(for: document)
+        let dictionary = try makeDocumentDictionary(for: document)
         let fundings = try #require(dictionary["fundings"] as? [[String: Any]])
         let funding = try #require(fundings.first)
         let settlement = try #require(funding["settlement"] as? [String: Any])
@@ -158,23 +158,23 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         #expect(document.jsonText.contains("\"satoshis\":1000"))
     }
 
-    @Test("Rejects negative fee satoshis when creating contract data document")
-    func rejectNegativeFeeSatoshisWhenCreatingContractDataDocument() throws {
+    @Test("Rejects nonpositive fee satoshis when creating contract data document")
+    func rejectNonpositiveFeeSatoshisWhenCreatingContractDataDocument() throws {
         let draftData = try makeDraftData(
             fees: [
                 OpalHedge.Core.ContractFeeData(
                     name: "settlement",
                     description: "Settlement service fee",
                     address: OpalHedgeFixtureData.longPayoutAddress,
-                    satoshis: -1
+                    satoshis: 0
                 )
             ]
         )
-        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
-        }
+        })
 
-        #expect(error == .invalidNonnegativeInteger(name: "fees[0].satoshis", value: -1))
+        #expect(error == .invalidPositiveInteger(name: "fees[0].satoshis", value: 0))
     }
 
     @Test("Rejects invalid fee address when creating contract data document")
@@ -268,25 +268,25 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         )
     }
 
-    @Test("Rejects negative funding satoshis when creating contract data document")
-    func rejectNegativeFundingSatoshisWhenCreatingContractDataDocument() throws {
+    @Test("Rejects nonpositive funding satoshis when creating contract data document")
+    func rejectNonpositiveFundingSatoshisWhenCreatingContractDataDocument() throws {
         let draftData = try makeDraftData(
             fundings: [
                 OpalHedge.Core.ContractFunding(
                     fundingTransactionHash: String(repeating: "1", count: 64),
                     fundingOutputIndex: 1,
-                    fundingSatoshis: -1
+                    fundingSatoshis: 0
                 )
             ]
         )
-        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
-        }
+        })
 
         #expect(
-            error == .invalidNonnegativeInteger(
+            error == .invalidPositiveInteger(
                 name: "fundings[0].fundingSatoshis",
-                value: -1
+                value: 0
             )
         )
     }
@@ -344,12 +344,12 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         )
     }
 
-    @Test("Rejects negative settlement payout satoshis when creating contract data document")
-    func rejectNegativeSettlementPayoutSatoshisWhenCreatingContractDataDocument() throws {
+    @Test("Rejects nonpositive settlement payout satoshis when creating contract data document")
+    func rejectNonpositiveSettlementPayoutSatoshisWhenCreatingContractDataDocument() throws {
         let settlement = OpalHedge.Core.ContractSettlement(
             kind: .maturation,
             settlementTransactionHash: String(repeating: "2", count: 64),
-            shortPayoutInSatoshis: -1,
+            shortPayoutInSatoshis: 0,
             longPayoutInSatoshis: 1_412_429
         )
         let draftData = try makeDraftData(
@@ -362,14 +362,14 @@ struct OpalHedgeCoreContractDataDocumentValidator {
                 )
             ]
         )
-        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
-        }
+        })
 
         #expect(
-            error == .invalidNonnegativeInteger(
+            error == .invalidPositiveInteger(
                 name: "fundings[0].settlement.hedgePayoutInSatoshis",
-                value: -1
+                value: 0
             )
         )
     }
@@ -634,7 +634,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         )
     }
 
-    private func fundingWithRequiredPayout() -> OpalHedge.Core.ContractFunding {
+    private func makeFundingWithRequiredPayout() -> OpalHedge.Core.ContractFunding {
         let settlement = OpalHedge.Core.ContractSettlement(
             kind: .maturation,
             settlementTransactionHash: String(repeating: "2", count: 64),
@@ -644,15 +644,10 @@ struct OpalHedgeCoreContractDataDocumentValidator {
             )
         )
 
-        return OpalHedge.Core.ContractFunding(
-            fundingTransactionHash: String(repeating: "1", count: 64),
-            fundingOutputIndex: 1,
-            fundingSatoshis: 5_651_049,
-            settlement: settlement
-        )
+        return makeFunding(settlement: settlement)
     }
 
-    private func fundingWithAutomatedPayout() -> OpalHedge.Core.ContractFunding {
+    private func makeFundingWithAutomatedPayout() -> OpalHedge.Core.ContractFunding {
         let settlement = OpalHedge.Core.ContractSettlement(
             kind: .maturation,
             settlementTransactionHash: String(repeating: "2", count: 64),
@@ -667,7 +662,13 @@ struct OpalHedgeCoreContractDataDocumentValidator {
             settlementPrice: 23_600
         )
 
-        return OpalHedge.Core.ContractFunding(
+        return makeFunding(settlement: settlement)
+    }
+
+    private func makeFunding(
+        settlement: OpalHedge.Core.ContractSettlement
+    ) -> OpalHedge.Core.ContractFunding {
+        OpalHedge.Core.ContractFunding(
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 1,
             fundingSatoshis: 5_651_049,
@@ -675,7 +676,7 @@ struct OpalHedgeCoreContractDataDocumentValidator {
         )
     }
 
-    private func documentDictionary(
+    private func makeDocumentDictionary(
         for document: OpalHedge.Core.ContractDataDocument
     ) throws -> [String: Any] {
         try #require(JSONSerialization.jsonObject(

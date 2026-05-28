@@ -42,7 +42,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         let record = try makeSettlementRequest().createSettlementRecord(
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
-        let dictionary = try documentDictionary(for: record.dataDocument)
+        let dictionary = try makeDocumentDictionary(for: record.dataDocument)
         let fundings = try #require(dictionary["fundings"] as? [[String: Any]])
         let funding = try #require(fundings.first)
         let settlement = try #require(funding["settlement"] as? [String: Any])
@@ -216,7 +216,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         )
     }
 
-    private func documentDictionary(
+    private func makeDocumentDictionary(
         for document: OpalHedge.Core.ContractDataDocument
     ) throws -> [String: Any] {
         try #require(JSONSerialization.jsonObject(

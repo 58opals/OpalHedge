@@ -1,6 +1,7 @@
 // OpalHedgeBitcoinCashAnyHedgeContractFundingOutput.swift
 
 import OpalHedgeBitcoinCash
+import OpalHedgeCore
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutput: Sendable, Equatable {
     public let contractAddress: OpalHedgeBitcoinCashContractAddress
@@ -13,7 +14,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutput: Sendable, Equat
         payoutSatoshis: Int64,
         dustReserveSatoshis: Int64
     ) throws {
-        guard payoutSatoshis > 0 else {
+        guard payoutSatoshis >= OpalHedgeCoreContractConstraintPolicy.dustLimitSatoshis else {
             throw OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError
                 .invalidPayoutSatoshis(payoutSatoshis)
         }
@@ -31,6 +32,11 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutput: Sendable, Equat
                     payoutSatoshis: payoutSatoshis,
                     dustReserveSatoshis: dustReserveSatoshis
                 )
+        }
+        guard totalSatoshis.partialValue <=
+              OpalHedgeCoreContractConstraintPolicy.maxContractSatoshis else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractFundingOutputError
+                .invalidPayoutSatoshis(payoutSatoshis)
         }
 
         self.contractAddress = contractAddress

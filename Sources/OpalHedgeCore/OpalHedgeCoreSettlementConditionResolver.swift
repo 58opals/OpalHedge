@@ -62,6 +62,10 @@ public enum OpalHedgeCoreSettlementConditionResolver {
         settlementSequence: Int64,
         settlementPrice: Int64
     ) throws -> OpalHedgeCoreSettlementCondition {
+        guard previousTimestamp > 0 else {
+            throw OpalHedgeCoreSettlementConditionError
+                .invalidPreviousTimestamp(previousTimestamp)
+        }
         guard previousSequence > 0 else {
             throw OpalHedgeCoreSettlementConditionError.metadataSequence(previousSequence)
         }
