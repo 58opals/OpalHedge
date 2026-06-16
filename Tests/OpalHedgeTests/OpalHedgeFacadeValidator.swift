@@ -14,7 +14,7 @@ struct OpalHedgeFacadeValidator {
     @Test("Uses Core facade aliases")
     func useCoreFacadeAliases() throws {
         let message = try OpalHedge.Oracle.PriceMessage.parse(
-            hex: OpalHedgeFixtureData.startingOracleMessageHex
+            rawHex: OpalHedgeFixtureData.startingOracleMessageHex
         )
         let outcome = try OpalHedge.Core.SettlementCalculator.calculateOutcome(
             parameters: OpalHedgeFixtureData.contractParameters,
@@ -128,7 +128,7 @@ struct OpalHedgeFacadeValidator {
         )
 
         let fundingRequestDocument = try OpalHedge.Core.ContractDataDocument(
-            jsonText: fundingRequest.contractDataDocument.jsonText
+            jsonText: fundingRequest.domainDataDocument.jsonText
         )
         let fundingRecordDocument = try OpalHedge.Core.ContractDataDocument(
             jsonText: fundingRecord.dataDocument.jsonText
@@ -158,7 +158,7 @@ struct OpalHedgeFacadeValidator {
     @Test("Uses Oracle facade aliases")
     func useOracleFacadeAliases() throws {
         let message = try OpalHedge.Oracle.PriceMessage.parse(
-            hex: OpalHedgeFixtureData.startingOracleMessageHex
+            rawHex: OpalHedgeFixtureData.startingOracleMessageHex
         )
         let isSignatureValid = try OpalHedge.Oracle.SignatureVerifier.verify(
             message: message,

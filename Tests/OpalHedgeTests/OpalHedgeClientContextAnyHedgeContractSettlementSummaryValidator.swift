@@ -31,7 +31,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
         #expect(summary == record.settlementSummary)
         #expect(summary.settlementKind == .maturation)
         #expect(summary.settlementPrice == 23_500)
-        #expect(summary.settlementTransactionHash == String(repeating: "2", count: 64))
+        #expect(summary.rawSettlementTransactionHash == String(repeating: "2", count: 64))
     }
 
     @Test("Creates AnyHedge contract settlement summary from contract plan")
@@ -62,7 +62,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
         )
 
         #expect(summary == record.settlementSummary)
-        #expect(summary.dataDocument.draftData.parameters == plan.parameters)
+        #expect(summary.domainDataDocument.draftData.parameters == plan.parameters)
         #expect(summary.settlementKind == .maturation)
     }
 
@@ -104,7 +104,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementSummaryValidator {
         #expect(summary.settlementKind == .liquidation)
         #expect(summary.settlementPrice == 17_500)
         #expect(summary.fundingOutputIndex == 1)
-        #expect(summary.dataDocument.jsonText.contains("\"satoshis\":1000"))
+        #expect(summary.domainDataDocument.jsonText.contains("\"satoshis\":1000"))
     }
 
     @Test("Creates AnyHedge contract settlement summary from data document")

@@ -13,10 +13,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingStateValidator {
         #expect(state == .unfunded(bundle.fundingRequest))
         #expect(!state.isFunded)
         #expect(state.fundingOutput == bundle.fundingOutput)
-        #expect(state.dataDocument == bundle.dataDocument)
-        #expect(state.fundingRequest == bundle.fundingRequest)
-        #expect(state.fundingRecord == nil)
-        #expect(state.funding == nil)
+        #expect(state.domainDataDocument == bundle.dataDocument)
+        #expect(state.domainFundingRequest == bundle.fundingRequest)
+        #expect(state.domainFundingRecord == nil)
+        #expect(state.domainFunding == nil)
     }
 
     @Test("Represents funded AnyHedge contract funding state")
@@ -31,10 +31,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingStateValidator {
         #expect(state == .funded(record))
         #expect(state.isFunded)
         #expect(state.fundingOutput == record.fundingOutput)
-        #expect(state.dataDocument == record.dataDocument)
-        #expect(state.fundingRequest == nil)
-        #expect(state.fundingRecord == record)
-        #expect(state.funding == record.funding)
+        #expect(state.domainDataDocument == record.dataDocument)
+        #expect(state.domainFundingRequest == nil)
+        #expect(state.domainFundingRecord == record)
+        #expect(state.domainFunding == record.funding)
     }
 
     private func makeBundle() throws -> OpalHedgeBitcoinCashAnyHedgeContractBundle {

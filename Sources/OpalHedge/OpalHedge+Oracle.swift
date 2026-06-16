@@ -21,7 +21,7 @@ extension OpalHedge {
             publicKeyHex: String
         ) throws -> OpalHedge.Core.ContractStartingOracleProof {
             do {
-                let message = try OpalHedgeOraclePriceMessage.parse(hex: messageHex)
+                let message = try OpalHedgeOraclePriceMessage.parse(rawHex: messageHex)
                 let isSignatureValid = try OpalHedgeOracleSignatureVerifier.verify(
                     message: message,
                     signatureHex: signatureHex,
@@ -38,7 +38,7 @@ extension OpalHedge {
                             .lowercased()
                     ),
                     message: try OpalHedge.Core.ContractOracleMessageData(
-                        hex: message.hex
+                        hex: message.rawMessageHex
                     ),
                     signature: try OpalHedge.Core.ContractOracleSignature(
                         hex: signatureHex
@@ -88,7 +88,7 @@ extension OpalHedge {
             publicKeyHex: String
         ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
             do {
-                let message = try OpalHedgeOraclePriceMessage.parse(hex: messageHex)
+                let message = try OpalHedgeOraclePriceMessage.parse(rawHex: messageHex)
                 let isSignatureValid = try OpalHedgeOracleSignatureVerifier.verify(
                     message: message,
                     signatureHex: signatureHex,
@@ -100,7 +100,7 @@ extension OpalHedge {
 
                 let proof = OpalHedge.Core.ContractSettlementOracleProof(
                     message: try OpalHedge.Core.ContractOracleMessageData(
-                        hex: message.hex
+                        hex: message.rawMessageHex
                     ),
                     signature: try OpalHedge.Core.ContractOracleSignature(
                         hex: signatureHex

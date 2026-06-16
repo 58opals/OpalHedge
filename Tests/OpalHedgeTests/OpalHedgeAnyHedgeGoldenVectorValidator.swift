@@ -34,18 +34,18 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
         #expect(plan.parameters == OpalHedgeFixtureData.contractParameters)
         #expect(constructorStackPushHexTexts == OpalHedgeAnyHedgeGoldenVectorData
             .constructorStackPushHexTexts)
-        #expect(makeHexText(bytecode.constructorStackBytecode) == OpalHedgeAnyHedgeGoldenVectorData
-            .constructorStackBytecodeHex)
-        #expect(bytecode.constructorStackPushes.count == OpalHedgeAnyHedgeGoldenVectorData
+        #expect(makeHexText(bytecode.rawConstructorStackBytecode) == OpalHedgeAnyHedgeGoldenVectorData
+            .rawConstructorStackBytecodeHex)
+        #expect(bytecode.rawConstructorStackPushes.count == OpalHedgeAnyHedgeGoldenVectorData
             .constructorStackPushCount)
-        #expect(bytecode.constructorStackBytecode.count == OpalHedgeAnyHedgeGoldenVectorData
-            .constructorStackBytecodeByteCount)
-        #expect(bytecode.redeemScriptBytecode.count == OpalHedgeAnyHedgeGoldenVectorData
+        #expect(bytecode.rawConstructorStackBytecode.count == OpalHedgeAnyHedgeGoldenVectorData
+            .rawConstructorStackBytecodeByteCount)
+        #expect(bytecode.rawRedeemScriptBytecode.count == OpalHedgeAnyHedgeGoldenVectorData
             .redeemScriptBytecodeByteCount)
-        #expect(makeHexText(bytecode.redeemScriptBytecode).hasSuffix(
+        #expect(makeHexText(bytecode.rawRedeemScriptBytecode).hasSuffix(
             OpalHedgeAnyHedgeGoldenVectorData.contractScriptBytecodeSuffixHex
         ))
-        #expect(makeHexText(address.scriptHash) == OpalHedgeAnyHedgeGoldenVectorData
+        #expect(makeHexText(address.rawScriptHash) == OpalHedgeAnyHedgeGoldenVectorData
             .mainnetContractScriptHashHex)
         #expect(address.rawValue == OpalHedgeAnyHedgeGoldenVectorData.mainnetContractAddress)
         #expect(bundle.contractAddress == address)
@@ -57,8 +57,8 @@ struct OpalHedgeAnyHedgeGoldenVectorValidator {
             .fundingOutputSatoshis)
         #expect(bundle.dataDocument.jsonText == OpalHedgeAnyHedgeGoldenVectorData
             .contractDataDocumentJsonText)
-        #expect(bundle.fundingRequest.contractDataDocument == bundle.dataDocument)
-        #expect(bundle.fundingRequest.redeemScriptBytecode == bytecode.redeemScriptBytecode)
+        #expect(bundle.fundingRequest.domainDataDocument == bundle.dataDocument)
+        #expect(bundle.fundingRequest.rawRedeemScriptBytecode == bytecode.rawRedeemScriptBytecode)
         #expect(bundle.fundingRequest.contractScriptArtifact == .anyHedgeV0_12)
     }
 

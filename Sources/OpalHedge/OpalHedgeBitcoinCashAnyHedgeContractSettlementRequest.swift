@@ -4,24 +4,48 @@ import OpalHedgeCore
 import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, Equatable {
-    public let fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord
-    public let previousOracleProof: OpalHedgeCoreContractSettlementOracleProof
-    public let settlementOracleProof: OpalHedgeCoreContractSettlementOracleProof
+    public let domainFundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord
+    public let previousOracleDomainProof: OpalHedgeCoreContractSettlementOracleProof
+    public let settlementOracleDomainProof: OpalHedgeCoreContractSettlementOracleProof
     public let settlementCondition: OpalHedgeCoreSettlementCondition
     public let settlementKind: OpalHedgeCoreSettlementKind
     public let settlementOutcome: OpalHedgeCoreSettlementOutcome
     public let settlementPayoutAmounts: OpalHedgeBitcoinCashAnyHedgeContractSettlementPayoutAmounts
 
-    public var fundingOutput: OpalHedgeBitcoinCashAnyHedgeContractFundingOutput {
-        fundingRecord.fundingOutput
+    public var reviewSummary: OpalHedgeBitcoinCashAnyHedgeContractSettlementReviewSummary {
+        OpalHedgeBitcoinCashAnyHedgeContractSettlementReviewSummary(settlementRequest: self)
     }
 
+    @available(*, deprecated, renamed: "domainFundingRecord")
+    public var fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord {
+        domainFundingRecord
+    }
+
+    @available(*, deprecated, renamed: "previousOracleDomainProof")
+    public var previousOracleProof: OpalHedgeCoreContractSettlementOracleProof {
+        previousOracleDomainProof
+    }
+
+    @available(*, deprecated, renamed: "settlementOracleDomainProof")
+    public var settlementOracleProof: OpalHedgeCoreContractSettlementOracleProof {
+        settlementOracleDomainProof
+    }
+
+    public var fundingOutput: OpalHedgeBitcoinCashAnyHedgeContractFundingOutput {
+        domainFundingRecord.fundingOutput
+    }
+
+    public var domainFunding: OpalHedgeCoreContractFunding {
+        domainFundingRecord.funding
+    }
+
+    @available(*, deprecated, renamed: "domainFunding")
     public var funding: OpalHedgeCoreContractFunding {
-        fundingRecord.funding
+        domainFunding
     }
 
     public var settlementPrice: Int64 {
-        settlementOracleProof.priceValue
+        settlementOracleDomainProof.priceValue
     }
 
     public var hedgePayoutInSatoshis: Int64 {
@@ -46,29 +70,29 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, E
     }
 
     public init(
-        fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord,
-        previousOracleProof: OpalHedgeCoreContractSettlementOracleProof,
-        settlementOracleProof: OpalHedgeCoreContractSettlementOracleProof
+        domainFundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord,
+        previousOracleDomainProof: OpalHedgeCoreContractSettlementOracleProof,
+        settlementOracleDomainProof: OpalHedgeCoreContractSettlementOracleProof
     ) throws {
         do {
-            let parameters = fundingRecord.draftData.parameters
+            let parameters = domainFundingRecord.draftData.parameters
             let settlementCondition = try OpalHedgeCoreSettlementConditionResolver.resolve(
                 parameters: parameters,
-                previousTimestamp: previousOracleProof.messageTimestamp,
-                previousSequence: previousOracleProof.messageSequence,
-                settlementTimestamp: settlementOracleProof.messageTimestamp,
-                settlementSequence: settlementOracleProof.messageSequence,
-                settlementPrice: settlementOracleProof.priceValue
+                previousTimestamp: previousOracleDomainProof.messageTimestamp,
+                previousSequence: previousOracleDomainProof.messageSequence,
+                settlementTimestamp: settlementOracleDomainProof.messageTimestamp,
+                settlementSequence: settlementOracleDomainProof.messageSequence,
+                settlementPrice: settlementOracleDomainProof.priceValue
             )
             let settlementOutcome = try OpalHedgeCoreSettlementCalculator.calculateOutcome(
                 parameters: parameters,
-                fundingSatoshis: fundingRecord.funding.fundingSatoshis,
-                redeemPrice: settlementOracleProof.priceValue
+                fundingSatoshis: domainFundingRecord.funding.fundingSatoshis,
+                redeemPrice: settlementOracleDomainProof.priceValue
             )
 
-            self.fundingRecord = fundingRecord
-            self.previousOracleProof = previousOracleProof
-            self.settlementOracleProof = settlementOracleProof
+            self.domainFundingRecord = domainFundingRecord
+            self.previousOracleDomainProof = previousOracleDomainProof
+            self.settlementOracleDomainProof = settlementOracleDomainProof
             self.settlementCondition = settlementCondition
             self.settlementKind = Self.settlementKind(for: settlementCondition)
             self.settlementOutcome = settlementOutcome
@@ -85,11 +109,11 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, E
                     OpalDiagnostics.Field.settlementKindField(self.settlementKind),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.fundingIndex,
-                        fundingRecord.fundingIndex
+                        domainFundingRecord.fundingIndex
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.settlementPrice,
-                        settlementOracleProof.priceValue
+                        settlementOracleDomainProof.priceValue
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.satoshiCount,
@@ -106,16 +130,29 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, E
                     OpalDiagnostics.Field.moduleField("opalhedge"),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.fundingIndex,
-                        fundingRecord.fundingIndex
+                        domainFundingRecord.fundingIndex
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.settlementPrice,
-                        settlementOracleProof.priceValue
+                        settlementOracleDomainProof.priceValue
                     )
                 ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
+    }
+
+    @available(*, deprecated, message: "Use init(domainFundingRecord:previousOracleDomainProof:settlementOracleDomainProof:) so funding and oracle proof material is explicit domain data.")
+    public init(
+        fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord,
+        previousOracleProof: OpalHedgeCoreContractSettlementOracleProof,
+        settlementOracleProof: OpalHedgeCoreContractSettlementOracleProof
+    ) throws {
+        try self.init(
+            domainFundingRecord: fundingRecord,
+            previousOracleDomainProof: previousOracleProof,
+            settlementOracleDomainProof: settlementOracleProof
+        )
     }
 
     private static func settlementKind(

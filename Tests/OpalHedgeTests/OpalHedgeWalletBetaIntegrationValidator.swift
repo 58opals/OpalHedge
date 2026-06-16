@@ -4,6 +4,21 @@ import Testing
 import OpalHedge
 
 struct OpalHedgeWalletBetaIntegrationValidator {
+    @Test("Client context exposes Wallet lane authority without runtime ownership")
+    func clientContextExposesWalletLaneAuthorityWithoutRuntimeOwnership() {
+        let authority = OpalHedge.Client.Context().domainAuthority
+
+        #expect(authority.supportsWalletAssetInteractorLane)
+        #expect(authority.supportsClaimableInteractorLane)
+        #expect(authority.supportsExplicitAuthoringWorkflowLane)
+        #expect(!authority.ownsWalletRuntime)
+        #expect(!authority.ownsSecretAccess)
+        #expect(!authority.ownsPublicChainTransport)
+        #expect(!authority.ownsSwiftDataSnapshots)
+        #expect(!authority.ownsTransactionBroadcast)
+        #expect(!authority.ownsUserTriggeredMoneyMovement)
+    }
+
     @Test("Creates stable Opal Wallet beta funding output")
     func createStableOpalWalletBetaFundingOutput() throws {
         let clientContext = OpalHedge.Client.Context()
@@ -16,7 +31,7 @@ struct OpalHedgeWalletBetaIntegrationValidator {
             "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
         #expect(fundingRequest.fundingOutput.satoshis == 5_651_049)
         #expect(fundingRequest.contractScriptArtifact == .anyHedgeV0_12)
-        #expect(fundingRequest.contractDataDocument.draftData.parameters ==
+        #expect(fundingRequest.domainDataDocument.draftData.parameters ==
             contractPlan.parameters)
     }
 
@@ -58,7 +73,7 @@ struct OpalHedgeWalletBetaIntegrationValidator {
             settlementTransactionHash: settlementTransactionHash
         )
         let persistedDocument = try OpalHedge.Core.ContractDataDocument(
-            jsonText: settlementSummary.dataDocument.jsonText
+            jsonText: settlementSummary.domainDataDocument.jsonText
         )
         let reconstructedSummary = try clientContext.createAnyHedgeContractSettlementSummary(
             from: persistedDocument

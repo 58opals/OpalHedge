@@ -29,8 +29,8 @@ extension OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
             scriptBytecode: scriptBytecode
         )
         let settlementRequest = try OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest(
-            fundingRecord: fundingRecord,
-            previousOracleProof: try Self.oracleProof(
+            domainFundingRecord: fundingRecord,
+            previousOracleDomainProof: try Self.oracleProof(
                 messageHex: settlement.previousMessageHex,
                 signatureHex: settlement.previousSignatureHex,
                 publicKeyHex: draftData.parameters.oraclePublicKeyHex,
@@ -38,7 +38,7 @@ extension OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord {
                 signatureName: "previousSignature",
                 fundingIndex: fundingIndex
             ),
-            settlementOracleProof: try Self.oracleProof(
+            settlementOracleDomainProof: try Self.oracleProof(
                 messageHex: settlement.settlementMessageHex,
                 signatureHex: settlement.settlementSignatureHex,
                 publicKeyHex: draftData.parameters.oraclePublicKeyHex,

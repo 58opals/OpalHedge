@@ -16,9 +16,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         )
 
         #expect(bytecode.artifact == .anyHedgeV0_12)
-        #expect(bytecode.constructorStackPushes.count == 13)
-        #expect(bytecode.constructorStackBytecode.count == 181)
-        #expect(makeHexText(bytecode.constructorStackBytecode).hasPrefix("03dbad6503db6409"))
+        #expect(bytecode.rawConstructorStackPushes.count == 13)
+        #expect(bytecode.rawConstructorStackBytecode.count == 181)
+        #expect(makeHexText(bytecode.rawConstructorStackBytecode).hasPrefix("03dbad6503db6409"))
     }
 
     @Test("Composes AnyHedge redeem script bytecode")
@@ -26,17 +26,17 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: OpalHedgeFixtureData.contractParameters
         )
-        let constructorPrefix = bytecode.redeemScriptBytecode.prefix(
-            bytecode.constructorStackBytecode.count
+        let constructorPrefix = bytecode.rawRedeemScriptBytecode.prefix(
+            bytecode.rawConstructorStackBytecode.count
         )
-        let scriptSuffix = bytecode.redeemScriptBytecode.suffix(
-            bytecode.scriptBytecode.rawData.count
+        let scriptSuffix = bytecode.rawRedeemScriptBytecode.suffix(
+            bytecode.scriptBytecode.rawScriptData.count
         )
-        let redeemScriptHexText = makeHexText(bytecode.redeemScriptBytecode)
+        let redeemScriptHexText = makeHexText(bytecode.rawRedeemScriptBytecode)
 
-        #expect(bytecode.redeemScriptBytecode.count == 343)
-        #expect(Data(constructorPrefix) == bytecode.constructorStackBytecode)
-        #expect(Data(scriptSuffix) == bytecode.scriptBytecode.rawData)
+        #expect(bytecode.rawRedeemScriptBytecode.count == 343)
+        #expect(Data(constructorPrefix) == bytecode.rawConstructorStackBytecode)
+        #expect(Data(scriptSuffix) == bytecode.scriptBytecode.rawScriptData)
         #expect(redeemScriptHexText.hasPrefix("03dbad6503db6409"))
         #expect(redeemScriptHexText.hasSuffix("cd547a8777777768"))
     }
@@ -48,11 +48,11 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         )
         let address = try bytecode.deriveContractAddress(network: .mainnet)
         let directAddress = try OpalHedgeBitcoinCashContractAddress(
-            redeemScript: bytecode.redeemScriptBytecode,
+            rawRedeemScript: bytecode.rawRedeemScriptBytecode,
             network: .mainnet
         )
 
-        #expect(makeHexText(address.scriptHash) == "6cf774143b35046148a90f3f9024b2fd96541e5c")
+        #expect(makeHexText(address.rawScriptHash) == "6cf774143b35046148a90f3f9024b2fd96541e5c")
         #expect(address.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
         #expect(address == directAddress)
     }
@@ -87,10 +87,10 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
         )
         let scriptBytecode = OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode(
             artifact: artifact,
-            rawHex: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
-                .anyHedgeV0_12.rawHex,
-            rawData: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
-                .anyHedgeV0_12.rawData
+            rawScriptHex: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
+                .anyHedgeV0_12.rawScriptHex,
+            rawScriptData: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
+                .anyHedgeV0_12.rawScriptData
         )
         let bytecode = try OpalHedgeBitcoinCashAnyHedgeContractBytecode(
             from: OpalHedgeFixtureData.contractParameters,
@@ -99,7 +99,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBytecodeValidator {
 
         #expect(bytecode.artifact == artifact)
         #expect(bytecode.scriptBytecode == scriptBytecode)
-        #expect(bytecode.constructorStackBytecode.count == 181)
+        #expect(bytecode.rawConstructorStackBytecode.count == 181)
     }
 
     private func makeHexText(_ data: Data) -> String {

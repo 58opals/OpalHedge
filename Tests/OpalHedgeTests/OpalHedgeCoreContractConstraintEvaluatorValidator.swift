@@ -87,19 +87,19 @@ struct OpalHedgeCoreContractConstraintEvaluatorValidator {
     }
 
     @Test("Rejects rounded integer overflow without trapping")
-    func rejectRoundedIntegerOverflowWithoutTrapping() {
+    func rejectRoundedIntegerOverflowWithoutTrapping() throws {
         let nominalUnits = Double(Int64.max) / Double(
             OpalHedge.Core.ContractConstraintPolicy.satoshisPerBitcoinCash
         )
         let context = OpalHedgeContractFixtureBuilder.makeCreationContext(
             nominalUnits: nominalUnits
         )
-        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+        let error = try #require(OpalHedgeTypedErrorCaptureTool.captureConstraintError {
             try OpalHedge.Core.ContractConstraintEvaluator.validateCreationContext(context)
-        }
+        })
 
-        guard case .invalidRoundedInteger(let name, let value)? = error else {
-            Issue.record("Unexpected error: \(String(describing: error))")
+        guard case .invalidRoundedInteger(let name, let value) = error else {
+            Issue.record("Unexpected error: \(error)")
             return
         }
 

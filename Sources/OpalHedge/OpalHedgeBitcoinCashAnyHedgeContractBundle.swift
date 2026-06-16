@@ -71,8 +71,8 @@ package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
             )
             let fundingRequest = OpalHedgeBitcoinCashAnyHedgeContractFundingRequest(
                 fundingOutput: fundingOutput,
-                contractDataDocument: dataDocument,
-                redeemScriptBytecode: bytecode.redeemScriptBytecode,
+                domainDataDocument: dataDocument,
+                rawRedeemScriptBytecode: bytecode.rawRedeemScriptBytecode,
                 contractScriptArtifact: bytecode.artifact
             )
 

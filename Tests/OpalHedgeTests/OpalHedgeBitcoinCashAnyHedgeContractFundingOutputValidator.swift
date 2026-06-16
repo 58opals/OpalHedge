@@ -85,7 +85,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
 
     private func makeContractAddress() throws -> OpalHedgeBitcoinCashContractAddress {
         try OpalHedgeBitcoinCashContractAddress(
-            redeemScriptHex: "51",
+            rawRedeemScriptHex: "51",
             network: .mainnet
         )
     }

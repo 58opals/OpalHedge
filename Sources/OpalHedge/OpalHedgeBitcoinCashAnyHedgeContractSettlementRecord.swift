@@ -11,7 +11,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
     public let dataDocument: OpalHedgeCoreContractDataDocument
 
     public var fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord {
-        settlementRequest.fundingRecord
+        settlementRequest.domainFundingRecord
     }
 
     public var settlementTransactionHash: String {
@@ -40,13 +40,13 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
                     shortPayoutInSatoshis: settlementRequest.hedgePayoutInSatoshis,
                     longPayoutInSatoshis: settlementRequest.longPayoutInSatoshis
                 ),
-                settlementMessageHex: settlementRequest.settlementOracleProof.messageHex,
-                settlementSignatureHex: settlementRequest.settlementOracleProof.signatureHex,
-                previousMessageHex: settlementRequest.previousOracleProof.messageHex,
-                previousSignatureHex: settlementRequest.previousOracleProof.signatureHex,
+                settlementMessageHex: settlementRequest.settlementOracleDomainProof.messageHex,
+                settlementSignatureHex: settlementRequest.settlementOracleDomainProof.signatureHex,
+                previousMessageHex: settlementRequest.previousOracleDomainProof.messageHex,
+                previousSignatureHex: settlementRequest.previousOracleDomainProof.signatureHex,
                 settlementPrice: settlementRequest.settlementPrice
             )
-            let fundingRecord = settlementRequest.fundingRecord
+            let fundingRecord = settlementRequest.domainFundingRecord
             let funding = OpalHedgeCoreContractFunding(
                 fundingTransactionHash: fundingRecord.funding.fundingTransactionHash,
                 fundingOutputIndex: fundingRecord.funding.fundingOutputIndex,
@@ -107,7 +107,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord: Sendable, Eq
                     OpalDiagnostics.Field.settlementKindField(settlementRequest.settlementKind),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.fundingIndex,
-                        settlementRequest.fundingRecord.fundingIndex
+                        settlementRequest.domainFundingRecord.fundingIndex
                     )
                 ] + OpalDiagnostics.Field.makeErrorFields(for: error)
             )

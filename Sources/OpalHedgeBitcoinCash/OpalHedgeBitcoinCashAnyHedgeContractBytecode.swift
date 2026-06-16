@@ -5,12 +5,27 @@ import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable {
     public let scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
-    public let constructorStackPushes: [Data]
-    public let constructorStackBytecode: Data
-    public let redeemScriptBytecode: Data
+    public let rawConstructorStackPushes: [Data]
+    public let rawConstructorStackBytecode: Data
+    public let rawRedeemScriptBytecode: Data
 
     public var artifact: OpalHedgeBitcoinCashContractScriptArtifact {
         scriptBytecode.artifact
+    }
+
+    @available(*, deprecated, renamed: "rawConstructorStackPushes")
+    public var constructorStackPushes: [Data] {
+        rawConstructorStackPushes
+    }
+
+    @available(*, deprecated, renamed: "rawConstructorStackBytecode")
+    public var constructorStackBytecode: Data {
+        rawConstructorStackBytecode
+    }
+
+    @available(*, deprecated, renamed: "rawRedeemScriptBytecode")
+    public var redeemScriptBytecode: Data {
+        rawRedeemScriptBytecode
     }
 
     public func deriveContractAddress(
@@ -18,7 +33,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable 
     ) throws -> OpalHedgeBitcoinCashContractAddress {
         do {
             let address = try OpalHedgeBitcoinCashContractAddress(
-                redeemScript: redeemScriptBytecode,
+                rawRedeemScript: rawRedeemScriptBytecode,
                 network: network
             )
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
@@ -30,7 +45,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable 
                     OpalDiagnostics.Field.networkField(network),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.byteCount,
-                        redeemScriptBytecode.count
+                        rawRedeemScriptBytecode.count
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.payloadType,
@@ -49,7 +64,7 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable 
                     OpalDiagnostics.Field.networkField(network),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.byteCount,
-                        redeemScriptBytecode.count
+                        rawRedeemScriptBytecode.count
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.payloadType,
@@ -71,10 +86,27 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable 
 
         self.init(
             scriptBytecode: scriptBytecode,
-            constructorStackPushes: constructorStackPushes
+            rawConstructorStackPushes: constructorStackPushes
         )
     }
 
+    public init(
+        scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode,
+        rawConstructorStackPushes: [Data]
+    ) {
+        let constructorStackBytecode = rawConstructorStackPushes.reduce(Data()) {
+            $0 + $1
+        }
+        var redeemScriptBytecode = constructorStackBytecode
+        redeemScriptBytecode.append(scriptBytecode.rawScriptData)
+
+        self.scriptBytecode = scriptBytecode
+        self.rawConstructorStackPushes = rawConstructorStackPushes
+        self.rawConstructorStackBytecode = constructorStackBytecode
+        self.rawRedeemScriptBytecode = redeemScriptBytecode
+    }
+
+    @available(*, deprecated, message: "Use init(scriptBytecode:rawConstructorStackPushes:) so raw script and constructor stack material are explicit.")
     public init(
         artifact: OpalHedgeBitcoinCashContractScriptArtifact,
         constructorStackPushes: [Data]
@@ -82,28 +114,23 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractBytecode: Sendable, Equatable 
         self.init(
             scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode(
                 artifact: artifact,
-                rawHex: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
-                    .anyHedgeV0_12.rawHex,
-                rawData: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
-                    .anyHedgeV0_12.rawData
+                rawScriptHex: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
+                    .anyHedgeV0_12.rawScriptHex,
+                rawScriptData: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode
+                    .anyHedgeV0_12.rawScriptData
             ),
-            constructorStackPushes: constructorStackPushes
+            rawConstructorStackPushes: constructorStackPushes
         )
     }
 
+    @available(*, deprecated, message: "Use init(scriptBytecode:rawConstructorStackPushes:) so raw constructor stack material is explicit.")
     public init(
         scriptBytecode: OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode,
         constructorStackPushes: [Data]
     ) {
-        let constructorStackBytecode = constructorStackPushes.reduce(Data()) {
-            $0 + $1
-        }
-        var redeemScriptBytecode = constructorStackBytecode
-        redeemScriptBytecode.append(scriptBytecode.rawData)
-
-        self.scriptBytecode = scriptBytecode
-        self.constructorStackPushes = constructorStackPushes
-        self.constructorStackBytecode = constructorStackBytecode
-        self.redeemScriptBytecode = redeemScriptBytecode
+        self.init(
+            scriptBytecode: scriptBytecode,
+            rawConstructorStackPushes: constructorStackPushes
+        )
     }
 }

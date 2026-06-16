@@ -6,24 +6,29 @@ import OpalDiagnostics
 
 public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
     public let rawValue: String
-    public let scriptHash: Data
+    public let rawScriptHash: Data
     public let network: OpalHedgeBitcoinCashNetwork
 
+    @available(*, deprecated, renamed: "rawScriptHash")
+    public var scriptHash: Data {
+        rawScriptHash
+    }
+
     public init(
-        scriptHash: Data,
+        rawScriptHash: Data,
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws {
         do {
-            guard scriptHash.count == Self.scriptHashByteCount else {
+            guard rawScriptHash.count == Self.scriptHashByteCount else {
                 throw OpalHedgeBitcoinCashContractAddressError
-                    .invalidScriptHashByteCount(scriptHash.count)
+                    .invalidScriptHashByteCount(rawScriptHash.count)
             }
 
             self.rawValue = try Self.cashAddr(
-                scriptHash: scriptHash,
+                rawScriptHash: rawScriptHash,
                 network: network
             )
-            self.scriptHash = scriptHash
+            self.rawScriptHash = rawScriptHash
             self.network = network
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
                 event: OpalDiagnostics.Event.contractAddressEncoded,
@@ -34,7 +39,7 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
                     OpalDiagnostics.Field.networkField(network),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.byteCount,
-                        scriptHash.count
+                        rawScriptHash.count
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.payloadType,
@@ -52,7 +57,7 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
                     OpalDiagnostics.Field.networkField(network),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.byteCount,
-                        scriptHash.count
+                        rawScriptHash.count
                     ),
                     OpalDiagnostics.Field.publicField(
                         OpalDiagnostics.Field.payloadType,
@@ -65,22 +70,22 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
     }
 
     public init(
-        redeemScript: Data,
+        rawRedeemScript: Data,
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws {
         try self.init(
-            scriptHash: OpalCrypto.Hashing.hash160(redeemScript),
+            rawScriptHash: OpalCrypto.Hashing.hash160(rawRedeemScript),
             network: network
         )
     }
 
     public init(
-        redeemScriptHex: String,
+        rawRedeemScriptHex: String,
         network: OpalHedgeBitcoinCashNetwork = .mainnet
     ) throws {
-        guard let redeemScript = OpalHedgeBitcoinCashHexadecimalCodec.decode(redeemScriptHex) else {
+        guard let redeemScript = OpalHedgeBitcoinCashHexadecimalCodec.decode(rawRedeemScriptHex) else {
             let error = OpalHedgeBitcoinCashContractAddressError.invalidRedeemScriptHex(
-                redeemScriptHex
+                rawRedeemScriptHex
             )
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
                 event: OpalDiagnostics.Event.contractAddressEncodingFailed,
@@ -99,7 +104,40 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
         }
 
         try self.init(
-            redeemScript: redeemScript,
+            rawRedeemScript: redeemScript,
+            network: network
+        )
+    }
+
+    @available(*, deprecated, message: "Use init(rawScriptHash:network:) so raw script hash material is explicit.")
+    public init(
+        scriptHash: Data,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet
+    ) throws {
+        try self.init(
+            rawScriptHash: scriptHash,
+            network: network
+        )
+    }
+
+    @available(*, deprecated, message: "Use init(rawRedeemScript:network:) so raw redeem script material is explicit.")
+    public init(
+        redeemScript: Data,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet
+    ) throws {
+        try self.init(
+            rawRedeemScript: redeemScript,
+            network: network
+        )
+    }
+
+    @available(*, deprecated, message: "Use init(rawRedeemScriptHex:network:) so raw redeem script material is explicit.")
+    public init(
+        redeemScriptHex: String,
+        network: OpalHedgeBitcoinCashNetwork = .mainnet
+    ) throws {
+        try self.init(
+            rawRedeemScriptHex: redeemScriptHex,
             network: network
         )
     }
@@ -109,11 +147,11 @@ public struct OpalHedgeBitcoinCashContractAddress: Sendable, Equatable {
     private static let checksumByteCount = 8
 
     private static func cashAddr(
-        scriptHash: Data,
+        rawScriptHash: Data,
         network: OpalHedgeBitcoinCashNetwork
     ) throws -> String {
         var payloadBytes = Data([payToScriptHashVersionByte])
-        payloadBytes.append(scriptHash)
+        payloadBytes.append(rawScriptHash)
 
         let payloadValues = fiveBitValues(from: payloadBytes)
         let checksumValues = try checksumValues(

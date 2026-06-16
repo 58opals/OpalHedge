@@ -35,8 +35,8 @@ extension OpalHedgeBitcoinCashAnyHedgeContractFundingRequest {
 
             self.init(
                 fundingOutput: fundingOutput,
-                contractDataDocument: dataDocument,
-                redeemScriptBytecode: bytecode.redeemScriptBytecode,
+                domainDataDocument: dataDocument,
+                rawRedeemScriptBytecode: bytecode.rawRedeemScriptBytecode,
                 contractScriptArtifact: bytecode.artifact
             )
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.funding).record(

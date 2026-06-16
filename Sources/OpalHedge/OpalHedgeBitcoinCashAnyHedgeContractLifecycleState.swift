@@ -7,6 +7,10 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     case funded(OpalHedgeBitcoinCashAnyHedgeContractFundingRecord)
     case settled(OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord)
 
+    public var reviewSnapshot: OpalHedgeBitcoinCashAnyHedgeContractLifecycleReviewSnapshot {
+        OpalHedgeBitcoinCashAnyHedgeContractLifecycleReviewSnapshot(lifecycleState: self)
+    }
+
     public var isFunded: Bool {
         switch self {
         case .unfunded:
@@ -39,9 +43,13 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     }
 
     public var dataDocument: OpalHedgeCoreContractDataDocument {
+        domainDataDocument
+    }
+
+    public var domainDataDocument: OpalHedgeCoreContractDataDocument {
         switch self {
         case .unfunded(let fundingRequest):
-            fundingRequest.contractDataDocument
+            fundingRequest.domainDataDocument
         case .funded(let fundingRecord):
             fundingRecord.dataDocument
         case .settled(let settlementRecord):
@@ -50,6 +58,10 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     }
 
     public var fundingRequest: OpalHedgeBitcoinCashAnyHedgeContractFundingRequest? {
+        domainFundingRequest
+    }
+
+    public var domainFundingRequest: OpalHedgeBitcoinCashAnyHedgeContractFundingRequest? {
         switch self {
         case .unfunded(let fundingRequest):
             fundingRequest
@@ -60,6 +72,10 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     }
 
     public var fundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord? {
+        domainFundingRecord
+    }
+
+    public var domainFundingRecord: OpalHedgeBitcoinCashAnyHedgeContractFundingRecord? {
         switch self {
         case .unfunded:
             nil
@@ -71,6 +87,10 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     }
 
     public var settlementRecord: OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord? {
+        domainSettlementRecord
+    }
+
+    public var domainSettlementRecord: OpalHedgeBitcoinCashAnyHedgeContractSettlementRecord? {
         switch self {
         case .unfunded,
              .funded:
@@ -81,10 +101,18 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     }
 
     public var settlementRequest: OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest? {
-        settlementRecord?.settlementRequest
+        domainSettlementRequest
+    }
+
+    public var domainSettlementRequest: OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest? {
+        domainSettlementRecord?.settlementRequest
     }
 
     public var funding: OpalHedgeCoreContractFunding? {
+        domainFunding
+    }
+
+    public var domainFunding: OpalHedgeCoreContractFunding? {
         switch self {
         case .unfunded:
             nil
@@ -96,15 +124,27 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractLifecycleState: Sendable, Equata
     }
 
     public var settlement: OpalHedgeCoreContractSettlement? {
-        settlementRecord?.settlement
+        domainSettlement
+    }
+
+    public var domainSettlement: OpalHedgeCoreContractSettlement? {
+        domainSettlementRecord?.settlement
     }
 
     public var settlementDataDocument: OpalHedgeCoreContractDataDocument? {
-        settlementRecord?.dataDocument
+        domainSettlementDataDocument
+    }
+
+    public var domainSettlementDataDocument: OpalHedgeCoreContractDataDocument? {
+        domainSettlementRecord?.dataDocument
     }
 
     public var settlementSummary: OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary? {
-        settlementRecord?.settlementSummary
+        domainSettlementSummary
+    }
+
+    public var domainSettlementSummary: OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary? {
+        domainSettlementRecord?.settlementSummary
     }
 
     package init(bundle: OpalHedgeBitcoinCashAnyHedgeContractBundle) {

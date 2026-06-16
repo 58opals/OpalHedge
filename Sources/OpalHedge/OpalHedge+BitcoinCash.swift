@@ -9,9 +9,15 @@ extension OpalHedge {
         public typealias AnyHedgeContractFundingRequest = OpalHedgeBitcoinCashAnyHedgeContractFundingRequest
         public typealias AnyHedgeContractFundingRequestError =
             OpalHedgeBitcoinCashAnyHedgeContractFundingRequestError
+        public typealias AnyHedgeContractFundingReviewSummary =
+            OpalHedgeBitcoinCashAnyHedgeContractFundingReviewSummary
         public typealias AnyHedgeContractFundingRecord = OpalHedgeBitcoinCashAnyHedgeContractFundingRecord
         public typealias AnyHedgeContractFundingRecordError = OpalHedgeBitcoinCashAnyHedgeContractFundingRecordError
         public typealias AnyHedgeContractFundingState = OpalHedgeBitcoinCashAnyHedgeContractFundingState
+        public typealias AnyHedgeContractLifecyclePhase =
+            OpalHedgeBitcoinCashAnyHedgeContractLifecyclePhase
+        public typealias AnyHedgeContractLifecycleReviewSnapshot =
+            OpalHedgeBitcoinCashAnyHedgeContractLifecycleReviewSnapshot
         public typealias AnyHedgeContractLifecycleState =
             OpalHedgeBitcoinCashAnyHedgeContractLifecycleState
         public typealias AnyHedgeContractSettlementPayoutAmounts =
@@ -22,6 +28,8 @@ extension OpalHedge {
             OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordError
         public typealias AnyHedgeContractSettlementRequest =
             OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest
+        public typealias AnyHedgeContractSettlementReviewSummary =
+            OpalHedgeBitcoinCashAnyHedgeContractSettlementReviewSummary
         public typealias AnyHedgeContractSettlementSummary =
             OpalHedgeBitcoinCashAnyHedgeContractSettlementSummary
         public typealias Network = OpalHedgeBitcoinCashNetwork

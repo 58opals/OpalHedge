@@ -23,15 +23,15 @@ public enum OpalHedgeBitcoinCashAnyHedgeContractParameterEncoder {
                     .encodeScriptNumberPush(parameters.satsForNominalUnitsAtHighLiquidation),
                 try OpalHedgeBitcoinCashScriptEncoder
                     .encodeScriptNumberPush(parameters.nominalUnitsXSatsPerBch),
-                try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(parameters.oraclePublicKey),
-                try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(parameters.longLockScript),
-                try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(parameters.shortLockScript),
+                try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(parameters.rawOraclePublicKey),
+                try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(parameters.rawLongLockScript),
+                try OpalHedgeBitcoinCashScriptEncoder.encodeDataPush(parameters.rawShortLockScript),
                 try OpalHedgeBitcoinCashScriptEncoder
                     .encodeScriptNumberPush(parameters.enableMutualRedemption),
                 try OpalHedgeBitcoinCashScriptEncoder
-                    .encodeDataPush(parameters.longMutualRedeemPublicKey),
+                    .encodeDataPush(parameters.rawLongMutualRedeemPublicKey),
                 try OpalHedgeBitcoinCashScriptEncoder
-                    .encodeDataPush(parameters.shortMutualRedeemPublicKey)
+                    .encodeDataPush(parameters.rawShortMutualRedeemPublicKey)
             ]
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.bitcoinCash).record(
                 event: OpalDiagnostics.Event.contractParametersEncoded,

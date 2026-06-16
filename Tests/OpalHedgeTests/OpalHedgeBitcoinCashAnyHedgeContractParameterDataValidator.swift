@@ -31,6 +31,23 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
         #expect(parameterData == manualParameterData)
     }
 
+    @Test("Exposes raw AnyHedge constructor material with explicit names")
+    func exposeRawAnyHedgeConstructorMaterialWithExplicitNames() throws {
+        let parameterData = try makeManualParameterData()
+
+        #expect(hexText(parameterData.rawOraclePublicKey) == OpalHedgeFixtureData.oraclePublicKeyHex)
+        #expect(hexText(parameterData.rawLongLockScript) == OpalHedgeFixtureData.longLockScriptHex)
+        #expect(hexText(parameterData.rawShortLockScript) == OpalHedgeFixtureData.shortLockScriptHex)
+        #expect(
+            hexText(parameterData.rawLongMutualRedeemPublicKey) ==
+                OpalHedgeFixtureData.longMutualRedeemPublicKeyHex
+        )
+        #expect(
+            hexText(parameterData.rawShortMutualRedeemPublicKey) ==
+                OpalHedgeFixtureData.shortMutualRedeemPublicKeyHex
+        )
+    }
+
     @Test("Encodes Core contract plan as AnyHedge constructor bytecode")
     func encodeCoreContractPlanAsAnyHedgeConstructorBytecode() throws {
         let plan = try OpalHedge.Core.ContractPlan(

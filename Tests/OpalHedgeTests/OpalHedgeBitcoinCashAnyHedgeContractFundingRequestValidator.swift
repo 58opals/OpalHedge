@@ -15,11 +15,13 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         let request = bundle.fundingRequest
 
         #expect(request.fundingOutput == bundle.fundingOutput)
-        #expect(request.contractDataDocument == bundle.dataDocument)
-        #expect(request.redeemScriptBytecode == bundle.bytecode.redeemScriptBytecode)
+        #expect(request.domainDataDocument == bundle.dataDocument)
+        #expect(request.rawRedeemScriptBytecode == bundle.bytecode.rawRedeemScriptBytecode)
         #expect(request.contractScriptArtifact == .anyHedgeV0_12)
         #expect(request.fundingOutput.satoshis == 5_651_049)
-        #expect(request.redeemScriptBytecode.count == 343)
+        #expect(request.rawRedeemScriptBytecode.count == 343)
+        #expect(request.reviewSummary.fundingSatoshis == 5_651_049)
+        #expect(request.reviewSummary.domainDataDocumentByteCount == bundle.dataDocument.utf8Data.count)
     }
 
     @Test("Creates AnyHedge contract funding request from client context")
@@ -34,8 +36,24 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
 
         #expect(request == bundle.fundingRequest)
         #expect(request.fundingOutput.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
-        #expect(request.contractDataDocument.jsonText == OpalHedgeFixtureData
+        #expect(request.domainDataDocument.jsonText == OpalHedgeFixtureData
             .upstreamHedgeTenWeekContractDataDocumentJsonText)
+    }
+
+    @Test("Funding review summary excludes raw script and domain document storage")
+    func fundingReviewSummaryExcludesRawScriptAndDomainDocumentStorage() throws {
+        let summary = try OpalHedge.Client.Context()
+            .createAnyHedgeContractFundingRequest(
+                from: OpalHedgeFixtureData.contractCreationContext
+            )
+            .reviewSummary
+        let labels = Set(Mirror(reflecting: summary).children.compactMap(\.label))
+
+        #expect(labels.contains("contractAddressDisplayValue"))
+        #expect(labels.contains("fundingSatoshis"))
+        #expect(labels.contains("rawRedeemScriptBytecode") == false)
+        #expect(labels.contains("domainDataDocument") == false)
+        #expect(labels.contains("signatureHex") == false)
     }
 
     @Test("Creates AnyHedge contract funding request from contract plan with client context")
@@ -52,7 +70,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         )
 
         #expect(request == bundle.fundingRequest)
-        #expect(request.contractDataDocument.draftData.parameters == plan.parameters)
+        #expect(request.domainDataDocument.draftData.parameters == plan.parameters)
         #expect(request.fundingOutput.contractAddress == bundle.contractAddress)
     }
 
@@ -71,7 +89,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         )
 
         #expect(request == bundle.fundingRequest)
-        #expect(request.contractDataDocument == decodedDocument)
+        #expect(request.domainDataDocument == decodedDocument)
         #expect(request.fundingOutput.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
     }
 
@@ -126,9 +144,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
             network: .regtest
         )
 
-        #expect(request.contractDataDocument == decodedDocument)
+        #expect(request.domainDataDocument == decodedDocument)
         #expect(request.fundingOutput.contractAddress.rawValue == "bchreg:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsr6pyr2gu")
-        #expect(request.redeemScriptBytecode == bundle.fundingRequest.redeemScriptBytecode)
+        #expect(request.rawRedeemScriptBytecode == bundle.fundingRequest.rawRedeemScriptBytecode)
     }
 
     @Test("Rejects funding request from funded data document")

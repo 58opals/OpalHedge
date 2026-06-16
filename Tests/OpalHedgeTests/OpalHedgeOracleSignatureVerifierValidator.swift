@@ -7,7 +7,7 @@ struct OpalHedgeOracleSignatureVerifierValidator {
     @Test("Verifies upstream starting oracle signature")
     func verifyUpstreamStartingOracleSignature() throws {
         let message = try OpalHedge.Oracle.PriceMessage.parse(
-            hex: OpalHedgeFixtureData.startingOracleMessageHex
+            rawHex: OpalHedgeFixtureData.startingOracleMessageHex
         )
 
         let isValid = try OpalHedge.Oracle.SignatureVerifier.verify(
@@ -22,10 +22,10 @@ struct OpalHedgeOracleSignatureVerifierValidator {
     @Test("Rejects non-canonical oracle price message fields")
     func rejectNonCanonicalOraclePriceMessageFields() throws {
         let message = try OpalHedge.Oracle.PriceMessage.parse(
-            hex: OpalHedgeFixtureData.startingOracleMessageHex
+            rawHex: OpalHedgeFixtureData.startingOracleMessageHex
         )
         let nonCanonicalMessage = OpalHedge.Oracle.PriceMessage(
-            rawData: message.rawData,
+            rawMessageData: message.rawMessageData,
             messageTimestamp: message.messageTimestamp,
             messageSequence: message.messageSequence,
             priceSequence: message.priceSequence,

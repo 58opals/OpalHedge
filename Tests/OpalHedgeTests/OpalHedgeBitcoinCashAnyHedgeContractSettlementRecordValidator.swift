@@ -19,7 +19,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
 
         #expect(record == directRecord)
         #expect(record.settlementRequest == request)
-        #expect(record.fundingRecord == request.fundingRecord)
+        #expect(record.fundingRecord == request.domainFundingRecord)
         #expect(record.settlementTransactionHash == String(repeating: "2", count: 64))
         #expect(record.settlement.kind == .maturation)
         #expect(
@@ -34,7 +34,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
         #expect(record.settlement.settlementPrice == 23_500)
         #expect(record.funding.settlement == record.settlement)
         #expect(record.draftData.fundings.last == record.funding)
-        #expect(record.draftData.fees == request.fundingRecord.draftData.fees)
+        #expect(record.draftData.fees == request.domainFundingRecord.draftData.fees)
     }
 
     @Test("Writes AnyHedge automated payout data")
@@ -182,59 +182,5 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRecordValidator {
                 actual: actualSettlement
             )
         )
-    }
-
-    private func makeSettlementRequest() throws
-        -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest {
-        try makeSettlementRequest(fundingRecord: makeFundingRecord())
-    }
-
-    private func makeSettlementRequest(
-        fundingRecord: OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord
-    ) throws -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest {
-        return try fundingRecord.createSettlementRequest(
-            previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeVerifiedStartingSettlementOracleProof(),
-            settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeVerifiedSettlementOracleProof(
-                    messageTimestamp: 6_663_643,
-                    priceValue: 23_500
-                )
-        )
-    }
-
-    private func makeFundingRecord() throws -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord {
-        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
-            plan: OpalHedge.Core.ContractPlan(
-                from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
-            )
-        )
-
-        return try bundle.createFundingRecord(
-            fundingTransactionHash: String(repeating: "1", count: 64),
-            fundingOutputIndex: 0
-        )
-    }
-
-    private func makeDocumentDictionary(
-        for document: OpalHedge.Core.ContractDataDocument
-    ) throws -> [String: Any] {
-        try #require(JSONSerialization.jsonObject(
-            with: document.utf8Data
-        ) as? [String: Any])
-    }
-
-    private func captureSettlementRecordError(
-        _ operation: () throws -> Void
-    ) -> OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecordError? {
-        do {
-            try operation()
-        } catch let error as OpalHedge.BitcoinCash.AnyHedgeContractSettlementRecordError {
-            return error
-        } catch {
-            Issue.record("Unexpected error: \(error)")
-        }
-
-        return nil
     }
 }

@@ -4,27 +4,37 @@ import Foundation
 import OpalDiagnostics
 
 public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
-    public let rawData: Data
+    public let rawMessageData: Data
     public let messageTimestamp: Int64
     public let messageSequence: Int64
     public let priceSequence: Int64
     public let priceValue: Int64
 
     public init(
-        rawData: Data,
+        rawMessageData: Data,
         messageTimestamp: Int64,
         messageSequence: Int64,
         priceSequence: Int64,
         priceValue: Int64
     ) {
-        self.rawData = rawData
+        self.rawMessageData = rawMessageData
         self.messageTimestamp = messageTimestamp
         self.messageSequence = messageSequence
         self.priceSequence = priceSequence
         self.priceValue = priceValue
     }
 
-    public static func parse(hex text: String) throws -> Self {
+    @available(*, deprecated, renamed: "rawMessageData")
+    public var rawData: Data {
+        rawMessageData
+    }
+
+    @available(*, deprecated, renamed: "rawMessageHex")
+    public var hex: String {
+        rawMessageHex
+    }
+
+    public static func parse(rawHex text: String) throws -> Self {
         let data: Data
         do {
             data = try OpalHedgeOracleHexadecimalCodec.decode(text)
@@ -48,10 +58,10 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
             throw error
         }
 
-        return try parse(data: data)
+        return try parse(rawData: data)
     }
 
-    public static func parse(data: Data) throws -> Self {
+    public static func parse(rawData data: Data) throws -> Self {
         do {
             let message = try parseValidatedData(data)
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.oracle).record(
@@ -64,7 +74,7 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
                         OpalDiagnostics.Field.payloadType,
                         "bytes"
                     )
-                ] + OpalDiagnostics.Field.makeMessageFields(for: message)
+                ] + OpalDiagnostics.Field.makeOraclePriceMessageSummaryFields(for: message)
             )
             return message
         } catch {
@@ -88,12 +98,22 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
         }
     }
 
-    public var hex: String {
-        OpalHedgeOracleHexadecimalCodec.encode(rawData)
+    @available(*, deprecated, message: "Use parse(rawHex:) so raw oracle message material is explicit at the call site.")
+    public static func parse(hex text: String) throws -> Self {
+        try parse(rawHex: text)
+    }
+
+    @available(*, deprecated, message: "Use parse(rawData:) so raw oracle message material is explicit at the call site.")
+    public static func parse(data: Data) throws -> Self {
+        try parse(rawData: data)
+    }
+
+    public var rawMessageHex: String {
+        OpalHedgeOracleHexadecimalCodec.encode(rawMessageData)
     }
 
     var isCanonical: Bool {
-        (try? Self.parseValidatedData(rawData)) == self
+        (try? Self.parseValidatedData(rawMessageData)) == self
     }
 
     private static func parseValidatedData(_ data: Data) throws -> Self {
@@ -117,7 +137,7 @@ public struct OpalHedgeOraclePriceMessage: Sendable, Equatable {
         try validatePositiveScriptInteger(priceValue, name: "priceValue")
 
         return Self(
-            rawData: data,
+            rawMessageData: data,
             messageTimestamp: messageTimestamp,
             messageSequence: messageSequence,
             priceSequence: priceSequence,

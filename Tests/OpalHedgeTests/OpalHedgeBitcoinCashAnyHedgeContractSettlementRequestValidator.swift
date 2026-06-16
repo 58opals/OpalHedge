@@ -20,17 +20,17 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
             settlementOracleProof: settlementOracleProof
         )
         let directRequest = try OpalHedge.BitcoinCash.AnyHedgeContractSettlementRequest(
-            fundingRecord: fundingRecord,
-            previousOracleProof: previousOracleProof,
-            settlementOracleProof: settlementOracleProof
+            domainFundingRecord: fundingRecord,
+            previousOracleDomainProof: previousOracleProof,
+            settlementOracleDomainProof: settlementOracleProof
         )
 
         #expect(request == directRequest)
-        #expect(request.fundingRecord == fundingRecord)
+        #expect(request.domainFundingRecord == fundingRecord)
         #expect(request.fundingOutput == fundingRecord.fundingOutput)
-        #expect(request.funding == fundingRecord.funding)
-        #expect(request.previousOracleProof == previousOracleProof)
-        #expect(request.settlementOracleProof == settlementOracleProof)
+        #expect(request.domainFunding == fundingRecord.funding)
+        #expect(request.previousOracleDomainProof == previousOracleProof)
+        #expect(request.settlementOracleDomainProof == settlementOracleProof)
         #expect(request.settlementCondition == .maturation)
         #expect(request.settlementKind == .maturation)
         #expect(request.settlementPrice == 23_500)
@@ -44,6 +44,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
         #expect(request.hedgePayoutInSatoshis == 4_255_319)
         #expect(request.longPayoutInSatoshis == 1_394_398)
         #expect(request.minerFeeInSatoshis == 1_332)
+        #expect(request.reviewSummary.settlementKind == .maturation)
+        #expect(request.reviewSummary.fundingSatoshis == fundingRecord.funding.fundingSatoshis)
     }
 
     @Test("Creates AnyHedge liquidation settlement request")
@@ -75,7 +77,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
 
     @Test("Rejects AnyHedge in-range settlement request before maturity")
     func rejectAnyHedgeInRangeSettlementRequestBeforeMaturity() throws {
-        let error = captureSettlementConditionError {
+        let error = try #require(captureSettlementConditionError {
             _ = try makeFundingRecord().createSettlementRequest(
                 previousOracleProof: OpalHedgeContractFixtureBuilder
                     .makeStartingSettlementOracleProof(),
@@ -85,9 +87,28 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
                         priceValue: 23_500
                     )
             )
-        }
+        })
 
         #expect(error == .priceInRangeBeforeMaturity(settlementPrice: 23_500))
+    }
+
+    @Test("Settlement review summary excludes raw hashes, oracle messages, and signatures")
+    func settlementReviewSummaryExcludesRawHashesOracleMessagesAndSignatures() throws {
+        let summary = try makeFundingRecord().createSettlementRequest(
+            previousOracleProof: OpalHedgeContractFixtureBuilder
+                .makeStartingSettlementOracleProof(),
+            settlementOracleProof: OpalHedgeContractFixtureBuilder
+                .makeSettlementOracleProof()
+        ).reviewSummary
+        let labels = Set(Mirror(reflecting: summary).children.compactMap(\.label))
+
+        #expect(labels.contains("settlementPrice"))
+        #expect(labels.contains("rawFundingTransactionHash") == false)
+        #expect(labels.contains("rawSettlementTransactionHash") == false)
+        #expect(labels.contains("rawPreviousOracleMessageHex") == false)
+        #expect(labels.contains("rawPreviousOracleSignatureHex") == false)
+        #expect(labels.contains("rawSettlementOracleMessageHex") == false)
+        #expect(labels.contains("rawSettlementOracleSignatureHex") == false)
     }
 
     private func makeFundingRecord() throws -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord {

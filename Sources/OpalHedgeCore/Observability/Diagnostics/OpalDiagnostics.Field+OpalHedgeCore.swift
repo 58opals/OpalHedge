@@ -30,10 +30,6 @@ extension OpalDiagnostics.Field {
         OpalDiagnostics.Field(name: name, publicValue: String(value))
     }
 
-    static func privateField(_ name: String, _ value: String) -> OpalDiagnostics.Field {
-        OpalDiagnostics.Field(name: name, value: value, privacy: .private)
-    }
-
     static func operationField(_ operation: String) -> OpalDiagnostics.Field {
         publicField(Self.operation, operation)
     }

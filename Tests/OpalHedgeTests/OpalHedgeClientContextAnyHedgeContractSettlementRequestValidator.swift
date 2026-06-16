@@ -29,7 +29,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
         )
 
         #expect(request == expectedRequest)
-        #expect(request.fundingRecord == fundingRecord)
+        #expect(request.domainFundingRecord == fundingRecord)
         #expect(request.settlementKind == .maturation)
         #expect(request.settlementPrice == 23_500)
     }
@@ -62,7 +62,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
         )
 
         #expect(request == expectedRequest)
-        #expect(request.fundingRecord.draftData.parameters == plan.parameters)
+        #expect(request.domainFundingRecord.draftData.parameters == plan.parameters)
         #expect(request.settlementKind == .maturation)
     }
 
@@ -104,7 +104,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
 
         #expect(request.settlementKind == .liquidation)
         #expect(request.settlementPrice == 17_500)
-        #expect(request.fundingRecord.draftData.fundings.first == existingFunding)
+        #expect(request.domainFundingRecord.draftData.fundings.first == existingFunding)
         #expect(
             request.fundingOutput.contractAddress.rawValue ==
                 "bchreg:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsr6pyr2gu"

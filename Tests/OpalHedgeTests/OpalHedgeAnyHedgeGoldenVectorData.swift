@@ -63,9 +63,9 @@ enum OpalHedgeAnyHedgeGoldenVectorData {
         "21" + OpalHedgeFixtureData.shortMutualRedeemPublicKeyHex
     ]
 
-    static let constructorStackBytecodeHex = constructorStackPushHexTexts.joined()
+    static let rawConstructorStackBytecodeHex = constructorStackPushHexTexts.joined()
     static let constructorStackPushCount = 13
-    static let constructorStackBytecodeByteCount = 181
+    static let rawConstructorStackBytecodeByteCount = 181
     static let redeemScriptBytecodeByteCount = 343
     static let contractScriptBytecodeSuffixHex = "cd547a8777777768"
     static let mainnetContractScriptHashHex = "6cf774143b35046148a90f3f9024b2fd96541e5c"

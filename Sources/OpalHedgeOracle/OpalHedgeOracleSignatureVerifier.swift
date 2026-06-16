@@ -45,14 +45,14 @@ public enum OpalHedgeOracleSignatureVerifier {
                 ] + OpalDiagnostics.Field.makeErrorFields(
                     for: OpalHedgeOracleSignatureVerificationError.invalidSignature,
                     errorCategory: "oracle_signature"
-                ) + OpalDiagnostics.Field.makeMessageFields(for: message)
+                ) + OpalDiagnostics.Field.makeOraclePriceMessageSummaryFields(for: message)
             )
             return false
         }
 
         do {
             let digest = try OpalCrypto.Signature.Digest(
-                rawRepresentation: OpalCrypto.Hashing.sha256(message.rawData)
+                rawRepresentation: OpalCrypto.Hashing.sha256(message.rawMessageData)
             )
             let schnorrSignature = try OpalCrypto.Signature.Schnorr(
                 rawRepresentation: signature
@@ -76,7 +76,7 @@ public enum OpalHedgeOracleSignatureVerifier {
                 ] + (isVerified ? [] : OpalDiagnostics.Field.makeErrorFields(
                     for: OpalHedgeOracleSignatureVerificationError.invalidSignature,
                     errorCategory: "oracle_signature"
-                )) + OpalDiagnostics.Field.makeMessageFields(for: message)
+                )) + OpalDiagnostics.Field.makeOraclePriceMessageSummaryFields(for: message)
             )
             return isVerified
         } catch let error as OpalCrypto.Signature.Error {
@@ -87,7 +87,7 @@ public enum OpalHedgeOracleSignatureVerifier {
                 fields: [
                     OpalDiagnostics.Field.operationField("verify_oracle_signature"),
                     OpalDiagnostics.Field.moduleField("oracle")
-                ] + OpalDiagnostics.Field.makeMessageFields(for: message)
+                ] + OpalDiagnostics.Field.makeOraclePriceMessageSummaryFields(for: message)
                     + OpalDiagnostics.Field.makeErrorFields(for: mappedError)
             )
             throw mappedError
@@ -99,7 +99,7 @@ public enum OpalHedgeOracleSignatureVerifier {
                 fields: [
                     OpalDiagnostics.Field.operationField("verify_oracle_signature"),
                     OpalDiagnostics.Field.moduleField("oracle")
-                ] + OpalDiagnostics.Field.makeMessageFields(for: message)
+                ] + OpalDiagnostics.Field.makeOraclePriceMessageSummaryFields(for: message)
                     + OpalDiagnostics.Field.makeErrorFields(for: mappedError)
             )
             throw mappedError
@@ -146,7 +146,7 @@ public enum OpalHedgeOracleSignatureVerifier {
                         OpalDiagnostics.Field.payloadType,
                         payloadType
                     )
-                ] + OpalDiagnostics.Field.makeMessageFields(for: message)
+                ] + OpalDiagnostics.Field.makeOraclePriceMessageSummaryFields(for: message)
                     + OpalDiagnostics.Field.makeErrorFields(
                         for: error,
                         errorCategory: "oracle_signature"

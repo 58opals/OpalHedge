@@ -28,10 +28,6 @@ extension OpalDiagnostics.Field {
         OpalDiagnostics.Field(name: name, publicValue: String(value))
     }
 
-    static func privateField(_ name: String, _ value: String) -> OpalDiagnostics.Field {
-        OpalDiagnostics.Field(name: name, value: value, privacy: .private)
-    }
-
     static func operationField(_ operation: String) -> OpalDiagnostics.Field {
         publicField(Self.operation, operation)
     }
@@ -40,9 +36,11 @@ extension OpalDiagnostics.Field {
         publicField(Self.module, module)
     }
 
-    static func makeMessageFields(for message: OpalHedgeOraclePriceMessage) -> [OpalDiagnostics.Field] {
+    static func makeOraclePriceMessageSummaryFields(
+        for message: OpalHedgeOraclePriceMessage
+    ) -> [OpalDiagnostics.Field] {
         [
-            publicField(Self.byteCount, message.rawData.count),
+            publicField(Self.byteCount, message.rawMessageData.count),
             publicField(Self.messageTimestamp, message.messageTimestamp),
             publicField(Self.messageSequence, message.messageSequence),
             publicField(Self.priceSequence, message.priceSequence),

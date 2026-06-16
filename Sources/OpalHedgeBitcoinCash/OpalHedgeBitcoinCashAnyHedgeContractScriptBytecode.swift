@@ -4,23 +4,46 @@ import Foundation
 
 public struct OpalHedgeBitcoinCashAnyHedgeContractScriptBytecode: Sendable, Equatable {
     public let artifact: OpalHedgeBitcoinCashContractScriptArtifact
-    public let rawHex: String
-    public let rawData: Data
+    public let rawScriptHex: String
+    public let rawScriptData: Data
 
+    public init(
+        artifact: OpalHedgeBitcoinCashContractScriptArtifact,
+        rawScriptHex: String,
+        rawScriptData: Data
+    ) {
+        self.artifact = artifact
+        self.rawScriptHex = rawScriptHex
+        self.rawScriptData = rawScriptData
+    }
+
+    @available(*, deprecated, renamed: "rawScriptHex")
+    public var rawHex: String {
+        rawScriptHex
+    }
+
+    @available(*, deprecated, renamed: "rawScriptData")
+    public var rawData: Data {
+        rawScriptData
+    }
+
+    @available(*, deprecated, message: "Use init(artifact:rawScriptHex:rawScriptData:) so raw script material is explicit at the call site.")
     public init(
         artifact: OpalHedgeBitcoinCashContractScriptArtifact,
         rawHex: String,
         rawData: Data
     ) {
-        self.artifact = artifact
-        self.rawHex = rawHex
-        self.rawData = rawData
+        self.init(
+            artifact: artifact,
+            rawScriptHex: rawHex,
+            rawScriptData: rawData
+        )
     }
 
     public static let anyHedgeV0_12 = Self(
         artifact: .anyHedgeV0_12,
-        rawHex: anyHedgeV0_12Hex,
-        rawData: Data(anyHedgeV0_12Bytes)
+        rawScriptHex: anyHedgeV0_12Hex,
+        rawScriptData: Data(anyHedgeV0_12Bytes)
     )
 
     private static let anyHedgeV0_12Hex =
