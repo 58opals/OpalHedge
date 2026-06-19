@@ -6,9 +6,11 @@ Opal Hedge is an open-source Swift package for building AnyHedge-compatible Bitc
 
 ## Status
 
-This package is beta-ready for Opal Wallet integration as a protocol and data library. The current focus is deterministic AnyHedge-compatible data, oracle proof handling, payout math, contract bytecode artifacts, funding data, settlement data, and plan-first client APIs.
+Status: Pilot on develop.
 
-For the Opal Wallet beta path, the intended dependency route is `OpalHedge` into `OpalBase`, then Opal Wallet consumes the wallet-facing hedge facade exposed by Opal Base. Opal Hedge owns protocol data and verification. Opal Base owns reusable wallet integration, transaction construction, signing, broadcast, and Bitcoin Cash app-domain adapters. Opal Wallet owns product UI, beta gates, copy, routing, and app persistence policy.
+This package is in Pilot for Opal Wallet integration as a protocol and data library. The current focus is deterministic AnyHedge-compatible data, oracle proof handling, payout math, contract bytecode artifacts, funding data, settlement data, and plan-first client APIs.
+
+For the Opal Wallet Pilot path, the intended dependency route is `OpalHedge` into `OpalBase`, then Opal Wallet consumes the wallet-facing hedge facade exposed by Opal Base. Opal Hedge owns protocol data and verification. Opal Base owns reusable wallet integration, transaction construction, signing, broadcast, and Bitcoin Cash app-domain adapters. Opal Wallet owns product UI, Pilot gates, copy, routing, and app persistence policy.
 
 Currently supported:
 
@@ -30,7 +32,7 @@ Not yet supported:
 - Merchant invoicing.
 - Early settlement user flows.
 
-See [Opal Wallet Beta Integration](Docs/OpalWalletBetaIntegration.md) for the supported integration boundary and checklist.
+See [Opal Wallet Pilot Integration](Docs/OpalWalletPilotIntegration.md) for the supported integration boundary and checklist.
 
 ## Installation
 
@@ -173,6 +175,20 @@ let preset = OpalHedge.Core.ContractPreset.usdSimpleHedgeThirtyDay
 ```
 
 The preset describes policy defaults. Contract creation still requires concrete oracle proofs, payout addresses, locking scripts, mutual redemption public keys, and timing values.
+
+## License
+
+Opal Hedge is available under the [Apache License 2.0](LICENSE).
+
+## Validation
+
+Current validation command:
+
+```sh
+swift test
+```
+
+Result: Passed on 2026-06-19 with 277 tests in 48 suites.
 
 ## Development
 

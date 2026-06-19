@@ -1,6 +1,6 @@
-# Opal Wallet Beta Integration
+# Opal Wallet Pilot Integration
 
-Opal Hedge is ready for Opal Wallet beta integration as a deterministic AnyHedge-compatible protocol and data library. The beta boundary is intentionally narrow: Opal Hedge prepares and verifies hedge contract data. Opal Base should own the reusable wallet adapter and transaction boundary, while Opal Wallet should own product UI, beta gates, copy, routing, and app persistence policy.
+Opal Hedge is in Pilot for Opal Wallet integration as a deterministic AnyHedge-compatible protocol and data library. The Pilot boundary is intentionally narrow: Opal Hedge prepares and verifies hedge contract data. Opal Base should own the reusable wallet adapter and transaction boundary, while Opal Wallet should own product UI, Pilot gates, copy, routing, and app persistence policy.
 
 ## Supported Boundary
 
@@ -16,9 +16,9 @@ Opal Hedge currently supports these integration surfaces:
 
 ## Recommended Dependency Path
 
-The durable Opal Wallet beta path is:
+The durable Opal Wallet Pilot path is:
 
-1. Add `OpalHedge` to Opal Base on the beta lane.
+1. Add `OpalHedge` to Opal Base on the Pilot lane.
 2. Expose a small Opal Base hedge facade for wallet-facing flows.
 3. Consume that Opal Base facade from Opal Wallet.
 
@@ -26,7 +26,7 @@ Opal Wallet should not normally add `OpalHedge` directly to the app target. A di
 
 ## Opal Base Responsibilities
 
-Opal Base should own these responsibilities during beta integration:
+Opal Base should own these responsibilities during Pilot integration:
 
 - Adapt Opal Base wallet vocabulary such as addresses, satoshis, transaction hashes, UTXOs, network selection, and wallet-owned key material into Opal Hedge contract inputs.
 - Produce payout addresses, locking scripts, and mutual redemption public keys from wallet-owned key material.
@@ -36,13 +36,13 @@ Opal Base should own these responsibilities during beta integration:
 
 ## Wallet Responsibilities
 
-Opal Wallet should own these responsibilities during beta integration:
+Opal Wallet should own these responsibilities during Pilot integration:
 
 - Obtain oracle messages and signatures from the selected oracle source.
 - Call the Opal Base hedge facade rather than importing Opal Hedge directly in durable app code.
 - Persist wallet-visible hedge state according to app policy and associate it with wallet transactions.
 - Decide product availability, risk copy, kill switches, user confirmation flows, and mainnet rollout controls.
-- Keep transaction signing and broadcast behind wallet-owned beta gates until end-to-end transaction tests are complete.
+- Keep transaction signing and broadcast behind wallet-owned Pilot gates until end-to-end transaction tests are complete.
 
 ## Suggested Integration Flow
 
@@ -55,20 +55,20 @@ Opal Wallet should own these responsibilities during beta integration:
 7. Verify settlement oracle proofs and create the settlement summary or settlement record from the same contract plan plus wallet-observed settlement data.
 8. Persist the produced data document as the portable AnyHedge-compatible contract record.
 
-## Beta Acceptance Checklist
+## Pilot Acceptance Checklist
 
-Before exposing the integration to beta users, Opal Wallet should verify:
+Before exposing the integration to Pilot users, Opal Wallet should verify:
 
 - Opal Base exposes a hedge facade that hides direct Opal Hedge dependency details from durable app code.
 - A wallet integration test can create the same funding output address and satoshi amount from stable fixture inputs.
 - Funding request JSON is persisted and can be reconstructed into equivalent funding data.
 - Settlement summary calculation matches expected maturation and liquidation fixture outcomes.
 - Wallet transaction signing and broadcast are covered through Opal Base and remain outside Opal Hedge.
-- Mainnet availability is gated by an explicit Opal Wallet beta switch.
+- Mainnet availability is gated by an explicit Opal Wallet Pilot switch.
 - User-visible copy does not imply Opal Hedge signs, broadcasts, escrows, or manages liquidity.
 
-The package test suite includes `OpalHedgeWalletBetaIntegrationValidator` as the baseline fixture for stable funding output, funding document reconstruction, and settlement summary reconstruction.
+The package test suite includes `OpalHedgeWalletPilotIntegrationValidator` as the baseline fixture for stable funding output, funding document reconstruction, and settlement summary reconstruction.
 
 ## Out Of Scope For This Package
 
-The beta library does not provide transaction signing, transaction broadcast, liquidity provider discovery, merchant invoicing, wallet UI, early settlement UX, or custom leverage controls.
+The Pilot library does not provide transaction signing, transaction broadcast, liquidity provider discovery, merchant invoicing, wallet UI, early settlement UX, or custom leverage controls.

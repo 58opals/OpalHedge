@@ -1,9 +1,9 @@
-// OpalHedgeWalletBetaIntegrationValidator.swift
+// OpalHedgeWalletPilotIntegrationValidator.swift
 
 import Testing
 import OpalHedge
 
-struct OpalHedgeWalletBetaIntegrationValidator {
+struct OpalHedgeWalletPilotIntegrationValidator {
     @Test("Client context exposes Wallet lane authority without runtime ownership")
     func clientContextExposesWalletLaneAuthorityWithoutRuntimeOwnership() {
         let authority = OpalHedge.Client.Context().domainAuthority
@@ -19,8 +19,8 @@ struct OpalHedgeWalletBetaIntegrationValidator {
         #expect(!authority.ownsUserTriggeredMoneyMovement)
     }
 
-    @Test("Creates stable Opal Wallet beta funding output")
-    func createStableOpalWalletBetaFundingOutput() throws {
+    @Test("Creates stable Opal Wallet Pilot funding output")
+    func createStableOpalWalletPilotFundingOutput() throws {
         let clientContext = OpalHedge.Client.Context()
         let contractPlan = try makeContractPlan()
         let fundingRequest = try clientContext.createAnyHedgeContractFundingRequest(
@@ -35,8 +35,8 @@ struct OpalHedgeWalletBetaIntegrationValidator {
             contractPlan.parameters)
     }
 
-    @Test("Reconstructs Opal Wallet beta funding record from persisted document")
-    func reconstructOpalWalletBetaFundingRecordFromPersistedDocument() throws {
+    @Test("Reconstructs Opal Wallet Pilot funding record from persisted document")
+    func reconstructOpalWalletPilotFundingRecordFromPersistedDocument() throws {
         let clientContext = OpalHedge.Client.Context()
         let contractPlan = try makeContractPlan()
         let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
@@ -56,8 +56,8 @@ struct OpalHedgeWalletBetaIntegrationValidator {
         #expect(reconstructedRecord.fundingOutput.satoshis == 5_651_049)
     }
 
-    @Test("Summarizes Opal Wallet beta settlement outcome from persisted document")
-    func summarizeOpalWalletBetaSettlementOutcomeFromPersistedDocument() throws {
+    @Test("Summarizes Opal Wallet Pilot settlement outcome from persisted document")
+    func summarizeOpalWalletPilotSettlementOutcomeFromPersistedDocument() throws {
         let clientContext = OpalHedge.Client.Context()
         let contractPlan = try OpalHedge.Core.ContractPlan(
             from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
