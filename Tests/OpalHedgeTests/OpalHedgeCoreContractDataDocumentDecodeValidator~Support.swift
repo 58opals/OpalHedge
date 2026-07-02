@@ -5,27 +5,6 @@ import OpalHedge
 
 extension OpalHedgeCoreContractDataDocumentDecodeValidator {
     func rejectInvalidContractDataDocumentIntegerFields(
-        replacingWith fieldValue: Any
-    ) throws {
-        for fieldPath in integerFieldPaths {
-            let jsonText = try OpalHedgeContractDataDocumentMutationTool.makeJsonText(
-                replacingFieldAt: fieldPath,
-                with: fieldValue,
-                in: try makeSourceJsonText(for: fieldPath)
-            )
-            let error = OpalHedgeTypedErrorCaptureTool.captureContractDataDocumentError {
-                _ = try OpalHedge.Core.ContractDataDocument(jsonText: jsonText)
-            }
-
-            OpalHedgeContractDataDocumentErrorExpectationTool.expectInvalidFieldType(
-                error,
-                at: fieldPath,
-                expectedFieldType: "integer"
-            )
-        }
-    }
-
-    func rejectInvalidContractDataDocumentIntegerFields(
         replacingWithRawJSONValue rawJSONValue: String
     ) throws {
         for fieldPath in integerFieldPaths {

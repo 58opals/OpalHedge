@@ -19,6 +19,16 @@ extension OpalHedgeCoreContractConstraintEvaluator {
         }
     }
 
+    static func validateFundingOutputIndex(_ value: Int64, name: String) throws {
+        guard value >= 0,
+              value <= Int64(UInt32.max) else {
+            throw OpalHedgeCoreContractConstraintError.invalidNonnegativeInteger(
+                name: name,
+                value: value
+            )
+        }
+    }
+
     static func validateBooleanInteger(_ value: Int64, name: String) throws {
         guard value == 0 || value == 1 else {
             throw OpalHedgeCoreContractConstraintError.invalidBooleanInteger(

@@ -123,18 +123,14 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
                 dataDocument: invalidSatoshisDocument
             )
         }
-        let invalidOutputIndexDocument = try OpalHedge.Core.ContractDataDocument(
-            jsonText: record.dataDocument.jsonText.replacingOccurrences(
-                of: #""fundingOutputIndex":0"#,
-                with: #""fundingOutputIndex":4294967296"#
-            )
-        )
-        let invalidOutputIndexError = OpalHedgeTypedErrorCaptureTool
-            .captureFundingRecordError {
-                _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord(
-                    dataDocument: invalidOutputIndexDocument
+        let invalidOutputIndexError = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(
+                jsonText: record.dataDocument.jsonText.replacingOccurrences(
+                    of: #""fundingOutputIndex":0"#,
+                    with: #""fundingOutputIndex":4294967296"#
                 )
-            }
+            )
+        }
 
         #expect(missingFundingError == .missingFundingRecord(index: 0))
         #expect(
@@ -143,7 +139,12 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
                 actual: 5_651_048
             )
         )
-        #expect(invalidOutputIndexError == .invalidFundingOutputIndex(4_294_967_296))
+        #expect(
+            invalidOutputIndexError == .invalidNonnegativeInteger(
+                name: "fundings[0].fundingOutputIndex",
+                value: 4_294_967_296
+            )
+        )
     }
 
     @Test("Rejects settled funding record data document")

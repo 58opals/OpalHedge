@@ -34,12 +34,13 @@ extension OpalHedgeCoreContractDataDocumentValidator {
         )
     }
 
-    @Test("Rejects nonpositive settlement payout satoshis when creating contract data document")
-    func rejectNonpositiveSettlementPayoutSatoshisWhenCreatingContractDataDocument() throws {
+    @Test("Rejects sub-dust settlement payout satoshis when creating contract data document")
+    func rejectSubDustSettlementPayoutSatoshisWhenCreatingContractDataDocument() throws {
         let settlement = OpalHedge.Core.ContractSettlement(
             kind: .maturation,
             settlementTransactionHash: String(repeating: "2", count: 64),
-            shortPayoutInSatoshis: 0,
+            shortPayoutInSatoshis: OpalHedge.Core.ContractConstraintPolicy
+                .dustLimitSatoshis - 1,
             longPayoutInSatoshis: 1_412_429
         )
         let draftData = try makeDraftData(
@@ -57,9 +58,8 @@ extension OpalHedgeCoreContractDataDocumentValidator {
         })
 
         #expect(
-            error == .invalidPositiveInteger(
-                name: "fundings[0].settlement.hedgePayoutInSatoshis",
-                value: 0
+            error == .invalidPayoutSatoshis(
+                OpalHedge.Core.ContractConstraintPolicy.dustLimitSatoshis - 1
             )
         )
     }
@@ -133,7 +133,8 @@ extension OpalHedgeCoreContractDataDocumentValidator {
             settlementTransactionHash: String(repeating: "2", count: 64),
             shortPayoutInSatoshis: OpalHedge.Core.ContractConstraintPolicy
                 .maxContractSatoshis,
-            longPayoutInSatoshis: 1
+            longPayoutInSatoshis: OpalHedge.Core.ContractConstraintPolicy
+                .dustLimitSatoshis
         )
         let draftData = try makeDraftData(
             fundings: [
@@ -151,7 +152,39 @@ extension OpalHedgeCoreContractDataDocumentValidator {
 
         #expect(
             error == .contractSatoshisExceedMaximum(
-                OpalHedge.Core.ContractConstraintPolicy.maxContractSatoshis + 1
+                OpalHedge.Core.ContractConstraintPolicy.maxContractSatoshis
+                    + OpalHedge.Core.ContractConstraintPolicy.dustLimitSatoshis
+            )
+        )
+    }
+
+    @Test("Rejects settlement payout total above funding when creating contract data document")
+    func rejectSettlementPayoutTotalAboveFundingWhenCreatingContractDataDocument() throws {
+        let settlement = OpalHedge.Core.ContractSettlement(
+            kind: .maturation,
+            settlementTransactionHash: String(repeating: "2", count: 64),
+            shortPayoutInSatoshis: 4_237_288,
+            longPayoutInSatoshis: 1_412_430
+        )
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 1,
+                    fundingSatoshis: 5_649_717,
+                    settlement: settlement
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidContractFunding(
+                shortInput: 4_237_288,
+                longInput: 1_412_430,
+                payoutSats: 5_649_717
             )
         )
     }

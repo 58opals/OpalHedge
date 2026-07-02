@@ -41,59 +41,64 @@ public struct OpalHedgeCoreContractDataDocument: Sendable, Equatable {
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.dataDocument).record(
                 event: successEvent,
                 level: .debug,
-                fields: [
-                    OpalDiagnostics.Field.operationField(diagnosticsOperation),
-                    OpalDiagnostics.Field.moduleField("core"),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.fundingCount,
-                        draftData.fundings.count
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.feeCount,
-                        draftData.fees.count
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.byteCount,
-                        diagnosticsByteCount ?? data.count
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.payloadType,
-                        "json"
-                    )
-                ] + extraFields
+                fields: Self.diagnosticsFields(
+                    operation: diagnosticsOperation,
+                    draftData: draftData,
+                    byteCount: diagnosticsByteCount ?? data.count,
+                    extraFields: extraFields
+                )
             )
         } catch {
-            let byteCountFields = diagnosticsByteCount.map {
-                [
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.byteCount,
-                        $0
-                    )
-                ]
-            } ?? []
             OpalDiagnostics.logger(category: OpalDiagnostics.Category.dataDocument).record(
                 event: failureEvent,
                 level: .error,
-                fields: [
-                    OpalDiagnostics.Field.operationField(diagnosticsOperation),
-                    OpalDiagnostics.Field.moduleField("core"),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.fundingCount,
-                        draftData.fundings.count
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.feeCount,
-                        draftData.fees.count
-                    ),
-                    OpalDiagnostics.Field.publicField(
-                        OpalDiagnostics.Field.payloadType,
-                        "json"
-                    )
-                ] + byteCountFields + extraFields
+                fields: Self.diagnosticsFields(
+                    operation: diagnosticsOperation,
+                    draftData: draftData,
+                    byteCount: diagnosticsByteCount,
+                    extraFields: extraFields
+                )
                     + OpalDiagnostics.Field.makeConstraintFields(for: error)
                     + OpalDiagnostics.Field.makeErrorFields(for: error)
             )
             throw error
         }
+    }
+
+    private static func diagnosticsFields(
+        operation: String,
+        draftData: OpalHedgeCoreContractDraftData,
+        byteCount: Int?,
+        extraFields: [OpalDiagnostics.Field]
+    ) -> [OpalDiagnostics.Field] {
+        var fields: [OpalDiagnostics.Field] = [
+            OpalDiagnostics.Field.operationField(operation),
+            OpalDiagnostics.Field.moduleField("core"),
+            OpalDiagnostics.Field.publicField(
+                OpalDiagnostics.Field.fundingCount,
+                draftData.fundings.count
+            ),
+            OpalDiagnostics.Field.publicField(
+                OpalDiagnostics.Field.feeCount,
+                draftData.fees.count
+            ),
+            OpalDiagnostics.Field.publicField(
+                OpalDiagnostics.Field.payloadType,
+                "json"
+            )
+        ]
+
+        if let byteCount {
+            fields.append(
+                OpalDiagnostics.Field.publicField(
+                    OpalDiagnostics.Field.byteCount,
+                    byteCount
+                )
+            )
+        }
+
+        fields.append(contentsOf: extraFields)
+
+        return fields
     }
 }

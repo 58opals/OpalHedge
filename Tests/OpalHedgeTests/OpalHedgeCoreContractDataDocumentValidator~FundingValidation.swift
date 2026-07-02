@@ -72,4 +72,27 @@ extension OpalHedgeCoreContractDataDocumentValidator {
             )
         )
     }
+
+    @Test("Rejects oversized funding output index when creating contract data document")
+    func rejectOversizedFundingOutputIndexWhenCreatingContractDataDocument() throws {
+        let draftData = try makeDraftData(
+            fundings: [
+                OpalHedge.Core.ContractFunding(
+                    fundingTransactionHash: String(repeating: "1", count: 64),
+                    fundingOutputIndex: 4_294_967_296,
+                    fundingSatoshis: 5_651_049
+                )
+            ]
+        )
+        let error = OpalHedgeTypedErrorCaptureTool.captureConstraintError {
+            _ = try OpalHedge.Core.ContractDataDocument(draftData: draftData)
+        }
+
+        #expect(
+            error == .invalidNonnegativeInteger(
+                name: "fundings[0].fundingOutputIndex",
+                value: 4_294_967_296
+            )
+        )
+    }
 }

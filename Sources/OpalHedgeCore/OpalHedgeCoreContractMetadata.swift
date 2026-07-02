@@ -57,15 +57,6 @@ public struct OpalHedgeCoreContractMetadata: Sendable, Equatable {
         self.minerCostInSatoshis = minerCostInSatoshis
     }
 
-    package init(from context: OpalHedgeCoreContractMetadataContext) throws {
-        try self.init(
-            from: OpalHedgeCoreContractPlanDerivationContext(
-                creationContext: context.creationContext,
-                fundingAmounts: context.fundingAmounts
-            )
-        )
-    }
-
     public init(from context: OpalHedgeCoreContractPlanDerivationContext) throws {
         let creationContext = context.creationContext
         let fundingAmounts = context.fundingAmounts

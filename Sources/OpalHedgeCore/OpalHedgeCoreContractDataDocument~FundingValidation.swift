@@ -10,7 +10,7 @@ extension OpalHedgeCoreContractDataDocument {
                 funding.fundingTransactionHash,
                 name: "\(fundingName).fundingTransactionHash"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validateNonnegativeInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validateFundingOutputIndex(
                 funding.fundingOutputIndex,
                 name: "\(fundingName).fundingOutputIndex"
             )
@@ -28,15 +28,16 @@ extension OpalHedgeCoreContractDataDocument {
                 settlement.settlementTransactionHash,
                 name: "\(settlementName).settlementTransactionHash"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validatePayoutSatoshis(
                 settlement.shortPayoutInSatoshis,
-                name: "\(settlementName).hedgePayoutInSatoshis"
             )
-            try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
+            try OpalHedgeCoreContractConstraintEvaluator.validatePayoutSatoshis(
                 settlement.longPayoutInSatoshis,
-                name: "\(settlementName).longPayoutInSatoshis"
             )
-            try validateSettlementPayoutTotal(settlement)
+            try validateSettlementPayoutTotal(
+                settlement,
+                fundingSatoshis: funding.fundingSatoshis
+            )
             if let settlementPrice = settlement.settlementPrice {
                 try OpalHedgeCoreContractConstraintEvaluator.validatePositiveInteger(
                     settlementPrice,
@@ -71,7 +72,8 @@ extension OpalHedgeCoreContractDataDocument {
     }
 
     private static func validateSettlementPayoutTotal(
-        _ settlement: OpalHedgeCoreContractSettlement
+        _ settlement: OpalHedgeCoreContractSettlement,
+        fundingSatoshis: Int64
     ) throws {
         let total = settlement.shortPayoutInSatoshis.addingReportingOverflow(
             settlement.longPayoutInSatoshis
@@ -85,6 +87,13 @@ extension OpalHedgeCoreContractDataDocument {
               OpalHedgeCoreContractConstraintPolicy.maxContractSatoshis else {
             throw OpalHedgeCoreContractConstraintError.contractSatoshisExceedMaximum(
                 total.partialValue
+            )
+        }
+        guard total.partialValue <= fundingSatoshis else {
+            throw OpalHedgeCoreContractConstraintError.invalidContractFunding(
+                shortInput: settlement.shortPayoutInSatoshis,
+                longInput: settlement.longPayoutInSatoshis,
+                payoutSats: fundingSatoshis
             )
         }
     }

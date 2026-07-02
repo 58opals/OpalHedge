@@ -65,15 +65,6 @@ public struct OpalHedgeCoreContractParameters: Sendable, Equatable {
         self.longMutualRedeemPublicKey = longMutualRedeemPublicKey
     }
 
-    package init(from context: OpalHedgeCoreContractParametersContext) throws {
-        try self.init(
-            from: OpalHedgeCoreContractPlanDerivationContext(
-                creationContext: context.creationContext,
-                fundingAmounts: context.fundingAmounts
-            )
-        )
-    }
-
     public init(from context: OpalHedgeCoreContractPlanDerivationContext) throws {
         let creationContext = context.creationContext
         let fundingAmounts = context.fundingAmounts

@@ -32,15 +32,6 @@ extension OpalHedgeCoreContractConstraintEvaluator {
         }
     }
 
-    package static func validateMetadataContext(
-        _ context: OpalHedgeCoreContractMetadataContext
-    ) throws {
-        _ = try OpalHedgeCoreContractPlanDerivationContext(
-            creationContext: context.creationContext,
-            fundingAmounts: context.fundingAmounts
-        )
-    }
-
     public static func validateOracleMessageData(
         _ message: OpalHedgeCoreContractOracleMessageData
     ) throws {

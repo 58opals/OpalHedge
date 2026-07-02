@@ -3,6 +3,11 @@
 import Testing
 import OpalHedge
 
+struct InvalidIntegerJSONValueCase: Sendable, CustomStringConvertible {
+    let description: String
+    let rawJSONValue: String
+}
+
 extension OpalHedgeCoreContractDataDocumentDecodeValidator {
     @Test("Rejects invalid contract data document metadata field shapes")
     func rejectInvalidContractDataDocumentMetadataFieldShapes() throws {
@@ -43,20 +48,28 @@ extension OpalHedgeCoreContractDataDocumentDecodeValidator {
         }
     }
 
-    @Test("Rejects decimal JSON numbers for contract data document integer fields")
-    func rejectDecimalJsonNumbersForContractDataDocumentIntegerFields() throws {
-        try rejectInvalidContractDataDocumentIntegerFields(replacingWith: 1.5)
-    }
-
-    @Test("Rejects boolean JSON values for contract data document integer fields")
-    func rejectBooleanJsonValuesForContractDataDocumentIntegerFields() throws {
-        try rejectInvalidContractDataDocumentIntegerFields(replacingWith: true)
-    }
-
-    @Test("Rejects out-of-range JSON numbers for contract data document integer fields")
-    func rejectOutOfRangeJsonNumbersForContractDataDocumentIntegerFields() throws {
+    @Test(
+        "Rejects invalid JSON values for contract data document integer fields",
+        arguments: [
+            InvalidIntegerJSONValueCase(
+                description: "decimal JSON number",
+                rawJSONValue: "1.5"
+            ),
+            InvalidIntegerJSONValueCase(
+                description: "boolean JSON value",
+                rawJSONValue: "true"
+            ),
+            InvalidIntegerJSONValueCase(
+                description: "out-of-range JSON number",
+                rawJSONValue: "9223372036854775808"
+            )
+        ]
+    )
+    func rejectInvalidJsonValuesForContractDataDocumentIntegerFields(
+        _ invalidValue: InvalidIntegerJSONValueCase
+    ) throws {
         try rejectInvalidContractDataDocumentIntegerFields(
-            replacingWithRawJSONValue: "9223372036854775808"
+            replacingWithRawJSONValue: invalidValue.rawJSONValue
         )
     }
 
