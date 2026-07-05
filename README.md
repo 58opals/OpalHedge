@@ -10,6 +10,8 @@ Status: Pilot on develop.
 
 This package is in Pilot for Opal Wallet integration as a protocol and data library. The current focus is deterministic AnyHedge-compatible data, oracle proof handling, payout math, contract bytecode artifacts, funding data, settlement data, and plan-first client APIs.
 
+See [Changelog](CHANGELOG.md) for notable public-facing package changes.
+
 For the Opal Wallet Pilot path, the intended dependency route is `OpalHedge` into `OpalBase`, then Opal Wallet consumes the wallet-facing hedge facade exposed by Opal Base. Opal Hedge owns protocol data and verification. Opal Base owns reusable wallet integration, transaction construction, signing, broadcast, and Bitcoin Cash app-domain adapters. Opal Wallet owns product UI, Pilot gates, copy, routing, and app persistence policy.
 
 Currently supported:
@@ -188,7 +190,7 @@ Current validation command:
 swift test
 ```
 
-Result: Passed on 2026-06-19 with 277 tests in 48 suites.
+Result: Passed on 2026-07-05 with 276 tests in 48 suites.
 
 ## Development
 
