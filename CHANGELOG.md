@@ -3,7 +3,8 @@
 ## Unreleased
 
 - Added this changelog to track notable public-facing package changes.
-- Updated the `OpalCrypto` SwiftPM branch pin to the latest `develop` revision, `4788919cc9772b5123554b84428f6fbeb5bfc91b`.
+- Switched `OpalDiagnostics` from its development branch to a stable `0.2.0`-or-newer package requirement.
+- Updated the `OpalCrypto` SwiftPM branch pin to the latest `develop` revision.
 
 ## Pilot Baseline - 2026-07-05
 

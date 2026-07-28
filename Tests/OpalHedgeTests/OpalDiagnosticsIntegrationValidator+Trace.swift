@@ -29,14 +29,14 @@ extension OpalDiagnosticsIntegrationValidator {
         #expect(OpalDiagnostics.Event.contractPlanCreated.rawValue == "opalhedge.contract.plan.created")
         #expect(OpalDiagnostics.Event.transactionHashValidationFailed.rawValue == "opalhedge.bitcoin_cash.transaction_hash.validation_failed")
         #expect(OpalDiagnostics.Field.errorCode == "error_code")
-        #expect(OpalDiagnostics.TraceID(rawValue: "wallet-action").rawValue == "wallet-action")
+        #expect(OpalDiagnostics.TraceID(publicValue: "wallet-action").rawValue == "wallet-action")
         #expect(OpalDiagnostics.currentTraceID == nil)
     }
 
     @Test("Wallet action diagnostics share trace ID")
     func verifyWalletActionDiagnosticsShareTraceID() throws {
         try withDiagnosticsCapture {
-            let traceID = OpalDiagnostics.TraceID(rawValue: "wallet-action-123")
+            let traceID = OpalDiagnostics.TraceID(publicValue: "wallet-action-123")
             let clientContext = OpalHedge.Client.Context()
             let fundingTransactionHash = String(repeating: "1", count: 64)
             let settlementTransactionHash = String(repeating: "2", count: 64)
@@ -80,7 +80,7 @@ extension OpalDiagnosticsIntegrationValidator {
     @Test("Nested trace scopes preserve current trace ID")
     func verifyNestedTraceScopesPreserveCurrentTraceID() throws {
         try withDiagnosticsCapture {
-            let traceID = OpalDiagnostics.TraceID(rawValue: "wallet-action-nested")
+            let traceID = OpalDiagnostics.TraceID(publicValue: "wallet-action-nested")
 
             try OpalDiagnostics.withTraceID(traceID) {
                 try OpalDiagnostics.withTraceID(traceID) {
@@ -122,7 +122,7 @@ extension OpalDiagnosticsIntegrationValidator {
             .init(minimumLevel: .debug, bufferPolicy: .enabled(capacity: 10_000))
         ) {
             OpalDiagnostics.clearRecentRecords()
-            let traceID = OpalDiagnostics.TraceID(rawValue: "wallet-action-mixed")
+            let traceID = OpalDiagnostics.TraceID(publicValue: "wallet-action-mixed")
 
             try OpalDiagnostics.withTraceID(traceID) {
                 _ = try OpalHedge.Core.ContractPlan(

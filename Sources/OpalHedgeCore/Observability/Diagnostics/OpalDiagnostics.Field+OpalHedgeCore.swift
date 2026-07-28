@@ -23,7 +23,7 @@ extension OpalDiagnostics.Field {
     }
 
     static func publicField(_ name: String, _ value: Int) -> OpalDiagnostics.Field {
-        OpalDiagnostics.Field(name: name, value: value)
+        OpalDiagnostics.Field(name: name, value: value, privacy: .public)
     }
 
     static func publicField(_ name: String, _ value: Int64) -> OpalDiagnostics.Field {
