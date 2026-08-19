@@ -36,6 +36,12 @@ Not yet supported:
 
 See [Opal Wallet Pilot Integration](Docs/OpalWalletPilotIntegration.md) for the supported integration boundary and checklist.
 
+## Requirements
+
+- Swift tools version: `6.4`
+- Platforms: `macOS 26`, `iOS 26`, `watchOS 26`, `tvOS 26`, `visionOS 26`
+- Xcode's Metal Toolchain component, required by the current OpalCrypto build plugin.
+
 ## Installation
 
 Add Opal Hedge as a SwiftPM dependency from reusable Bitcoin Cash infrastructure packages, integration test harnesses, or server-side Swift code:
@@ -46,6 +52,8 @@ Add Opal Hedge as a SwiftPM dependency from reusable Bitcoin Cash infrastructure
     branch: "develop"
 )
 ```
+
+The current manifest follows `OpalCrypto` and `OpalDiagnostics` on their public `develop` branches. No SemVer tag is prepared by this migration.
 
 Then depend on the `OpalHedge` library product:
 
