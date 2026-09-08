@@ -141,7 +141,6 @@ extension OpalDiagnosticsIntegrationValidator {
             let hedgeRecords = OpalDiagnostics.recentRecords(matching: .init(traceID: traceID))
                 .filter { $0.category.isOpalHedgeCategory }
             #expect(hedgeRecords.isEmpty == false)
-            #expect(hedgeRecords.allSatisfy { $0.category.isOpalHedgeCategory })
             #expect(hedgeRecords.map(\.event).contains(
                 OpalDiagnostics.Event.contractPlanCreated
             ))

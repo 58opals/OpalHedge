@@ -26,6 +26,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractBundleValidator {
         #expect(bundle.parameterData == expectedParameterData)
         #expect(bundle.bytecode == expectedBytecode)
         #expect(bundle.bytecode.rawRedeemScriptBytecode.count == 343)
+        #expect(bundle.fundingOutput.contractAddress == bundle.contractAddress)
+        #expect(bundle.fundingOutput.payoutSatoshis == 5_649_717)
+        #expect(bundle.fundingOutput.dustReserveSatoshis == 1_332)
         #expect(bundle.fundingOutput.satoshis == 5_651_049)
         #expect(bundle.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
         #expect(bundle.dataDocument.jsonText == OpalHedgeFixtureData

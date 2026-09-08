@@ -192,6 +192,8 @@ Opal Hedge is available under the [Apache License 2.0](LICENSE).
 
 ## Validation
 
+Tests own oracle verification, payout arithmetic, contract bytecode, compatibility vectors, and funding/settlement data. Product presets and exact numeric boundaries are contracts, even when expressed as constants. Keep composed contract fixtures in their owning lifecycle suite and retain every distinct payout, dust, address, and validation assertion when consolidating duplicate setup.
+
 Current validation command:
 
 ```sh

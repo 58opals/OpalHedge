@@ -51,24 +51,6 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingOutputValidator {
         #expect(error == .invalidPayoutSatoshis(maximumContractSatoshis))
     }
 
-    @Test("Includes AnyHedge contract funding output in bundle")
-    func includeAnyHedgeContractFundingOutputInBundle() throws {
-        let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
-            plan: OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
-            )
-        )
-
-        #expect(bundle.fundingOutput.contractAddress == bundle.contractAddress)
-        #expect(bundle.fundingOutput.payoutSatoshis == 5_649_717)
-        #expect(bundle.fundingOutput.dustReserveSatoshis == 1_332)
-        #expect(bundle.fundingOutput.satoshis == 5_651_049)
-        #expect(
-            bundle.fundingOutput.contractAddress.rawValue ==
-                "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx"
-        )
-    }
-
     private func captureFundingOutputError(
         _ operation: () throws -> Void
     ) -> OpalHedge.BitcoinCash.AnyHedgeContractFundingOutputError? {

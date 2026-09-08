@@ -11,21 +11,6 @@ enum OpalHedgeContractFixtureBuilder {
         ).compressedRepresentation
     )
 
-    static func makeStartingOracleProof(
-        oraclePublicKey: OpalHedge.Core.ContractPublicKey =
-            OpalHedgeFixtureData.oracleContractPublicKey,
-        message: OpalHedge.Core.ContractOracleMessageData =
-            OpalHedgeFixtureData.contractOracleMessageData,
-        signature: OpalHedge.Core.ContractOracleSignature =
-            OpalHedgeFixtureData.contractOracleSignature
-    ) -> OpalHedge.Core.ContractStartingOracleProof {
-        OpalHedge.Core.ContractStartingOracleProof(
-            oraclePublicKey: oraclePublicKey,
-            message: message,
-            signature: signature
-        )
-    }
-
     static func makeVerifiedStartingOracleProof() throws
         -> OpalHedge.Core.ContractStartingOracleProof {
         let messageHex = makeOracleMessageHex(
