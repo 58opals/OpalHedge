@@ -39,7 +39,7 @@ See [Opal Wallet Pilot Integration](Docs/OpalWalletPilotIntegration.md) for the 
 ## Requirements
 
 - Swift tools version: `6.4`
-- Platforms: `macOS 26`, `iOS 26`, `watchOS 26`, `tvOS 26`, `visionOS 26`
+- Platforms: `macOS 27`, `iOS 27`, `watchOS 27`, `tvOS 27`, `visionOS 27`
 - Xcode's Metal Toolchain component, required by the current OpalCrypto build plugin.
 
 ## Installation
