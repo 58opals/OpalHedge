@@ -149,15 +149,16 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRecordValidator {
 
     @Test("Rejects settled funding record data document")
     func rejectSettledFundingRecordDataDocument() throws {
-        let fundingRecord = try makeBundle().createFundingRecord(
+        let fundingRecord = try OpalHedge.Client.Context().createAnyHedgeContractFundingRecord(
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext(),
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0
         )
         let settlementRequest = try fundingRecord.createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof()
+                .makeVerifiedSettlementOracleProof()
         )
         let settlementRecord = try settlementRequest.createSettlementRecord(
             settlementTransactionHash: String(repeating: "2", count: 64)

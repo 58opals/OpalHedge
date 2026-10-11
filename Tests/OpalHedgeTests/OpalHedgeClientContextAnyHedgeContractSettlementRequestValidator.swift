@@ -8,18 +8,18 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
     func createAnyHedgeContractSettlementRequestFromClientContext() throws {
         let clientContext = OpalHedge.Client.Context()
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof()
+            .makeVerifiedSettlementOracleProof()
         let request = try clientContext.createAnyHedgeContractSettlementRequest(
-            from: OpalHedgeFixtureData.contractCreationContext,
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext(),
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: previousOracleProof,
             settlementOracleProof: settlementOracleProof
         )
         let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
-            from: OpalHedgeFixtureData.contractCreationContext,
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext(),
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0
         )
@@ -38,12 +38,12 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
     func createAnyHedgeContractSettlementRequestFromContractPlan() throws {
         let clientContext = OpalHedge.Client.Context()
         let plan = try OpalHedge.Core.ContractPlan(
-            from: OpalHedgeFixtureData.contractCreationContext
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
         )
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof()
+            .makeVerifiedSettlementOracleProof()
         let request = try clientContext.createAnyHedgeContractSettlementRequest(
             from: plan,
             fundingTransactionHash: String(repeating: "1", count: 64),
@@ -69,9 +69,9 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
     @Test("Passes AnyHedge contract settlement request options through client context")
     func passAnyHedgeContractSettlementRequestOptionsThroughClientContext() throws {
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof(
+            .makeVerifiedSettlementOracleProof(
                 messageTimestamp: 615_644,
                 priceValue: 17_500
             )
@@ -86,7 +86,8 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
             address: OpalHedgeFixtureData.longRegtestPayoutAddress,
             satoshis: 1_000
         )
-        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+        let creationContext = try OpalHedgeContractFixtureBuilder.makeCreationContext(
+            startingOracleProof: OpalHedgeContractFixtureBuilder.makeVerifiedStartingOracleProof(),
             shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
             longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
         )
@@ -107,7 +108,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRequestValidator {
         #expect(request.domainFundingRecord.draftData.fundings.first == existingFunding)
         #expect(
             request.fundingOutput.contractAddress.rawValue ==
-                "bchreg:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsr6pyr2gu"
+                "bchreg:pq4865rxtqujgy6j8uzqdzs7rsnznqfwxszvdj5g2d"
         )
     }
 }

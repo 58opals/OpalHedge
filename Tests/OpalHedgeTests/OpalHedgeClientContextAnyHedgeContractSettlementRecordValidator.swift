@@ -8,11 +8,11 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
     func createAnyHedgeContractSettlementRecordFromClientContext() throws {
         let clientContext = OpalHedge.Client.Context()
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof()
+            .makeVerifiedSettlementOracleProof()
         let record = try clientContext.createAnyHedgeContractSettlementRecord(
-            from: OpalHedgeFixtureData.contractCreationContext,
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext(),
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: previousOracleProof,
@@ -20,7 +20,7 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
         let settlementRequest = try clientContext.createAnyHedgeContractSettlementRequest(
-            from: OpalHedgeFixtureData.contractCreationContext,
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext(),
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: previousOracleProof,
@@ -40,12 +40,12 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
     func createAnyHedgeContractSettlementRecordFromContractPlan() throws {
         let clientContext = OpalHedge.Client.Context()
         let plan = try OpalHedge.Core.ContractPlan(
-            from: OpalHedgeFixtureData.contractCreationContext
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
         )
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof()
+            .makeVerifiedSettlementOracleProof()
         let record = try clientContext.createAnyHedgeContractSettlementRecord(
             from: plan,
             fundingTransactionHash: String(repeating: "1", count: 64),
@@ -74,9 +74,9 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
     @Test("Passes AnyHedge contract settlement record options through client context")
     func passAnyHedgeContractSettlementRecordOptionsThroughClientContext() throws {
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof(
+            .makeVerifiedSettlementOracleProof(
                 messageTimestamp: 615_644,
                 priceValue: 17_500
             )
@@ -91,7 +91,8 @@ struct OpalHedgeClientContextAnyHedgeContractSettlementRecordValidator {
             address: OpalHedgeFixtureData.longRegtestPayoutAddress,
             satoshis: 1_000
         )
-        let creationContext = OpalHedgeContractFixtureBuilder.makeCreationContext(
+        let creationContext = try OpalHedgeContractFixtureBuilder.makeCreationContext(
+            startingOracleProof: OpalHedgeContractFixtureBuilder.makeVerifiedStartingOracleProof(),
             shortPayoutAddress: OpalHedgeFixtureData.shortRegtestPayoutAddress,
             longPayoutAddress: OpalHedgeFixtureData.longRegtestPayoutAddress
         )

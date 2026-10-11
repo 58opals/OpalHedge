@@ -63,25 +63,25 @@ struct OpalHedgeFacadeValidator {
     func useBitcoinCashSettlementFacadeAliases() throws {
         let clientContext = OpalHedge.Client.Context()
         let contractPlan = try OpalHedge.Core.ContractPlan(
-            from: OpalHedgeFixtureData.contractCreationContext
+            from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
         )
         let settlementRequest = try clientContext.createAnyHedgeContractSettlementRequest(
             from: contractPlan,
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof()
+                .makeVerifiedSettlementOracleProof()
         )
         let settlementRecord = try clientContext.createAnyHedgeContractSettlementRecord(
             from: contractPlan,
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof(),
+                .makeVerifiedSettlementOracleProof(),
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
         let summary = try clientContext.createAnyHedgeContractSettlementSummary(
@@ -89,9 +89,9 @@ struct OpalHedgeFacadeValidator {
             fundingTransactionHash: String(repeating: "1", count: 64),
             fundingOutputIndex: 0,
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof(),
+                .makeVerifiedSettlementOracleProof(),
             settlementTransactionHash: String(repeating: "2", count: 64)
         )
 

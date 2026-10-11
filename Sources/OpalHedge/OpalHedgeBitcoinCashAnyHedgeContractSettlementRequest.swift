@@ -76,6 +76,15 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequest: Sendable, E
     ) throws {
         do {
             let parameters = domainFundingRecord.draftData.parameters
+            // A proof verified against another oracle is not authority for this
+            // funded contract. Bind both signatures before deriving a settlement.
+            for proof in [previousOracleDomainProof, settlementOracleDomainProof] {
+                _ = try OpalHedge.Oracle.verifySettlementOracleProof(
+                    messageHex: proof.messageHex,
+                    signatureHex: proof.signatureHex,
+                    publicKeyHex: parameters.oraclePublicKeyHex
+                )
+            }
             let settlementCondition = try OpalHedgeCoreSettlementConditionResolver.resolve(
                 parameters: parameters,
                 previousTimestamp: previousOracleDomainProof.messageTimestamp,

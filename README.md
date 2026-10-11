@@ -147,7 +147,7 @@ let fundingRecord = try clientContext.createAnyHedgeContractFundingRecord(
 )
 ```
 
-Create settlement data from verified oracle proofs:
+Create settlement data from verified oracle proofs. Settlement request creation verifies both proofs against the funded contract's oracle public key before calculating the settlement:
 
 ```swift
 let previousOracleProof = try OpalHedge.Oracle.verifySettlementOracleProof(

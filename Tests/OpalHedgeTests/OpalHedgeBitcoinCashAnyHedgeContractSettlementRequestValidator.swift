@@ -9,9 +9,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
     func createAnyHedgeMaturationSettlementRequest() throws {
         let fundingRecord = try makeFundingRecord()
         let previousOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeStartingSettlementOracleProof()
+            .makeVerifiedStartingSettlementOracleProof()
         let settlementOracleProof = try OpalHedgeContractFixtureBuilder
-            .makeSettlementOracleProof(
+            .makeVerifiedSettlementOracleProof(
                 messageTimestamp: 6_663_643,
                 priceValue: 23_500
             )
@@ -52,9 +52,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
     func createAnyHedgeLiquidationSettlementRequest() throws {
         let request = try makeFundingRecord().createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof(
+                .makeVerifiedSettlementOracleProof(
                     messageTimestamp: 615_644,
                     priceValue: 17_500
                 )
@@ -80,9 +80,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
         let error = try #require(captureSettlementConditionError {
             _ = try makeFundingRecord().createSettlementRequest(
                 previousOracleProof: OpalHedgeContractFixtureBuilder
-                    .makeStartingSettlementOracleProof(),
+                    .makeVerifiedStartingSettlementOracleProof(),
                 settlementOracleProof: OpalHedgeContractFixtureBuilder
-                    .makeSettlementOracleProof(
+                    .makeVerifiedSettlementOracleProof(
                         messageTimestamp: 615_644,
                         priceValue: 23_500
                     )
@@ -96,9 +96,9 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
     func settlementReviewSummaryExcludesRawHashesOracleMessagesAndSignatures() throws {
         let summary = try makeFundingRecord().createSettlementRequest(
             previousOracleProof: OpalHedgeContractFixtureBuilder
-                .makeStartingSettlementOracleProof(),
+                .makeVerifiedStartingSettlementOracleProof(),
             settlementOracleProof: OpalHedgeContractFixtureBuilder
-                .makeSettlementOracleProof()
+                .makeVerifiedSettlementOracleProof()
         ).reviewSummary
         let labels = Set(Mirror(reflecting: summary).children.compactMap(\.label))
 
@@ -114,7 +114,7 @@ struct OpalHedgeBitcoinCashAnyHedgeContractSettlementRequestValidator {
     private func makeFundingRecord() throws -> OpalHedge.BitcoinCash.AnyHedgeContractFundingRecord {
         let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
-                from: OpalHedgeFixtureData.contractCreationContext
+                from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
             )
         )
 

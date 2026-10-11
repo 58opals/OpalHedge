@@ -45,7 +45,7 @@ extension OpalDiagnosticsIntegrationValidator {
                 #expect(OpalDiagnostics.currentTraceID == traceID)
 
                 let plan = try OpalHedge.Core.ContractPlan(
-                    from: OpalHedgeFixtureData.contractCreationContext
+                    from: OpalHedgeContractFixtureBuilder.makeVerifiedCreationContext()
                 )
                 _ = try clientContext.createAnyHedgeContractFundingRequest(
                     from: plan
@@ -55,9 +55,9 @@ extension OpalDiagnosticsIntegrationValidator {
                     fundingTransactionHash: fundingTransactionHash,
                     fundingOutputIndex: 0,
                     previousOracleProof: OpalHedgeContractFixtureBuilder
-                        .makeStartingSettlementOracleProof(),
+                        .makeVerifiedStartingSettlementOracleProof(),
                     settlementOracleProof: OpalHedgeContractFixtureBuilder
-                        .makeSettlementOracleProof(),
+                        .makeVerifiedSettlementOracleProof(),
                     settlementTransactionHash: settlementTransactionHash
                 )
             }
