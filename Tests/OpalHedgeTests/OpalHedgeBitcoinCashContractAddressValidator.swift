@@ -76,15 +76,15 @@ struct OpalHedgeBitcoinCashContractAddressValidator {
         #expect(error == .invalidScriptHashByteCount(19))
     }
 
-    @Test("Rejects invalid redeem script hex")
-    func rejectInvalidRedeemScriptHex() {
+    @Test("Rejects invalid redeem script hex", arguments: ["zz", "+1", "+f", "-0", "51+1"])
+    func rejectInvalidRedeemScriptHex(_ invalidHex: String) {
         let error = captureContractAddressError {
             _ = try OpalHedgeBitcoinCashContractAddress(
-                rawRedeemScriptHex: "zz"
+                rawRedeemScriptHex: invalidHex
             )
         }
 
-        #expect(error == .invalidRedeemScriptHex("zz"))
+        #expect(error == .invalidRedeemScriptHex(invalidHex))
     }
 
     private func captureContractAddressError(

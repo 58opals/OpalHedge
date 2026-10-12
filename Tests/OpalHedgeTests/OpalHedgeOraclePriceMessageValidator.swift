@@ -30,6 +30,29 @@ struct OpalHedgeOraclePriceMessageValidator {
         #expect(didThrow)
     }
 
+    @Test(
+        "Rejects signed integer chunks in oracle hexadecimal text",
+        arguments: [
+            ("+1000000010000000100000001000000", "+1"),
+            ("01-00000010000000100000001000000", "-0"),
+            ("010000000100000001000000+f000000", "+f")
+        ]
+    )
+    func rejectSignedIntegerHexadecimalChunks(_ malformedHex: String, _ invalidChunk: String) {
+        #expect(throws: OpalHedge.Oracle.MessageError.invalidHexCharacter(invalidChunk)) {
+            _ = try OpalHedge.Oracle.PriceMessage.parse(rawHex: malformedHex)
+        }
+    }
+
+    @Test("Parses oracle hexadecimal text with uppercase digits and surrounding whitespace")
+    func parseUppercaseHexadecimalWithSurroundingWhitespace() throws {
+        let message = try OpalHedge.Oracle.PriceMessage.parse(
+            rawHex: " \n" + OpalHedgeFixtureData.startingOracleMessageHex.uppercased() + "\t "
+        )
+
+        #expect(message.rawMessageHex == OpalHedgeFixtureData.startingOracleMessageHex)
+    }
+
     @Test("Rejects metadata sequence as a price message")
     func rejectMetadataSequenceAsPriceMessage() {
         var didThrow = false

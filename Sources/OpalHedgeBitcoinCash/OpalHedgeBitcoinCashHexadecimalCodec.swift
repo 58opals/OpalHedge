@@ -14,7 +14,12 @@ enum OpalHedgeBitcoinCashHexadecimalCodec {
         var index = hex.startIndex
         while index < hex.endIndex {
             let nextIndex = hex.index(index, offsetBy: 2)
-            guard let byte = UInt8(hex[index..<nextIndex], radix: 16) else {
+            let byteText = hex[index..<nextIndex]
+            guard byteText.utf8.allSatisfy({
+                (0x30...0x39).contains($0)
+                    || (0x41...0x46).contains($0)
+                    || (0x61...0x66).contains($0)
+            }), let byte = UInt8(byteText, radix: 16) else {
                 return nil
             }
 
