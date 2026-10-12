@@ -85,14 +85,55 @@ struct OpalHedgeBitcoinCashAnyHedgeContractParameterDataValidator {
         )
     }
 
-    private func makeManualParameterData()
+    @Test(
+        "Rejects out-of-field and off-curve enabled mutual-redemption keys on either side",
+        arguments: [
+            "02fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f",
+            "02" + String(repeating: "00", count: 32)
+        ],
+        [true, false]
+    )
+    func rejectInvalidEnabledMutualRedemptionPublicKey(
+        keyHex: String,
+        isShortKey: Bool
+    ) throws {
+        let keyName = isShortKey ? "shortMutualRedeemPublicKey" : "longMutualRedeemPublicKey"
+
+        #expect(throws: OpalHedgeBitcoinCashAnyHedgeContractParameterError
+            .invalidCompressedPublicKey(name: keyName, byteCount: 33)) {
+            _ = try makeManualParameterData(
+                shortMutualRedeemPublicKeyHex: isShortKey ? keyHex :
+                    OpalHedgeFixtureData.shortMutualRedeemPublicKeyHex,
+                longMutualRedeemPublicKeyHex: isShortKey ?
+                    OpalHedgeFixtureData.longMutualRedeemPublicKeyHex : keyHex
+            )
+        }
+    }
+
+    @Test("Preserves compressed placeholder keys when mutual redemption is disabled")
+    func preserveDisabledMutualRedemptionPlaceholderKeys() throws {
+        let placeholderHex = "02" + String(repeating: "00", count: 32)
+        let parameterData = try makeManualParameterData(
+            shortMutualRedeemPublicKeyHex: placeholderHex,
+            longMutualRedeemPublicKeyHex: placeholderHex,
+            enableMutualRedemption: 0
+        )
+
+        #expect(parameterData.enableMutualRedemption == 0)
+        #expect(hexText(parameterData.rawShortMutualRedeemPublicKey) == placeholderHex)
+        #expect(hexText(parameterData.rawLongMutualRedeemPublicKey) == placeholderHex)
+    }
+
+    private func makeManualParameterData(
+        shortMutualRedeemPublicKeyHex: String = OpalHedgeFixtureData.shortMutualRedeemPublicKeyHex,
+        longMutualRedeemPublicKeyHex: String = OpalHedgeFixtureData.longMutualRedeemPublicKeyHex,
+        enableMutualRedemption: Int64 = 1
+    )
         throws -> OpalHedgeBitcoinCashAnyHedgeContractParameterData {
         try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
-            shortMutualRedeemPublicKeyHex: OpalHedgeFixtureData
-                .shortMutualRedeemPublicKeyHex,
-            longMutualRedeemPublicKeyHex: OpalHedgeFixtureData
-                .longMutualRedeemPublicKeyHex,
-            enableMutualRedemption: 1,
+            shortMutualRedeemPublicKeyHex: shortMutualRedeemPublicKeyHex,
+            longMutualRedeemPublicKeyHex: longMutualRedeemPublicKeyHex,
+            enableMutualRedemption: enableMutualRedemption,
             shortLockScriptHex: OpalHedgeFixtureData.shortLockScriptHex,
             longLockScriptHex: OpalHedgeFixtureData.longLockScriptHex,
             oraclePublicKeyHex: OpalHedgeFixtureData.oraclePublicKeyHex,

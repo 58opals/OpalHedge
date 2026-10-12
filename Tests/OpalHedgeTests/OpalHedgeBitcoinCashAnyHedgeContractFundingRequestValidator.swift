@@ -93,8 +93,8 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
         #expect(request.fundingOutput.contractAddress.rawValue == "bitcoincash:ppk0waq58v6sgc2g4y8nlypykt7ev4q7tsa5nzzwvx")
     }
 
-    @Test("Rejects unverified starting oracle signature in data document")
-    func rejectUnverifiedStartingOracleSignatureInDataDocument() throws {
+    @Test("Rejects unverified starting oracle signature through document and raw-plan funding paths")
+    func rejectUnverifiedStartingOracleSignatureThroughFundingPaths() throws {
         let bundle = try OpalHedgeBitcoinCashAnyHedgeContractBundle(
             plan: OpalHedge.Core.ContractPlan(
                 from: OpalHedgeFixtureData.contractCreationContext
@@ -113,16 +113,30 @@ struct OpalHedgeBitcoinCashAnyHedgeContractFundingRequestValidator {
             jsonText: tamperedJsonText
         )
 
-        var didRejectTamperedProof = false
-        do {
+        let documentError = OpalHedgeTypedErrorCaptureTool.captureStartingPriceProofError {
             _ = try OpalHedge.BitcoinCash.AnyHedgeContractFundingRequest(
                 dataDocument: tamperedDocument
             )
-        } catch {
-            didRejectTamperedProof = true
+        }
+        let rawPlan = OpalHedge.Core.ContractPlan(
+            parameters: tamperedDocument.draftData.parameters,
+            metadata: tamperedDocument.draftData.metadata
+        )
+        let clientContext = OpalHedge.Client.Context()
+        let planRequestError = OpalHedgeTypedErrorCaptureTool.captureStartingPriceProofError {
+            _ = try clientContext.createAnyHedgeContractFundingRequest(from: rawPlan)
+        }
+        let planRecordError = OpalHedgeTypedErrorCaptureTool.captureStartingPriceProofError {
+            _ = try clientContext.createAnyHedgeContractFundingRecord(
+                from: rawPlan,
+                fundingTransactionHash: String(repeating: "1", count: 64),
+                fundingOutputIndex: 0
+            )
         }
 
-        #expect(didRejectTamperedProof)
+        #expect(documentError == .invalidSignature)
+        #expect(planRequestError == .invalidSignature)
+        #expect(planRecordError == .invalidSignature)
     }
 
     @Test("Creates AnyHedge contract funding request from data document with client context")

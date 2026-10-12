@@ -50,6 +50,11 @@ package struct OpalHedgeBitcoinCashAnyHedgeContractBundle: Sendable, Equatable {
                 fees: fees
             )
             try network.validatePayoutAddressNetworks(in: draftData)
+            _ = try OpalHedge.Oracle.verifyStartingPriceProof(
+                messageHex: draftData.metadata.startingOracleMessageHex,
+                signatureHex: draftData.metadata.startingOracleSignatureHex,
+                publicKeyHex: draftData.parameters.oraclePublicKeyHex
+            )
 
             let parameterData = try OpalHedgeBitcoinCashAnyHedgeContractParameterData(
                 from: plan

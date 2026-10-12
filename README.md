@@ -123,6 +123,8 @@ let contractPlan = try OpalHedge.Core.ContractPlan(
 
 Build AnyHedge-compatible funding data:
 
+Funding data creation verifies the starting oracle proof against the plan's oracle key, including manually constructed plans. When mutual redemption is enabled, both mutual-redemption keys must encode valid compressed secp256k1 points. Disabled mutual redemption continues to accept compressed placeholder keys.
+
 ```swift
 let clientContext = OpalHedge.Client.Context()
 let fundingRequest = try clientContext.createAnyHedgeContractFundingRequest(

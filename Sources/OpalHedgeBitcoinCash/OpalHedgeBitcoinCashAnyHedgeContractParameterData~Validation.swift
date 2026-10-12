@@ -1,12 +1,22 @@
 // OpalHedgeBitcoinCashAnyHedgeContractParameterData~Validation.swift
 
 import Foundation
+import OpalCrypto
 
 extension OpalHedgeBitcoinCashAnyHedgeContractParameterData {
     static func validateCompressedPublicKey(_ value: Data, name: String) throws {
         guard value.count == compressedPublicKeyByteCount,
               let firstByte = value.first,
               compressedPublicKeyPrefixes.contains(firstByte) else {
+            throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
+                .invalidCompressedPublicKey(name: name, byteCount: value.count)
+        }
+    }
+
+    static func validateMutualRedemptionPublicKey(_ value: Data, name: String) throws {
+        do {
+            _ = try OpalCrypto.Secp256k1.PublicKey(rawRepresentation: value)
+        } catch {
             throw OpalHedgeBitcoinCashAnyHedgeContractParameterError
                 .invalidCompressedPublicKey(name: name, byteCount: value.count)
         }

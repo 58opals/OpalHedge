@@ -83,6 +83,16 @@ public struct OpalHedgeBitcoinCashAnyHedgeContractParameterData: Sendable, Equat
                 enableMutualRedemption,
                 name: "enableMutualRedemption"
             )
+            if enableMutualRedemption == 1 {
+                try Self.validateMutualRedemptionPublicKey(
+                    rawShortMutualRedeemPublicKey,
+                    name: "shortMutualRedeemPublicKey"
+                )
+                try Self.validateMutualRedemptionPublicKey(
+                    rawLongMutualRedeemPublicKey,
+                    name: "longMutualRedeemPublicKey"
+                )
+            }
             try Self.validatePositiveInteger(
                 nominalUnitsXSatsPerBch,
                 name: "nominalUnitsXSatsPerBch"
