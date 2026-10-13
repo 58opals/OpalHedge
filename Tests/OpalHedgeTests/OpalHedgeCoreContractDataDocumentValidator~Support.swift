@@ -88,6 +88,7 @@ extension OpalHedgeCoreContractDataDocumentValidator {
         nominalUnits: Double? = nil,
         lowLiquidationPriceMultiplier: Double? = nil,
         highLiquidationPriceMultiplier: Double? = nil,
+        isSimpleHedge: Int64? = nil,
         shortInputInOracleUnits: Double? = nil,
         longInputInOracleUnits: Double? = nil,
         minerCostInSatoshis: Int64? = nil
@@ -106,7 +107,7 @@ extension OpalHedgeCoreContractDataDocumentValidator {
                 ?? metadata.lowLiquidationPriceMultiplier,
             highLiquidationPriceMultiplier: highLiquidationPriceMultiplier
                 ?? metadata.highLiquidationPriceMultiplier,
-            isSimpleHedge: metadata.isSimpleHedge,
+            isSimpleHedge: isSimpleHedge ?? metadata.isSimpleHedge,
             shortInputInOracleUnits: shortInputInOracleUnits
                 ?? metadata.shortInputInOracleUnits,
             longInputInOracleUnits: longInputInOracleUnits

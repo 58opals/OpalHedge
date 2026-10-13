@@ -7,4 +7,5 @@ public enum OpalHedgeCoreContractDataDocumentError: Error, Sendable, Equatable {
     case invalidFieldType(name: String, expected: String)
     case invalidContractSide(String)
     case invalidSettlementType(String)
+    case inconsistentMetadataComponent(name: String, expected: Int64, actual: Int64)
 }

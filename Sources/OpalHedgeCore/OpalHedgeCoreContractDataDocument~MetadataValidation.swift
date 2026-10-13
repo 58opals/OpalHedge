@@ -41,6 +41,20 @@ extension OpalHedgeCoreContractDataDocument {
             )
         }
 
+        try OpalHedgeCoreContractConstraintEvaluator.validateBooleanInteger(
+            metadata.isSimpleHedge,
+            name: "isSimpleHedge"
+        )
+        let expectedSimpleHedgeFlag: Int64 =
+            parameters.satsForNominalUnitsAtHighLiquidation == 0 ? 1 : 0
+        guard metadata.isSimpleHedge == expectedSimpleHedgeFlag else {
+            throw OpalHedgeCoreContractDataDocumentError.inconsistentMetadataComponent(
+                name: "isSimpleHedge",
+                expected: expectedSimpleHedgeFlag,
+                actual: metadata.isSimpleHedge
+            )
+        }
+
         let expectedDuration = parameters.maturityTimestamp - parameters.startTimestamp
         guard metadata.durationInSeconds == expectedDuration else {
             throw OpalHedgeCoreContractConstraintError

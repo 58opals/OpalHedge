@@ -118,6 +118,8 @@ extension OpalDiagnostics.Field {
             return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_contract_side")
         case .invalidSettlementType:
             return OpalDiagnostics.ErrorCode(rawValue: "data_document.invalid_settlement_type")
+        case .inconsistentMetadataComponent:
+            return OpalDiagnostics.ErrorCode(rawValue: "data_document.inconsistent_metadata_component")
         }
     }
 
