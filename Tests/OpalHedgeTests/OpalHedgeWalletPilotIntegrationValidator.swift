@@ -127,15 +127,4 @@ struct OpalHedgeWalletPilotIntegrationValidator {
         )
     }
 
-    private func makePreviousOracleProof() throws -> OpalHedge.Core.ContractSettlementOracleProof {
-        try OpalHedge.Oracle.verifySettlementOracleProof(
-            messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
-            signatureHex: OpalHedgeFixtureData.startingOracleSignatureHex,
-            publicKeyHex: OpalHedgeFixtureData.oraclePublicKeyHex
-        )
-    }
-
-    private func makeSettlementOracleProof() throws -> OpalHedge.Core.ContractSettlementOracleProof {
-        try OpalHedgeContractFixtureBuilder.makeSettlementOracleProof()
-    }
 }

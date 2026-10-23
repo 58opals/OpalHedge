@@ -27,15 +27,6 @@ enum OpalHedgeContractFixtureBuilder {
         )
     }
 
-    static func makeStartingSettlementOracleProof(
-        signatureHex: String = OpalHedgeFixtureData.startingOracleSignatureHex
-    ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
-        try OpalHedge.Core.ContractSettlementOracleProof(
-            messageHex: OpalHedgeFixtureData.startingOracleMessageHex,
-            signatureHex: signatureHex
-        )
-    }
-
     static func makeVerifiedStartingSettlementOracleProof() throws
         -> OpalHedge.Core.ContractSettlementOracleProof {
         try makeVerifiedSettlementOracleProof(
@@ -43,24 +34,6 @@ enum OpalHedgeContractFixtureBuilder {
             messageSequence: 1,
             priceSequence: 1,
             priceValue: 23_600
-        )
-    }
-
-    static func makeSettlementOracleProof(
-        messageTimestamp: Int64 = 6_663_643,
-        messageSequence: Int64 = 2,
-        priceSequence: Int64 = 2,
-        priceValue: Int64 = 23_500,
-        signatureHex: String = OpalHedgeFixtureData.startingOracleSignatureHex
-    ) throws -> OpalHedge.Core.ContractSettlementOracleProof {
-        try OpalHedge.Core.ContractSettlementOracleProof(
-            messageHex: makeOracleMessageHex(
-                messageTimestamp: messageTimestamp,
-                messageSequence: messageSequence,
-                priceSequence: priceSequence,
-                priceValue: priceValue
-            ),
-            signatureHex: signatureHex
         )
     }
 

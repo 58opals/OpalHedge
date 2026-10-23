@@ -1,13 +1,12 @@
 {
-  "originHash" : "ff9bf7e30e06254f6e60c61a43be51d7dc0b18b4c6aca54b023f6fc641514040",
+  "originHash" : "9a6252e8f50014e0e3da7e162353ed311848377f61d5be04c32aaa6c4f360285",
   "pins" : [
     {
       "identity" : "opalcrypto",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/58opals/OpalCrypto.git",
       "state" : {
-        "branch" : "develop",
-        "revision" : "187a4ddb1e9dd4421d4108bbe8f92d36fb48f711"
+        "revision" : "51fc53c50a66779ca23d564168351da8ecd00faf"
       }
     },
     {

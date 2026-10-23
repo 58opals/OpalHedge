@@ -5,7 +5,7 @@
 - Verify the starting oracle proof when creating funding data from a manually constructed contract plan.
 - Reject invalid secp256k1 points for either mutual-redemption key when mutual redemption is enabled.
 - Added this changelog to track notable public-facing package changes.
-- Switched `OpalDiagnostics` from its development branch to a stable `0.2.0`-or-newer package requirement.
+- Switched `OpalDiagnostics` to a stable `0.2.0`-or-newer requirement, then returned it to the public `develop` lane with the Swift 6.4 migration.
 - Updated the `OpalCrypto` SwiftPM branch pin to the latest `develop` revision.
 
 ## Pilot Baseline - 2026-07-05
