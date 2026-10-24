@@ -42,6 +42,8 @@ See [Opal Wallet Pilot Integration](Docs/OpalWalletPilotIntegration.md) for the 
 - Platforms: `macOS 27`, `iOS 27`, `watchOS 27`, `tvOS 27`, `visionOS 27`
 - Xcode's Metal Toolchain component, required by the current OpalCrypto build plugin.
 
+Use the Xcode 27 family with a compiler supporting Swift tools 6.4 and Swift 6 language mode. The supported platform versions above are 27.0 deployment minimums; a newer selected 27.x SDK does not raise them. Before validation, record the active developer-directory selection and overrides, Xcode build, effective Swift compiler and each selected SDK version/path. Record the Metal compiler version and tool paths separately. After any of these inputs changes, use a new external scratch or derived-data lane and rerun the affected builds and tests against the existing dependency lock. Preserve earlier receipts and normal signing/security/plugin settings; selecting newer tools neither updates package pins nor renews earlier validation.
+
 ## Installation
 
 Add Opal Hedge as a SwiftPM dependency from reusable Bitcoin Cash infrastructure packages, integration test harnesses, or server-side Swift code:
@@ -53,7 +55,7 @@ Add Opal Hedge as a SwiftPM dependency from reusable Bitcoin Cash infrastructure
 )
 ```
 
-The current manifest follows `OpalCrypto` and `OpalDiagnostics` on their public `develop` branches. No SemVer tag is prepared by this migration.
+The current manifest pins `OpalCrypto` to an inspected public `develop` revision and follows `OpalDiagnostics` on its public `develop` branch. `Package.resolved` records the exact resolved revisions. No SemVer tag is prepared by this migration.
 
 Then depend on the `OpalHedge` library product:
 
@@ -190,7 +192,7 @@ The preset describes policy defaults. Contract creation still requires concrete 
 
 ## License
 
-Opal Hedge is available under the [Apache License 2.0](LICENSE).
+Opal Hedge is available under the [Apache License 2.0](LICENSE). The embedded AnyHedge program retains its [upstream MIT notice and artifact provenance](Docs/AnyHedgeProvenance.md).
 
 ## Validation
 
