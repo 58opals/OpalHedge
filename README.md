@@ -198,22 +198,28 @@ Opal Hedge is available under the [Apache License 2.0](LICENSE). The embedded An
 
 Tests own oracle verification, payout arithmetic, contract bytecode, compatibility vectors, and funding/settlement data. Product presets and exact numeric boundaries are contracts, even when expressed as constants. Keep composed contract fixtures in their owning lifecycle suite and retain every distinct payout, dust, address, and validation assertion when consolidating duplicate setup.
 
-Current validation command:
+Use the focused development lane for routine feedback, then select the owning suite for a feature change:
 
 ```sh
-swift test
+scripts/validate.sh
+scripts/validate.sh focused OpalHedgeOracleStartingPriceProofValidator
+scripts/validate.sh assurance
 ```
 
-Result: Passed on 2026-07-05 with 276 tests in 48 suites.
+The default `develop` lane runs facade, upstream golden-vector, oracle signature and settlement arithmetic contracts. This is a representative subset, not full package assurance. `focused` uses a literal substring of a discovered identifier and rejects empty/no-match selections. Every lane reports selected/total definitions; add leading `--list` to inspect selection without execution. `assurance` keeps all tests, including funding, settlement, lifecycle, malformed-input and diagnostics contracts. These tests use local fixture data and do not contact live oracle or liquidity services.
+
+Discovery compiles the test products once with the tracked `Package.resolved`; execution reuses them within the same invocation. There is no separate `swift build` prerequisite. SwiftPM checks incremental inputs on subsequent invocations and the script rejects lock changes. Build products default to `.build/validation`; set absolute `OPAL_VALIDATION_SCRATCH_PATH` to select a different or fresh toolchain lane. Do not independently reuse `--skip-build` after source, dependency or toolchain changes. Run complete assurance and required platform checks for a publication or release; a focused pass does not replace them.
+
+Historical result: passed on 2026-07-05 with 276 tests in 48 suites. This dated result is not a count or acceptance claim for the current tree.
 
 ## Development
 
 The `Dependency graph` workflow runs on pushes and pull requests. It resolves the published package graph and requires the tracked lockfile to remain unchanged before accepting dependency updates; it does not replace the test suite.
 
-Run the test suite:
+Run complete offline assurance explicitly:
 
 ```sh
-swift test
+scripts/validate.sh assurance
 ```
 
 The tests use Swift Testing and cover oracle parsing, oracle signature verification, contract planning, payout math, AnyHedge contract data documents, constructor parameter encoding, script bytecode composition, CashAddr derivation, funding lifecycle values, and settlement lifecycle values.
