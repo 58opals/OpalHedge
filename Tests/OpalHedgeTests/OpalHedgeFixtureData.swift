@@ -11,7 +11,6 @@ enum OpalHedgeFixtureData {
     static let shortPayoutAddress = "bitcoincash:qq59hv6s3qdjrtyfwfxxldkuj9xsjmx48vrz882knz"
     static let longPayoutAddress = "bitcoincash:qpzlruwy4xu5rxjs3z37nsj29y7h59gwvsu4ddp0u4"
     static let shortTestnetPayoutAddress = "bchtest:qq59hv6s3qdjrtyfwfxxldkuj9xsjmx48v8srqgp57"
-    static let longTestnetPayoutAddress = "bchtest:qpzlruwy4xu5rxjs3z37nsj29y7h59gwvsc8f2rcmf"
     static let shortRegtestPayoutAddress = "bchreg:qq59hv6s3qdjrtyfwfxxldkuj9xsjmx48vav4ptjhc"
     static let longRegtestPayoutAddress = "bchreg:qpzlruwy4xu5rxjs3z37nsj29y7h59gwvszmltqtc0"
     static let shortLockScriptHex = "76a914285bb350881b21ac89724c6fb6dc914d096cd53b88ac"

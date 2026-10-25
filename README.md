@@ -55,7 +55,7 @@ Add Opal Hedge as a SwiftPM dependency from reusable Bitcoin Cash infrastructure
 )
 ```
 
-The current manifest pins `OpalCrypto` to an inspected public `develop` revision and follows `OpalDiagnostics` on its public `develop` branch. `Package.resolved` records the exact resolved revisions. No SemVer tag is prepared by this migration.
+The current manifest pins `OpalCrypto` to an inspected public integration revision and `OpalDiagnostics` to public revision `aa56dec5d6c8581beb2b3cef43b03dd577ccd9f1`. `Package.resolved` records the complete resolved graph. No SemVer tag is prepared by this migration.
 
 Then depend on the `OpalHedge` library product:
 
@@ -207,6 +207,8 @@ swift test
 Result: Passed on 2026-07-05 with 276 tests in 48 suites.
 
 ## Development
+
+The `Dependency graph` workflow runs on pushes and pull requests. It resolves the published package graph and requires the tracked lockfile to remain unchanged before accepting dependency updates; it does not replace the test suite.
 
 Run the test suite:
 
