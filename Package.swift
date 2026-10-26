@@ -18,8 +18,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/58opals/OpalCrypto.git", revision: "06f9edcbd5b44c869e6f81f3da1ea147add1d8cf"),
-        .package(url: "https://github.com/58opals/OpalDiagnostics.git", revision: "aa56dec5d6c8581beb2b3cef43b03dd577ccd9f1")
+        .package(url: "https://github.com/58opals/OpalCrypto.git", revision: "0adfc220b30dfc9512bb8a45c1e4e6033e8bd95a"),
+        .package(url: "https://github.com/58opals/OpalDiagnostics.git", revision: "4147c6191a4d25624c4f4f7e4e97eaeb8010a8fd")
     ],
     targets: [
         .target(
