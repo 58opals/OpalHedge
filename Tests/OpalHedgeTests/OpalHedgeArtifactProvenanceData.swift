@@ -12,4 +12,11 @@ enum OpalHedgeArtifactProvenanceData {
     // This is the existing local ten-week fixture, not a claimed upstream compiler result.
     static let tenWeekConstructorSHA256 =
         "1a52b2ea89aa5781ff14e52f56640543bb4ee210b378651f0540c7fa2abb4acd"
+    static let libraryRevision = "bf87e6769abe8030b217fa00b4c346695dbd8055"
+    static let tenWeekSourceSHA256 =
+        "f5a514662f954ea9d47addace923a7e3ef43858697e6980674e95c084e8675ff"
+    static let tenWeekParametersSHA256 =
+        "cf3b0fe267a258d653015875a3d98dfa2a1b136c8516ca3f2e3270df64964a52"
+    static let tenWeekOracleProofSHA256 =
+        "7ca40c8cabedd452386b508a12a01c4ba965a2e5975c983f3fa01944426c8a5a"
 }
