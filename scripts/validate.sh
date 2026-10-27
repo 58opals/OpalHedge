@@ -40,7 +40,7 @@ test_command() {
 test_command list >"$work/discovered"
 grep -E '^OpalHedgeTests[.]' "$work/discovered" >"$work/all"
 case "$lane" in
-    develop) filter='[.](OpalHedgeFacadeValidator|OpalHedgeAnyHedgeGoldenVectorValidator|OpalHedgeOracleSignatureVerifierValidator|OpalHedgeCoreSettlementCalculatorValidator)/'
+    develop) filter='[.](OpalHedgeFacadeValidator|OpalHedgeAnyHedgeGoldenVectorValidator|OpalHedgeOracleSignatureVerifierValidator|OpalHedgeCoreSettlementCalculatorValidator|OpalHedgeArtifactProvenanceValidator)/'
         grep -E -- "$filter" "$work/all" >"$work/selected" || { printf '%s\n' 'Development selection matched no tests.' >&2; exit 1; } ;;
     focused)
         grep -F -- "$literal" "$work/all" >"$work/selected" || { printf '%s\n' 'Focused identifier matched no tests.' >&2; exit 1; }

@@ -24,8 +24,8 @@ public struct OpalHedgeBitcoinCashContractScriptArtifact: Sendable, Equatable {
     public static let anyHedgeV0_12 = Self(
         version: .anyHedgeV0_12,
         packageName: "@generalprotocols/anyhedge-contracts",
-        sourceCodeUrl: "https://gitlab.com/GeneralProtocols/anyhedge/contracts/-/raw/development/contracts/v0.12/contract.cash",
-        bytecodeAssemblyUrl: "https://gitlab.com/GeneralProtocols/anyhedge/contracts/-/raw/development/contracts/v0.12/bytecode.asm",
-        artifactJsonUrl: "https://gitlab.com/GeneralProtocols/anyhedge/contracts/-/raw/development/contracts/v0.12/artifact.json"
+        sourceCodeUrl: "https://gitlab.com/GeneralProtocols/anyhedge/contracts/-/raw/9505f738486becfc297d42d91c4fc4685bec7a14/contracts/v0.12/contract.cash",
+        bytecodeAssemblyUrl: "https://gitlab.com/GeneralProtocols/anyhedge/contracts/-/raw/9505f738486becfc297d42d91c4fc4685bec7a14/contracts/v0.12/bytecode.asm",
+        artifactJsonUrl: "https://gitlab.com/GeneralProtocols/anyhedge/contracts/-/raw/9505f738486becfc297d42d91c4fc4685bec7a14/contracts/v0.12/artifact.json"
     )
 }
